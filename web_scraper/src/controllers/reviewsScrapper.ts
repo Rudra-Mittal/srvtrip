@@ -26,7 +26,7 @@ export async function scrapeGoogleMapsReviews(placeName:string, maxScrolls:numbe
         await page.waitForTimeout(3000);
 
         // Wait for the reviews section to appear
-        const reviewSection = await page.locator("//div[contains(@class, 'm6QErb DxyBCb kA9KIf dS8AEf XiKgde')]");
+        const reviewSection =  page.locator("//div[contains(@class, 'm6QErb DxyBCb kA9KIf dS8AEf XiKgde')]");
         if (await reviewSection.count() === 0) {
             console.log("Error: Reviews section not found.");
             await browser.close();
@@ -35,13 +35,13 @@ export async function scrapeGoogleMapsReviews(placeName:string, maxScrolls:numbe
 
         let reviews = [];
         let scrollAttempts = 0;
-        // Scroll inside the review section and collect reviews
+        // Scrolling to load more reviews
         while(scrollAttempts<maxScrolls){
             await page.evaluate((reviewSection) => {
                 reviewSection?.scrollBy(0, 800);
             }, await reviewSection.elementHandle());
 
-            await page.waitForTimeout(2000);  // Allow new reviews to load
+            await page.waitForTimeout(2000);  // delay, depending on network speed
             scrollAttempts++;
         }
         const reviewElements = await reviewSection.locator("//div[contains(@class, 'MyEned')]").all();
