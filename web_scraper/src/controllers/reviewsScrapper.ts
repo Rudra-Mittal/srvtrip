@@ -14,7 +14,14 @@ export async function scrapeGoogleMapsReviews(placeName:string, maxScrolls:numbe
         await page.fill('input#searchboxinput', placeName);
         await page.keyboard.press('Enter');
         await page.waitForTimeout(5500);  // Allow search results to load
+        const multipleResults= page.locator("//div[contains(@class, 'JrN27d SuV3fd Zjt37e TGiyyc ')]");
 
+        if(await multipleResults.count()>0){
+            const searchResults= await page.locator("//div[contains(@class, 'Nv2PK THOPZb CpccDe ')]").all();
+            const firstResult= searchResults[0];
+            await firstResult.click();
+            await page.waitForTimeout(3000);
+        }         
         // Click on "More Reviews" button
         const reviewsButton = page.locator("//button[contains(@aria-label, 'Reviews')]");
         if (await reviewsButton.count() === 0) {
