@@ -13,12 +13,12 @@ export async function scrapeGoogleMapsReviews(placeName:string, maxScrolls:numbe
         // Search for the place
         await page.fill('input#searchboxinput', placeName);
         await page.keyboard.press('Enter');
-        await page.waitForTimeout(5000);  // Allow search results to load
+        await page.waitForTimeout(5500);  // Allow search results to load
 
         // Click on "More Reviews" button
         const reviewsButton = page.locator("//button[contains(@aria-label, 'Reviews')]");
         if (await reviewsButton.count() === 0) {
-            console.log("Error: 'More Reviews' button not found.");
+            console.log("Error: 'Reviews' button not found.");
             await browser.close();
             return null;
         }
