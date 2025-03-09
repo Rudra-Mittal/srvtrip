@@ -1,4 +1,4 @@
-import {chromium } from 'playwright';
+import {chromium } from 'playwright'                                    ;
 
 export async function scrapeGoogleMapsReviews(placeName:string, maxScrolls:number) {
     const browser = await chromium.launch({ headless: true });  // Set headless: true to run without UI
