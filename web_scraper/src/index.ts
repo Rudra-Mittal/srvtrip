@@ -1,9 +1,9 @@
 import { scrapeGoogleMapsReviews } from "./controllers/reviewsScrapper";
 
-const places=["Taj Mahal, India","Hawa Mahal, India","UIET Punjab University","JW Marriott Hotel Chandigarh","Rann of Kutch","Ram Mandir,Ayodhya"];
+const places=["Dominos,Chandigarh","UIET, PU,chandigarh","Hawa mahal","Marine Drive","gateway of india","Taj hotel, mumbai"];
 
 places.forEach(place=>{
-    scrapeGoogleMapsReviews(place,0).then((reviews)=>{
+    scrapeGoogleMapsReviews(place,10).then((reviews)=>{
         console.log(reviews);
     })
 });

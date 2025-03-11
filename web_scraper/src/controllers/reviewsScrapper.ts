@@ -1,69 +1,71 @@
-import {chromium } from 'playwright'                                    ;
+import { chromium } from 'playwright';
 
-export async function scrapeGoogleMapsReviews(placeName:string, maxScrolls:number) {
-    const browser = await chromium.launch({ headless: true });  // Set headless: true to run without UI
+export async function scrapeGoogleMapsReviews(placeName: string, maxScrolls: number) {
+    const browser = await chromium.launch({ headless: true, args: ['--disable-gpu', '--disable-dev-shm-usage'] });
     const context = await browser.newContext();
     const page = await context.newPage();
 
     try {
-        // Open Google Maps
-        await page.goto('https://www.google.com/maps', { timeout: 60000 });
-        await page.waitForTimeout(3000);
+        // Navigate to Google Maps and wait for search input
+        await page.goto('https://www.google.com/maps', );
+        await page.waitForSelector('input#searchboxinput', { state: 'visible', timeout: 60000 });
 
-        // Search for the place
+        // Perform search
         await page.fill('input#searchboxinput', placeName);
         await page.keyboard.press('Enter');
-        await page.waitForTimeout(5500);  // Allow search results to load
-        const multipleResults= page.locator("//div[contains(@class, 'JrN27d SuV3fd Zjt37e TGiyyc ')]");
-
-        if(await multipleResults.count()>0){
-            const searchResults= await page.locator("//div[contains(@class, 'Nv2PK THOPZb CpccDe ')]").all();
-            const firstResult= searchResults[0];
-            await firstResult.click();
-            await page.waitForTimeout(3000);
-        }         
-        // Click on "More Reviews" button
-        const reviewsButton = page.locator("//button[contains(@aria-label, 'Reviews')]");
-        if (await reviewsButton.count() === 0) {
-            console.log("Error: 'Reviews' button not found.");
-            await browser.close();
-            return null;
-        }
-        await reviewsButton.click();
-        await page.waitForTimeout(3000);
-
-        // Wait for the reviews section to appear
-        const reviewSection =  page.locator("//div[contains(@class, 'm6QErb DxyBCb kA9KIf dS8AEf XiKgde')]");
-        if (await reviewSection.count() === 0) {
-            console.log("Error: Reviews section not found.");
-            await browser.close();
-            return null;
+        
+        // Handle search results
+        try {
+            // Wait for either search results or direct place page
+            await page.waitForSelector('//div[contains(@aria-label, "Results")]', { timeout: 5000 });
+            const searchResult = page.locator('//a[contains(@class, "hfpxzc")]').first();
+            await searchResult.click();
+            // Wait for place page to load
+            await page.waitForSelector('//button[contains(@aria-label, "Reviews")]', { timeout: 5000 });
+        } catch {
+            // Continue if we're already on place page
         }
 
-        let reviews = [];
-        let scrollAttempts = 0;
-        // Scrolling to load more reviews
-        while(scrollAttempts<maxScrolls){
-            await page.evaluate((reviewSection) => {
-                reviewSection?.scrollBy(0, 800);
-            }, await reviewSection.elementHandle());
-
-            await page.waitForTimeout(2000);  // delay, depending on network speed
-            scrollAttempts++;
+        // Open reviews section
+        try {
+            const reviewsButton = page.locator('//button[contains(@aria-label, "Reviews")]');
+            await reviewsButton.waitFor({ state: 'visible', timeout: 5000 });
+            await reviewsButton.click();
+        } catch {
+            const reviewSpan = page.locator('//span[contains(@class, "j8EM5b")]');
+            await reviewSpan.waitFor({ state: 'visible', timeout: 5000 });
+            await reviewSpan.click();
         }
-        const reviewElements = await reviewSection.locator("//div[contains(@class, 'MyEned')]").all();
-            for (const review of reviewElements) {
-                const moreButton= review.locator("//button[contains(@class, 'w8nwRe kyuRq')]");
-                // console.log(moreButton);
-                if(await moreButton.count()>0)  moreButton.click();
-                await page.waitForTimeout(2000);
-                const reviewEle= review.locator("//span[contains(@class, 'wiI7pd')]");
-                const reviewText = await reviewEle.textContent();
-                reviews.push(reviewText);
+
+        // Wait for reviews container
+        const reviewSection = page.locator('//div[@class="m6QErb DxyBCb kA9KIf dS8AEf XiKgde "]');
+        await reviewSection.waitFor({ state: 'visible', timeout: 5000 });
+
+        // Scroll through reviews
+        for (let i = 0; i < maxScrolls; i++) {
+            await reviewSection.evaluate(el => el.scrollBy(0, 1000));
+            await page.waitForTimeout(1000); // Brief pause between scrolls
+        }
+
+        // Process reviews
+        const reviews = [];
+        const reviewElements = await reviewSection.locator('//div[contains(@class, "MyEned")]').all();
+        
+        for (const review of reviewElements) {
+            // Expand "More" button if present
+            const moreButton = review.locator('//button[contains(@class, "w8nwRe")]');
+            if (await moreButton.isVisible({ timeout: 2000 })) {
+                await moreButton.click();
+                await moreButton.waitFor({ state: 'hidden' }).catch(() => {});
             }
+            
+            // Extract review text
+            const reviewText = await review.locator('//span[contains(@class, "wiI7pd")]').textContent();
+            reviews.push(reviewText?.trim() || '');
+        }
 
-            await browser.close();
-            return { placeName, reviews: reviews};
+        await browser.close();
+        return { placeName, reviews: reviews.filter(Boolean) };
 
     } catch (error) {
         console.error("Error during scraping:", error);
