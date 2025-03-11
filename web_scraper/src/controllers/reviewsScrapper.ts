@@ -1,7 +1,7 @@
 import { chromium } from 'playwright';
 
 export async function scrapeGoogleMapsReviews(placeName: string, maxScrolls: number) {
-    const browser = await chromium.launch({ headless: false, args: ['--disable-gpu', '--disable-dev-shm-usage'] });
+    const browser = await chromium.launch({ headless: true, args: ['--disable-gpu', '--disable-dev-shm-usage'] });
     const context = await browser.newContext();
     const page = await context.newPage();
 
