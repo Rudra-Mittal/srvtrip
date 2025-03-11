@@ -19,10 +19,10 @@ def summarize_reviews(place_name, reviews):
     system_prompt = (
         "You are an AI assistant that summarizes reviews for places. "
         "Given a list of user reviews, generate a concise and insightful summary "
-        "highlighting common themes (positive and negative) in 2-3 sentences."
+        "highlighting common themes (positive and negative) in 50 sentences."
     )
 
-    user_prompt = f"Reviews for {place_name}: {reviews[:5]}\nProvide a short summary:"
+    user_prompt = f"Reviews for {place_name}: {reviews}\nProvide a 50 lines summary:"
 
     try:
         response = requests.post(
