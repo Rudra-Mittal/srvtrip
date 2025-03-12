@@ -18,7 +18,7 @@ export const generateItinerary = async (
     const prompt = `
       Generate a detailed, optimized travel itinerary for a trip to ${destination} spanning ${number_of_days} days.
       The budget for this trip is ₹${budget}, and it is planned for ${number_of_persons} people.
-      ${interests ? `Interests to consider: ${interests}.` : "Interests are optional."}
+      ${interests ? `Interests to consider: ${interests}. take it as a priority` : ""}
 
       Each day's plan must be structured into **morning, afternoon, and evening** activities, and the response **must be valid JSON with no extra text**.
 

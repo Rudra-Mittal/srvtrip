@@ -13,11 +13,10 @@ interface ReqBody {
 }
 
 app.post("/gen-itinerary", async (req: any, res: any) => {
-    console.log("khcwvhsvchhjsbbjk");
   try {
 
-    console.log("Request body:", req.body);
-    const { destination, number_of_days, budget, number_of_persons, interests } =req.body;
+    // console.log("Request body:", req.body);
+    const { destination, number_of_days, budget, number_of_persons, interests } =req.body as ReqBody;
     console.log(destination, number_of_days, budget, number_of_persons, interests);
 
     // Validate the request body
@@ -29,7 +28,7 @@ app.post("/gen-itinerary", async (req: any, res: any) => {
 
     // Generate itinerary by calling the AI model
     const itinerary = await generateItinerary(destination, number_of_days, budget, number_of_persons, interests);
-    console.log("Generated itinerary:", itinerary);
+    console.log("Generated itinerary:", itinerary.itinerary);
 
     return res.json({ success: true, itinerary });
   } catch (error) {
