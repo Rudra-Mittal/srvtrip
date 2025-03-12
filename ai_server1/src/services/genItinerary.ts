@@ -29,19 +29,19 @@ export const generateItinerary = async (
           {
             "day": 1,
             "morning": {
-              "activities": "Arrive in Shimla, check into Hotel Combermere, and explore Mall Road.",
+              "activities": "Arrive in Shimla, check into Hotel Combermere,opposite Tourism Lift, The Mall, Shimla and explore Mall Road.",
               "food": "Breakfast at Indian Coffee House (₹250 per person).",
               "transport": "Taxi from airport to hotel (₹800 total).",
               "cost": "₹1,050"
             },
             "afternoon": {
               "activities": "Visit The Ridge and Christ Church for scenic views.",
-              "food": "Lunch at Wake & Bake Café (₹600 per person).",
+              "food": "Lunch at Wake & Bake Café,34/1, Mall Rd, Middle Bazar, The Mall, Shimla (₹600 per person).",
               "transport": "Walking tour.",
               "cost": "₹600"
             },
             "evening": {
-              "activities": "Dinner at 8INE rooftop restaurant.",
+              "activities": "Dinner at Eighteen71 Cookhouse & Bar,near Tourism Lift Hotel Willow Banks, The Mall, Shimla.",
               "food": "North Indian/Chinese cuisine (₹800 per person).",
               "transport": "Auto-rickshaw to restaurant (₹150).",
               "cost": "₹950"

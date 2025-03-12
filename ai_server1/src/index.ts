@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import { generateItinerary } from "./services/genItinerary";
+import { extractplaces } from "./services/extractplaces";
 
 const app = express();
 app.use(express.json());
@@ -34,6 +35,26 @@ app.post("/gen-itinerary", async (req: any, res: any) => {
   } catch (error) {
     console.error("Error generating itinerary:", error);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.post("/extract-places",async(req:any,res:any)=>{
+  try{
+    const {itinerary}=req.body;
+
+    if(!itinerary){
+      return res.status(400).json({
+        error:"Missing required fields: itinerary"
+      });
+    }
+
+    let places=await extractplaces(itinerary);
+    console.log("Extracted places:",places.places);
+    return res.json({success:true,places});
+  }
+  catch(error){
+    console.error("Error extracting places from itinerary:",error);
+    res.status(500).json({error:"Internal Server Error"});
   }
 });
 
