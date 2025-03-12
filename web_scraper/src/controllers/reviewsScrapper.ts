@@ -1,6 +1,6 @@
 import { chromium } from 'playwright';
 
-export async function scrapeGoogleMapsReviews(placeName: string, maxScrolls: number) {
+export async function scrapeGoogleMapsReviews(placeName: string, maxScrolls: number):Promise<{placeName:string,reviews:string[]}> { 
     const browser = await chromium.launch({ headless: true, args: ['--disable-gpu', '--disable-dev-shm-usage'] });
     const context = await browser.newContext();
     const page = await context.newPage();
@@ -65,11 +65,14 @@ export async function scrapeGoogleMapsReviews(placeName: string, maxScrolls: num
         }
 
         await browser.close();
-        return { placeName, reviews: reviews.filter(Boolean) };
+        return { placeName, reviews: reviews };
 
     } catch (error) {
         console.error("Error during scraping:", error);
         await browser.close();
-        return null;
+        return {
+            placeName:"",
+            reviews:[]
+        };
     }
 }
