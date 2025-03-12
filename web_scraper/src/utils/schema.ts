@@ -2,7 +2,7 @@ import weaviate,{ dataType } from "weaviate-client";
 import { WeaviateClient } from "weaviate-client";
 
 export const reviewSchema = {
-    name: "reviews",
+    name: "ReviewSchema",
     properties: [
       {
         name: 'place',
@@ -11,10 +11,6 @@ export const reviewSchema = {
       {
         name: 'review',
         dataType: dataType.TEXT,
-      },
-      {
-        name: 'rating',
-        dataType: dataType.NUMBER,
       },
     ],
     vectorizers: [
