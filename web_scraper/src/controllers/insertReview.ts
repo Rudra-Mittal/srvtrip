@@ -4,8 +4,12 @@ dotenv.config();
 const weaviateURL = process.env.WEAVIATE_URL as string;
 const weaviateApiKey = process.env.WEAVIATE_API_KEY as string;
 const jinaaiApiKey = process.env.JINAAI_API_KEY as string;
-import fs from 'fs';
-export async function insertData() {
+import { createSchema } from '../utils/schema';
+interface Review {
+  reviews: string[];
+  place: string;
+}
+export async function insertData(reviews: Review):Promise<void> {
     const client = await weaviate.connectToWeaviateCloud(
       weaviateURL,
       { authCredentials: new weaviate.ApiKey(weaviateApiKey),
@@ -14,11 +18,13 @@ export async function insertData() {
         }
        }
     );
-    const jsonData = JSON.parse(fs.readFileSync('../data.json', 'utf-8'));
-    const className = "reviews";
-    
-    const reviewSchema =  client.collections.get(className);
-      const uuid=await reviewSchema.data.insertMany(jsonData)
+    const schemaName = "ReviewSchema";
+    await createSchema(client,schemaName);
+    const reviewSchema =  client.collections.get(schemaName);
+     for(let i=0;i<reviews.reviews.length;i++){
+      const uuid=await reviewSchema.data.insert({review:reviews.reviews[i],place:reviews.place});
       console.log(uuid)
+     }
     console.log("Data inserted successfully!");
-  }
+    return
+}
