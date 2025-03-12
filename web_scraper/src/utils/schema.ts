@@ -19,7 +19,8 @@ export const reviewSchema = {
         sourceProperties: ['review'],
         model:'jina-embeddings-v3'
       })
-    ]
+    ],
+    generative: weaviate.configure.generative.mistral()
   };
 
   export async function createSchema(client: WeaviateClient,schemaName:string): Promise<boolean> {
