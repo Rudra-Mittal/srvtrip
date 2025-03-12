@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import { generateItinerary } from "./services/genItinerary";
 import { extractplaces } from "./services/extractplaces";
+import { convertItineraryToPara } from "./services/convertItineraryToPara";
 
 const app = express();
 app.use(express.json());
@@ -31,7 +32,13 @@ app.post("/gen-itinerary", async (req: any, res: any) => {
     const itinerary = await generateItinerary(destination, number_of_days, budget, number_of_persons, interests);
     console.log("Generated itinerary:", itinerary.itinerary);
 
-    return res.json({ success: true, itinerary });
+    //send the json formatted itinerary for conversion of it to paragraph based itinerary fn
+    const paraItinerary=await convertItineraryToPara(itinerary.itinerary);
+
+    console.log("Converted Itinerary:",paraItinerary);
+
+    return res.json({ success: true, itinerary ,paraItinerary});//returning both json and paragraph based itinerary
+
   } catch (error) {
     console.error("Error generating itinerary:", error);
     res.status(500).json({ error: "Internal Server Error" });
