@@ -12,10 +12,15 @@
   "type": "commonjs",
   "dependencies": {
     "fs": "^0.0.1-security",
+    "node-fetch": "^3.3.2",
     "playwright": "^1.51.0",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "weaviate-client": "^3.4.1",
+    "weaviate-ts-client": "^2.2.0"
   },
   "devDependencies": {
-    "@types/node": "^22.13.10"
+    "@types/dotenv": "^6.1.1",
+    "@types/node": "^22.13.10",
+    "dotenv": "^16.4.7"
   }
 }
