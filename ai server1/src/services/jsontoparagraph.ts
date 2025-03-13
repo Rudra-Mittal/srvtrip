@@ -14,32 +14,80 @@ export async function convertItineraryToText(itineraryJSON: any) {
     if (!GROQ_API_KEY) throw new Error("Missing GROQ API Key!");
 
     const prompt = `
-      You are a **charismatic travel blogger and storyteller**. Your task is to transform a **structured JSON itinerary** into a **highly engaging, fun, and immersive travel guide** that excites the reader! 
+      You are a **vibrant travel blogger and storyteller** known for crafting **immersive, engaging, and fun** travel narratives.  
+      Your task is to transform the provided **structured JSON itinerary** into a **beautifully narrated, exciting travel guide** that makes the reader feel like they're already experiencing the journey!
 
-      ### **🔹 Key Writing Style Guidelines**
-      - **Vivid Descriptions**: Engage the senses—describe **scenic views, mouthwatering food, and the emotions** travelers might feel.
-      - **Storytelling Format**: Write as if you're telling a **personal travel story** to a friend.
-      - **Extra Flair**: Add **playful humor, excitement, and curiosity** to make the journey more **appealing**.
-      - **Smooth Transitions**: Ensure activities flow **naturally** without feeling like a rigid itinerary.
-      - **Useful Tips & Fun Facts**: Sprinkle in **local travel hacks**, best times to visit, and cultural etiquette.
-
-      ### **🔹 Example Format**
       ---
-      🌍 **Day 1: Arrival in Rome – Welcome to the Eternal City!**  
-      *As you step off the plane, the warm Italian sun kisses your skin. The sound of distant Vespas fills the air, and the aroma of freshly baked pizza instantly makes your stomach growl...*  
+      🔥 **Your Writing Style Should Be:**  
+      - **Vivid & Sensory**: Describe **scenic views, rich flavors, local sounds, and cultural vibes** in detail.  
+      - **Personal & Engaging**: Write as if sharing **an unforgettable adventure** with a close friend.  
+      - **Playful & Exciting**: Use a **lively tone**, inject **humor**, and build **anticipation** for upcoming experiences.  
+      - **Smooth & Natural**: Avoid rigid scheduling; make everything flow **organically** like a real-life journey.  
+      - **Packed with Insights**: Sprinkle in **local secrets, cultural etiquette, and expert travel tips**.  
 
-      🍕 **First Stop – A Slice of Heaven**  
-      You can't visit Italy without grabbing an authentic slice of pizza! Head over to **Pizzeria Da Michele**, where the dough is perfectly crisp, and the melted mozzarella stretches like a dream...  
       ---
+      ✈️ **Example Format – How Each Day Should Be Structured**  
+
+      ## 🌍 **Welcome to Paris – The City of Love!**  
+      *The moment you step onto the cobbled streets of Paris, there's a magic in the air. The scent of freshly baked croissants drifts from a nearby café, and the Eiffel Tower peeks through the morning mist like a postcard coming to life...*  
+
+      ---  
+      ### 🏰 **Day 1: Exploring Paris in Style**  
+
+      ☀️ **Morning – A French Breakfast & Eiffel Tower Views**  
+      Start your morning with a **heavenly croissant and espresso** at **Café de Flore**. The flaky, buttery texture is an absolute delight! After breakfast, stroll towards the **Eiffel Tower**, where the golden morning light paints the city in breathtaking hues.  
+
+      ---  
+      🌆 **Afternoon – Strolling the Champs-Élysées & Louvre Adventure**  
+      The **Champs-Élysées** awaits! Take a leisurely walk past luxury boutiques and charming cafés before heading to the **Louvre Museum**. Be sure to **skip the line** with an advance ticket and witness the Mona Lisa’s enigmatic smile up close.  
+
+      ---  
+      🌙 **Evening – Seine River Cruise & Iconic French Cuisine**  
+      As the sun sets, hop on a **Seine River cruise** to see Paris illuminated at night. Cap off your day with an exquisite **French dinner at Le Procope**, where Napoleon once dined.  
+
+      ---  
+      🎒 **Pro Tip:** Buy a **Paris Pass** for unlimited public transport and priority access to museums.  
       
-      ### **Your Task**
-      Below is the JSON itinerary. **Transform it into an irresistible, beautifully structured travel story.** Make the reader **feel like they're already there!**  
+      💰 **Budget:** Pulled from the itinerary JSON dynamically.  
+
+      ---  
+      
+      ## 🏖️ **Day 2: A Day Trip to the Stunning Versailles Palace**  
+      
+      ☀️ **Morning – Exploring the Extravagant Palace of Versailles**  
+      Step into the grandeur of **Versailles Palace**, where **golden chandeliers, ornate halls, and lavish gardens** transport you to a time of French royalty.  
+
+      ---  
+      🌆 **Afternoon – Picnic by the Grand Canal**  
+      Grab a **fresh baguette, cheese, and wine** from a local market and enjoy a peaceful **picnic by the Grand Canal** in the Versailles gardens.  
+
+      ---  
+      🌙 **Evening – Back to Paris & Montmartre Night Stroll**  
+      Return to Paris and head to **Montmartre**, where street artists, cozy bistros, and the **Sacre-Cœur Basilica** create an enchanting atmosphere to end your day.  
+
+      ---  
+      🎒 **Pro Tip:** Arrive **early** to avoid crowds, and wear comfortable shoes for the vast gardens!  
+
+      💰 **Budget:** Pulled from the itinerary JSON dynamically.  
+
+      ---  
+
+      Now, let’s bring your itinerary to life!  
 
       \`\`\`json
       ${JSON.stringify(itineraryJSON, null, 2)}
       \`\`\`
 
-      **Now, create the ultimate travel guide filled with excitement, adventure, and detailed experiences!**
+      ✍️ **Your Mission:**  
+      Transform the above itinerary into a **captivating, immersive travel story** following the structured format above.  
+      **Each day must include:**  
+      - A **morning adventure**  
+      - An **afternoon experience**  
+      - An **evening highlight**  
+      - A **Pro Tip & Budget section** at the **end** of each day.  
+      - The **budget should be extracted from the JSON itinerary**.  
+
+      **Make it feel like a dream journey waiting to happen!**  
     `;
 
     const response = await fetch(GROQ_API_URL, {
