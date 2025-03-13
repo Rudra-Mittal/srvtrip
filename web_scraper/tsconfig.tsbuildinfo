@@ -1,1 +1,1 @@
-{"root":["./src/index.ts","./src/temp.ts","./src/controllers/reviewsScrapper.ts"],"version":"5.7.3"}
+{"root":["./src/index.ts","./src/controllers/getSimilar.ts","./src/controllers/insertReview.ts","./src/controllers/reviewsScrapper.ts","./src/utils/schema.ts"],"version":"5.8.2"}
