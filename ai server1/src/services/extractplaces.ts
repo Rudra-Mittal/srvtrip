@@ -18,51 +18,60 @@ export async function extractPlacesAI(filePath: string) {
       throw new Error("Invalid JSON format: 'itinerary' key missing");
     }
 
-    const prompt = `
-    Extract **only place names** from this travel itinerary and categorize them **day-wise**.
+   const prompt = `
+    You are an AI that extracts **only places** (landmarks, attractions, restaurants, hotels) from a given travel itinerary **along with their specific full,precise locations**.  
 
-        **❌ STRICTLY EXCLUDE:**
-    - **Transport modes** (e.g., "Toy Train Ride", "Bus Journey", "Car Rental")
-    - **Experiences & Activities** (e.g., "Hot Air Balloon Ride", "Camel Ride", "Scuba Diving", "Paragliding")
-    - **Generic phrases** (e.g., "City Tour", "Local Market" without a specific name)
-    - **Events & Services** (e.g., "Live Music Night", "Cultural Show", "Cooking Class")
-  
-    **✅ INCLUDE ONLY:**
-    - Hotels
-    - Restaurants, cafés, dhabas
-    - Landmarks, monuments
-    - Markets
-    -  beaches
+    **Strict Extraction Guidelines:**
+    1. **Extract only the mentioned places**—do not create new ones.  
+    2. **Ensure precise locations** by including city, state, and country (e.g., "Cafe Simla Times, The Mall Road, Shimla, Himachal Pradesh, India").  
+    3. **If a place’s location is incomplete**, infer it using the itinerary's context (destination, region).  
+    4. **Avoid duplicate entries**—if a place appears multiple times, ensure each entry remains **unique** in that day's itinerary.  
+    5. **Maintain a structured JSON format with no extra text.**  
+    6. **Use the provided itinerary data** to extract places accurately**.
+    7. ** do not include the hotels and restaurant places in the activities for each day means the places in hotels and food are not in the activites for each day don't combine the places **.
+    8. ** strictly include landmarks and attractions in the activities for each day don't include hotels,restaurants , rides etc. **.
 
-    **📝 STRICT JSON FORMAT (Example Output):**
+    ### **Input Itinerary:**  
+    \`\`\`json
+    ${JSON.stringify(itineraryData, null, 2)}
+    \`\`\`
+
+    ### **Expected JSON Output:**  
+    \`\`\`json
     {
       "places": [
         {
-          "day": 1,
-          "morning": ["Taj Mahal", "Shiv Café"],
-          "afternoon": ["Agra Fort", "Pind Balluchi Restaurant"],
-          "evening": ["Mehtab Bagh", "JW Marriott Hotel"],
-          "night": ["ITC Mughal"]
-        },
-        {
-          "day": 2,
-          "morning": ["Hawa Mahal", "Laxmi Misthan Bhandar"],
-          "afternoon": ["Amber Fort", "Samode Haveli"],
-          "evening": ["Nahargarh Fort", "Tapri Tea House"],
-          "night": ["Rambagh Palace"]
+          "day": <day_number>,
+          "activities": [
+            {
+              "name": "<Place Name>",
+              "location": "<Full Address or City, State, Country>"
+            }
+          ],
+          "food": [
+            {
+              "name": "<Restaurant Name>",
+              "location": "<Full Address or City, State, Country>"
+            }
+          ],
+          "hotel": [
+            {
+              "name": "<Hotel Name>",
+              "location": "<Full Address or City, State, Country>"
+            }
+          ]
         }
       ]
     }
-  
-    **⚠️ INSTRUCTIONS FOR AI:**
-    - **Remove any transport-related entries** like "Toy Train Ride", "Bus Tour".
-    - **Remove all activities & experiences** like "Hot Air Balloon Ride", "Paragliding".
-    - **Ensure JSON format is followed strictly** (no explanations, no extra text).
-  
-    **Now process the following itinerary JSON:**
-    ${JSON.stringify(itineraryData)}
-  `;
-  
+    \`\`\`
+
+    ### **Final Instructions:**  
+    - **No extra text, explanations, or formatting errors—only return JSON.**  
+    - **Ensure accuracy in place names and locations.**  
+    - **If a place appears multiple times in a day, list it only once.**  
+    - **Each place should have a unique and correctly formatted address.**  
+    - **Keep the response structured exactly as shown above.**  
+    `;
 
   
     const response = await fetch(GROQ_API_URL, {

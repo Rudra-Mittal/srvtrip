@@ -9,81 +9,75 @@ export async function generateItinerary(
   days: number,
   totalBudget: number,
   persons: number,
-  interests?: string[],
+  interests?: string[]
 ) {
   try {
     if (!GROQ_API_KEY) throw new Error("Missing GROQ API Key!");
 
-    const interestText = interests && interests.length > 0 
-      ? `Prioritize activities related to the following interests: **${interests.join(", ")}**. Ensure that at least **60%** of the itinerary aligns with these interests.`
-      : "Provide a well-balanced itinerary covering **sightseeing, culture, food, and leisure**.";
+    const interestText =
+      interests && interests.length > 0
+        ? `Focus on activities related to these interests: **${interests.join(
+            ", "
+          )}**. Ensure at least **60%** of the itinerary aligns with these while keeping diversity.`
+        : "Ensure a **balanced** mix of sightseeing, cultural experiences, local food, adventure, and relaxation.";
 
     const prompt = `
-    📌 **Generate a detailed, exciting, and immersive travel itinerary** for a trip to **${destination}** spanning **${days} days**.
-    - The trip is planned for **${persons} people** with a total budget of **₹${totalBudget}**.
-    - Ensure the budget covers **food, transport, sightseeing, activities, and miscellaneous expenses**.
-    - Optimize **travel routes** to minimize unnecessary travel time and maximize experience.
-    - If an activity is **seasonal or weather-dependent**, mention it in **tips**.
+      You are an expert travel planner. **Design an engaging, optimized, and budget-friendly itinerary** for a trip to **${destination}**, making sure all locations are real and available on **Google Maps**.
 
-    🔹 **User Interests:**  
-    ${interestText}
+      ### **📌 Trip Overview:**
+      - **Destination:** ${destination} 📍
+      - **Duration:** ${days} days 📆
+      - **Travelers:** ${persons} person(s) 👥
+      - **Total Budget:** ₹${totalBudget} 💰 (**Must be evenly distributed across the trip**)
+      - **Special Interests:** ${interestText}
+      
+      ### **🎯 Itinerary Guidelines:**
+      1. **Accurate Locations:** Every location (attraction, restaurant, hotel, etc.) **must exist on Google Maps**. Provide the **exact name** to ensure easy lookup.
+      2. **Daily Plan Structure:** Each day must have **morning, afternoon, and evening** activities.
+      3. **Local Food & Culture:** Include **authentic experiences** such as local cuisine, street food, or cultural events.
+      4. **Budget Breakdown:** Provide the cost per activity, food, and transport. **Multiply costs by ${persons} people** if applicable.
+      5. **Weather Considerations:** If an activity is weather-dependent, provide a **backup indoor option**.
+      6. **Hidden Gems & Offbeat Spots:** Mix popular sites with **unique and lesser-known** experiences.
+      7. **Travel Tips:** Provide helpful travel hacks, safety advice, or best times to visit.
 
-    ---  
+      **STRICTLY RETURN JSON FORMAT ONLY. DO NOT INCLUDE EXTRA TEXT OR EXPLANATIONS.**
 
-    🏝️ **Daily Itinerary Format**  
-    Each day must be **structured in morning, afternoon, and evening**, with **rich details** on:
-    - **Activities** → Provide a detailed description, unique experiences, and any historical or cultural insights.
-    - **Food** → Recommend **authentic local dishes** with restaurant names and pricing.
-    - **Transport** → Include best travel modes with estimated costs.
-    - **Budget Breakdown** → Ensure a clear **₹ cost estimate** for the day.
-    - **Insider Tips & Fun Facts** → Add special **travel hacks, safety tips, and hidden gems**.
-
-    ---  
-
-    **🔹 Response Format (Strict JSON Only)**
-    {
-      "itinerary": [
-        {
-          "day": 1,
-          "morning": {
-            "activities": "🌅 **Sunrise at XYZ Viewpoint** – Watch the sky transform into a painting as the golden sun rises over the city. This spot is a local favorite for yoga enthusiasts and photographers.",
-            "food": "🥞 **Breakfast at ABC Café** – Try the legendary **butter masala dosa**, freshly brewed filter coffee, and soft idlis with four types of chutney. (₹250 per person)",
-            "transport": "🚖 Taxi from hotel to viewpoint (₹500 total)",
-            "cost": "₹750"
-          },
-          "afternoon": {
-            "activities": "🏰 **Explore the Majestic XYZ Palace** – Step into history with this **400-year-old royal residence**, filled with **intricate carvings, grand chandeliers, and secret underground tunnels**. Local guides share hidden stories of lost treasures.",
-            "food": "🍛 **Lunch at The Royal Kitchen** – Savor a rich **Mughlai thali** featuring saffron-infused biryani, tender kebabs, and creamy korma. (₹700 per person)",
-            "transport": "🚶 Walk through the bustling Old Bazaar streets, filled with spice vendors and handloom stalls.",
-            "cost": "₹850"
-          },
-          "evening": {
-            "activities": "🚢 **Sunset Boat Ride on the XYZ River** – Glide through the serene waters as the sun paints the sky in hues of pink and orange. The riverbanks are lined with **ancient temples and hidden caves**.",
-            "food": "🍣 **Dinner at Sky Lounge** – Enjoy an **open-air rooftop dining experience** with breathtaking city views. Try their signature **grilled salmon with lemon butter sauce**. (₹900 per person)",
-            "transport": "🚕 Auto-rickshaw to the riverside (₹200)",
-            "cost": "₹1,100"
-          },
-          "budget_breakdown": "₹2,700",
-          "tips": [
-            "🔹 **Hidden Gem Alert!** Visit the small café near XYZ Palace that serves handmade rose-flavored kulfi – a local delicacy!",
-            "🔹 **Best Time to Visit:** Arrive at the palace before 10 AM to avoid long queues.",
-            "🔹 **Bargaining Tip:** At Old Bazaar, start at **50% of the quoted price** when buying souvenirs."
-          ]
-        }
-      ]
-    }
-
-    ---  
-
-    **🔹 Strict Response Instructions:**  
-    - **Return only JSON** (no extra explanations or markdown formatting).  
-    - Ensure **realistic budget allocation** that aligns with the total budget.  
-    - Multiply **cost estimates by ${persons} people** where applicable.  
-    - Enhance storytelling to make the itinerary **exciting and immersive**.  
-    - Use **fun facts, hidden gems, and expert travel tips** to enrich the experience.  
-
-    🎯 **Now, generate an unforgettable itinerary!** 🚀
-  `;
+      JSON format:
+      {
+        "trip_overview": {
+          "destination": "${destination}",
+          "duration": "${days} days",
+          "travelers": "${persons} person(s)",
+          "total_budget": "₹${totalBudget}",
+          "special_interests": "${interestText}"
+        },
+        "itinerary": [
+          {
+            "day": 1,
+            "morning": {
+              "activities": "Visit example place",
+              "food": "Example restaurant (₹500 per person)",
+              "transport": "Example transport",
+              "cost": "₹500"
+            },
+            "afternoon": {
+              "activities": "Visit example place",
+              "food": "Example restaurant (₹600 per person)",
+              "transport": "Example transport",
+              "cost": "₹600"
+            },
+            "evening": {
+              "activities": "Visit example place",
+              "food": "Example restaurant (₹700 per person)",
+              "transport": "Example transport",
+              "cost": "₹700"
+            },
+            "budget_breakdown": "₹1,800",
+            "tips": "Example tip"
+          }
+        ]
+      }
+    `;
 
     const response = await fetch(GROQ_API_URL, {
       method: "POST",
@@ -103,17 +97,28 @@ export async function generateItinerary(
       throw new Error("Invalid response from AI API");
     }
 
-    // Debugging: Log raw AI response
     console.log("🛠️ Raw AI Response:", data.choices[0].message.content);
 
-    // Extract only JSON from the response
-    const jsonMatch = data.choices[0].message.content.match(/\{[\s\S]*\}/);
+    const responseText = data.choices[0].message.content;
+
+    // Extract JSON safely
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("AI response is not valid JSON");
 
-    const itineraryJSON = JSON.parse(jsonMatch[0]);
-    console.log("🗺️ AI-Generated JSON Itinerary:\n", JSON.stringify(itineraryJSON, null, 2));
+    // Clean up and ensure valid JSON
+    const cleanedJson = jsonMatch[0]
+      .replace(/```json|```/g, "")  // Remove Markdown code block indicators
+      .trim();
 
-    return itineraryJSON;
+    try {
+      const itineraryJSON = JSON.parse(cleanedJson);
+      console.log("🗺️ AI-Generated JSON Itinerary:\n", JSON.stringify(itineraryJSON, null, 2));
+      return itineraryJSON;
+    } catch (jsonError) {
+      console.error("❌ Error parsing AI response JSON:", jsonError);
+      console.error("Raw AI Response:", responseText);
+      throw new Error("Failed to parse AI-generated JSON");
+    }
   } catch (error) {
     console.error("❌ Error generating itinerary:", error);
     throw error;

@@ -1,11 +1,18 @@
 import express, { Request, Response } from "express";
 import fs from "fs";
 import path from "path";
+import axios from "axios";
+import dotenv from "dotenv";
 import { generateItinerary } from "./services/Itinerarygen";
 import { extractPlacesAI } from "./services/extractplaces"; // Import the extraction function
+import { convertItineraryToText } from "./services/jsontoparagraph"; // Import AI conversion function
+
+dotenv.config();
 
 const app = express();
 app.use(express.json());
+
+const API_KEY = process.env.GEO_API_KEY; // Ensure you have the API key in .env
 
 interface ReqBody {
   destination: string;
@@ -19,7 +26,6 @@ interface ReqBody {
 app.post("/gen-itinerary", async (req: any, res: any) => {
   try {
     const { destination, number_of_days, budget, number_of_persons, interests } = req.body as ReqBody;
-    console.log(destination, number_of_days, budget, number_of_persons, interests);
 
     if (!destination || !number_of_days || !budget || !number_of_persons) {
       return res.status(400).json({
@@ -28,13 +34,9 @@ app.post("/gen-itinerary", async (req: any, res: any) => {
     }
 
     const itinerary = await generateItinerary(destination, number_of_days, budget, number_of_persons, interests);
-    console.log("Generated itinerary:", itinerary);
 
     const filePath = path.join(__dirname, "generated_itinerary.json");
-
     fs.writeFileSync(filePath, JSON.stringify(itinerary, null, 2));
-
-    console.log(`📝 Itinerary saved to ${filePath}`);
 
     return res.json({ success: true, itinerary, message: "Itinerary saved successfully!" });
   } catch (error) {
@@ -43,7 +45,7 @@ app.post("/gen-itinerary", async (req: any, res: any) => {
   }
 });
 
-// 🆕 Route to extract places from the itinerary
+// Route to extract places from the itinerary
 app.get("/extract-places", async (req: any, res: any) => {
   try {
     const filePath = path.join(__dirname, "generated_itinerary.json");
@@ -52,10 +54,39 @@ app.get("/extract-places", async (req: any, res: any) => {
       return res.status(400).json({ error: "No itinerary found. Please generate one first!" });
     }
 
-    const places = await extractPlacesAI(filePath); // Extract places using AI
+    const places = await extractPlacesAI(filePath);
     return res.json({ success: true, places });
   } catch (error) {
     console.error("❌ Error extracting places:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// **New Route to Convert JSON Itinerary to Text and Save it**
+app.get("/convert-itinerary", async (req: any, res: any) => {
+  try {
+    const jsonFilePath = path.join(__dirname, "generated_itinerary.json");
+
+    if (!fs.existsSync(jsonFilePath)) {
+      return res.status(400).json({ error: "No itinerary found. Please generate one first!" });
+    }
+
+    const itineraryJSON = JSON.parse(fs.readFileSync(jsonFilePath, "utf-8"));
+
+    // Convert JSON to readable text using AI
+    const itineraryText = await convertItineraryToText(itineraryJSON);
+
+    // Save the output to a text file
+    const textFilePath = path.join(__dirname, "generated_itinerary.txt");
+    fs.writeFileSync(textFilePath, itineraryText, "utf-8");
+
+    return res.json({
+      success: true,
+      message: "Itinerary converted and saved successfully!",
+      textFilePath,
+    });
+  } catch (error) {
+    console.error("❌ Error converting itinerary to text:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
