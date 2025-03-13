@@ -10,35 +10,57 @@ export const extractplaces = async (itinerary:any) => {
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `
-    You are an AI that extracts **only places** (landmarks, attractions, restaurants, hotels) from a given travel itinerary.  
-    **Do NOT create any new places. Only return places from the itinerary below.**  
-    The response must be in **strict JSON format**.
+    You are an AI that extracts **only places** (landmarks, attractions, restaurants, hotels) from a given travel itinerary **along with their specific full,precise locations**.  
 
-    **Input Itinerary (Extract from this only):**  
+    **Strict Extraction Guidelines:**
+    1. **Extract only the mentioned places**—do not create new ones.  
+    2. **Ensure precise locations** by including city, state, and country (e.g., "Cafe Simla Times, The Mall Road, Shimla, Himachal Pradesh, India").  
+    3. **If a place’s location is incomplete**, infer it using the itinerary's context (destination, region).  
+    4. **Avoid duplicate entries**—if a place appears multiple times, ensure each entry remains **unique** in that day's itinerary.  
+    5. **Maintain a structured JSON format with no extra text.**  
+
+    ### **Input Itinerary:**  
     \`\`\`json
     ${JSON.stringify(itinerary, null, 2)}
     \`\`\`
 
-    **Expected JSON Format (Do NOT add explanations, just return JSON):**  
+    ### **Expected JSON Output:**  
     \`\`\`json
     {
       "places": [
         {
           "day": <day_number>,
-          "activities": [<list_of_places>],
-          "food": [<list_of_restaurants>],
-          "hotel": [<list_of_hotels>]
+          "activities": [
+            {
+              "name": "<Place Name>",
+              "location": "<Full Address or City, State, Country>"
+            }
+          ],
+          "food": [
+            {
+              "name": "<Restaurant Name>",
+              "location": "<Full Address or City, State, Country>"
+            }
+          ],
+          "hotel": [
+            {
+              "name": "<Hotel Name>",
+              "location": "<Full Address or City, State, Country>"
+            }
+          ]
         }
       ]
     }
     \`\`\`
 
-    **Instructions:**  
-    - **Extract only place names** (e.g., "Mahakaleshwar Temple", "Cafe Simla Times").  
-    - **DO NOT** include transport, costs, or tips.  
-    - Ensure output is **valid JSON** with correct formatting.  
-    - **DO NOT make up places**. Use only the ones present in the itinerary.  
+    ### **Final Instructions:**  
+    - **No extra text, explanations, or formatting errors—only return JSON.**  
+    - **Ensure accuracy in place names and locations.**  
+    - **If a place appears multiple times in a day, list it only once.**  
+    - **Each place should have a unique and correctly formatted address.**  
+    - **Keep the response structured exactly as shown above.**  
     `;
+
 
     const response = await model.generateContent(prompt);
     const result = response.response;
