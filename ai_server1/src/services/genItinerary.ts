@@ -23,14 +23,14 @@ export const generateItinerary = async (
     ### **Strict Budget Utilization Guidelines:**
     - **Ensure optimal use of the budget**—avoid excessive leftover amounts. The remaining budget should be **reasonably low** while maintaining quality accommodations, food, and experiences.
     - **Distribute expenses efficiently** across accommodation, food, transport, and activities.
-    - **Do not exceed the given budget**, but also do not leave more than **20-25% of the budget unspent** unless necessary.
-    - **Prioritize quality experiences** that match the budget rather than overly cheap options.
+    - **Do not exceed the given budget**, but also do not leave more than **25-30% of the budget unspent** unless necessary.
+    - **Prioritize quality experiences that match** the budget rather than overly cheap options.
 
     ### **Location Accuracy Requirements:**
-    - Each **activity, restaurant, and transport mode** should include the **exact name and location** (e.g., landmarks, area names, or full addresses if available).
-    - Food recommendations must include the **specific restaurant name and address**.
-    - **Transport details must specify pick-up/drop-off points** to ensure clarity.
-      
+    - Each **activity, restaurant, and transport mode** should include the **place name along with the city or district only** in the format **#Place Name, City/District#**.
+    - Food recommendations must include the **specific restaurant name and city/district only** in the format **#Restaurant Name, City/District#**.
+    - **Transport details must specify pick-up/drop-off points** in the format **#Transport Location, City/District#**.
+
     ### **Itinerary Structure:**
     - Each day's plan must be structured into **morning, afternoon, and evening** sections.
     - Include **food, transport, and cost breakdown** within each section.
@@ -48,25 +48,25 @@ export const generateItinerary = async (
           {
             "day": 1,
             "morning": {
-              "activities": "Arrive in Shimla, check into Hotel Combermere (Opposite Tourism Lift, The Mall, Shimla), and explore Mall Road.",
-              "food": "Breakfast at Indian Coffee House (33, Mall Road, Middle Bazar, Shimla) - ₹250 per person.",
-              "transport": "Taxi from Jubbarhatti Airport (Shimla) to Hotel Combermere - ₹800 total.",
+              "activities": "Arrive in #Hotel Combermere, Shimla# and explore #Mall Road, Shimla#.",
+              "food": "Breakfast at #Indian Coffee House, Shimla# - ₹250 per person.",
+              "transport": "Taxi from #Jubbarhatti Airport, Shimla# to #Hotel Combermere, Shimla# - ₹800 total.",
               "cost": "₹1,050"
             },
             "afternoon": {
-              "activities": "Visit The Ridge (The Mall, Shimla) and Christ Church (The Ridge, Shimla) for scenic views and photography.",
-              "food": "Lunch at Wake & Bake Café (34/1, Mall Road, Middle Bazar, Shimla) - ₹600 per person.",
+              "activities": "Visit #The Ridge, Shimla# and #Christ Church, Shimla# for scenic views and photography.",
+              "food": "Lunch at #Wake & Bake Café, Shimla# - ₹600 per person.",
               "transport": "Walking tour.",
               "cost": "₹600"
             },
             "evening": {
-              "activities": "Enjoy a fine dining experience at Eighteen71 Cookhouse & Bar (Hotel Willow Banks, The Mall, Shimla).",
+              "activities": "Enjoy a fine dining experience at #Eighteen71 Cookhouse & Bar, Shimla#.",
               "food": "North Indian & Chinese cuisine - ₹800 per person.",
-              "transport": "Auto-rickshaw from The Ridge to Eighteen71 Cookhouse & Bar - ₹150.",
+              "transport": "Auto-rickshaw from #The Ridge, Shimla# to #Eighteen71 Cookhouse & Bar, Shimla# - ₹150.",
               "cost": "₹950"
             },
             "budget_breakdown": "₹3,100",
-            "tips": "Explore Mall Road in the evening for a lively atmosphere. Arrive early at The Ridge for better photos."
+            "tips": "Explore #Mall Road, Shimla# in the evening for a lively atmosphere. Arrive early at #The Ridge, Shimla# for better photos."
           }
         ],
         "total_budget_used": "₹X,XXX",
@@ -78,8 +78,6 @@ export const generateItinerary = async (
     Ensure that the itinerary is engaging, **realistic**, and structured to provide a **seamless travel experience**.  
     It must be in **valid JSON format with no extra text**.
     `;
-
-
 
     const response = await model.generateContent(prompt);
     const result = response.response;
