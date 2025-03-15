@@ -14,7 +14,9 @@ export async function placeInfo(placename: string,photonum=3,photwidth=600): Pro
     }).
         then(async (da) => {
             const data = await da.json();
+            console.log(data)
             const place= data.places[0];
+            // check if this place exist already in db
             const photoUris = await Promise.all(place.photos.slice(0,photonum).map((photo: any) => getPhotoUri(photo.name,photwidth)));
             return {
                 id:place.id,
