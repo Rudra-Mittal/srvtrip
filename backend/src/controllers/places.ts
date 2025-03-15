@@ -17,13 +17,12 @@ export async function placeInfo(placename: string,photonum=3,photwidth=600): Pro
             console.log(data)
             const place= data.places[0];
             // check if this place exist already in db
-            const photoUris = await Promise.all(place.photos.slice(0,photonum).map((photo: any) => getPhotoUri(photo.name,photwidth)));
             return {
                 id:place.id,
                 formattedAddress:place.formattedAddress,
                 displayName:place.displayName.text,
                 location:place.location,
-                photos:photoUris
+                photos:place.photos.map((photo:any)=>photo.name)
             };
         })
         .catch((err) => {
@@ -32,7 +31,7 @@ export async function placeInfo(placename: string,photonum=3,photwidth=600): Pro
         });
 }
 
-async function getPhotoUri(photoreference:string,photwidth:number):Promise<string>{
+export async function getPhotoUri(photoreference:string,photwidth=600):Promise<string>{
     return fetch(`https://places.googleapis.com/v1/${photoreference}/media?key=${process.env.GOOGLE_PLACES_API_KEY}&maxWidthPx=${photwidth}&skipHttpRedirect=true`)
     .then(async (data) => {
         const res = await data.json();
