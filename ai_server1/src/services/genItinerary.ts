@@ -15,52 +15,68 @@ export const generateItinerary = async (
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-    const prompt = `
-      Generate a detailed, optimized travel itinerary for a trip to ${destination} spanning ${number_of_days} days.
-      The budget for this trip is ₹${budget}, and it is planned for ${number_of_persons} people.
-      ${interests ? `Interests to consider: ${interests}. take it as a priority` : ""}
+    const prompt =`
+    Generate a detailed, optimized travel itinerary for a trip to **${destination}** spanning **${number_of_days}** days.
+    The total budget for this trip is **₹${budget}**, and it is planned for **${number_of_persons}** people.
+    ${interests ? `Interests to consider: ${interests}. Take it as a priority.` : ""}
 
-      Each day's plan must be structured into **morning, afternoon, and evening** activities, and the response **must be valid JSON with no extra text**.
+    ### **Strict Budget Utilization Guidelines:**
+    - **Ensure optimal use of the budget**—avoid excessive leftover amounts. The remaining budget should be **reasonably low** while maintaining quality accommodations, food, and experiences.
+    - **Distribute expenses efficiently** across accommodation, food, transport, and activities.
+    - **Do not exceed the given budget**, but also do not leave more than **25-30% of the budget unspent** unless necessary.
+    - **Prioritize quality experiences that match** the budget rather than overly cheap options.
 
-      ### **Strict JSON Format**:
-      \\u0060\\u0060\\u0060json
-      {
-        "itinerary": [
+    ### **Location Accuracy Requirements:**
+    - Each **activity, restaurant, and transport mode** should include the **place name along with the city or district only** in the format **#Place Name, City/District#**.
+    - Food recommendations must include the **specific restaurant name and city/district only** in the format **#Restaurant Name, City/District#**.
+    - **Transport details must specify pick-up/drop-off points** in the format **#Transport Location, City/District#**.
+
+    ### **Itinerary Structure:**
+    - Each day's plan must be structured into **morning, afternoon, and evening** sections.
+    - Include **food, transport, and cost breakdown** within each section.
+    - **Provide a total budget estimation** at the end, summing up all costs.
+
+    ### **Strict JSON Format**:
+    \`\`\`json
+    {
+      "itinerary": {
+        "destination": "${destination}",
+        "number_of_days": ${number_of_days},
+        "budget": ${budget},
+        "number_of_persons": ${number_of_persons},
+        "days": [
           {
             "day": 1,
             "morning": {
-              "activities": "Arrive in Shimla, check into Hotel Combermere, and explore Mall Road.",
-              "food": "Breakfast at Indian Coffee House (₹250 per person).",
-              "transport": "Taxi from airport to hotel (₹800 total).",
+              "activities": "Arrive in #Hotel Combermere, Shimla# and explore #Mall Road, Shimla#.",
+              "food": "Breakfast at #Indian Coffee House, Shimla# - ₹250 per person.",
+              "transport": "Taxi from #Jubbarhatti Airport, Shimla# to #Hotel Combermere, Shimla# - ₹800 total.",
               "cost": "₹1,050"
             },
             "afternoon": {
-              "activities": "Visit The Ridge and Christ Church for scenic views.",
-              "food": "Lunch at Wake & Bake Café (₹600 per person).",
+              "activities": "Visit #The Ridge, Shimla# and #Christ Church, Shimla# for scenic views and photography.",
+              "food": "Lunch at #Wake & Bake Café, Shimla# - ₹600 per person.",
               "transport": "Walking tour.",
               "cost": "₹600"
             },
             "evening": {
-              "activities": "Dinner at 8INE rooftop restaurant.",
-              "food": "North Indian/Chinese cuisine (₹800 per person).",
-              "transport": "Auto-rickshaw to restaurant (₹150).",
+              "activities": "Enjoy a fine dining experience at #Eighteen71 Cookhouse & Bar, Shimla#.",
+              "food": "North Indian & Chinese cuisine - ₹800 per person.",
+              "transport": "Auto-rickshaw from #The Ridge, Shimla# to #Eighteen71 Cookhouse & Bar, Shimla# - ₹150.",
               "cost": "₹950"
             },
             "budget_breakdown": "₹3,100",
-            "tips": "Best to explore Mall Road in the evening for a lively atmosphere."
+            "tips": "Explore #Mall Road, Shimla# in the evening for a lively atmosphere. Arrive early at #The Ridge, Shimla# for better photos."
           }
-        ]
+        ],
+        "total_budget_used": "₹X,XXX",
+        "remaining_budget": "₹X,XXX"
       }
-      \\u0060\\u0060\\u0060
+    }
+    \`\`\`
 
-      ### **Response Instructions**:
-      - The response **must be valid JSON** without extra text, explanations, or preambles.
-      - Do **not** include phrases like “Sure, here’s your itinerary” or “I hope this helps.”
-      - The response **must begin with { and end with }** (strict JSON format).
-      - **Each day's itinerary must include:** morning, afternoon, and evening plans with activities, food, transport, cost, and travel tips.
-      - **Multiply costs for ${number_of_persons} people** when necessary.
-
-      **Ensure the response is directly usable as JSON. Do not provide any non-JSON text.**
+    Ensure that the itinerary is engaging, **realistic**, and structured to provide a **seamless travel experience**.  
+    It must be in **valid JSON format with no extra text**.
     `;
 
     const response = await model.generateContent(prompt);
