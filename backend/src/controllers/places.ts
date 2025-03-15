@@ -16,9 +16,8 @@ export async function placeInfo(placename:string){
         const data=await da.json();
         const res= data.places.map((place:any)=>{
             const photos= place.photos.map((photo:any)=>{
-                console.log(photo.widthPx);
                 return {
-                    "name":photo.name,
+                    "url":"https://places.googleapis.com/v1/"+photo.name+`/media?maxHeightPx=400&maxWidthPx=400&key=${process.env.GOOGLE_PLACES_API_KEY}`,
                     "width":photo.widthPx,
                     "height":photo.heightPx,
                 }
