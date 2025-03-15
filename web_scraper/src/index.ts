@@ -11,7 +11,7 @@ app.use(express.json())
 app.post('/scraper',async (req,res)=>{
     const {placeName,maxScrolls}=req.body;
     const review=await scrapeGoogleMapsReviews(placeName,maxScrolls);
-    if(review.reviews.length>0) insertData(review)
+    // if(review.reviews.length>0) insertData(review)
     res.send(review)
 })
 app.listen(3000,()=>{

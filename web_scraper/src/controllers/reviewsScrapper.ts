@@ -1,7 +1,7 @@
 import { chromium } from 'playwright';
 
 export async function scrapeGoogleMapsReviews(placeName: string, maxScrolls: number):Promise<{place:string,reviews:string[]}> { 
-    const browser = await chromium.launch({ headless: true, args: ['--disable-gpu', '--disable-dev-shm-usage'] });
+    const browser = await chromium.launch({ headless: false, args: ['--disable-gpu', '--disable-dev-shm-usage'] });
     const context = await browser.newContext();
     const page = await context.newPage();
 
@@ -15,16 +15,16 @@ export async function scrapeGoogleMapsReviews(placeName: string, maxScrolls: num
         await page.keyboard.press('Enter');
         
         // Handle search results
-        try {
-            // Wait for either search results or direct place page
-            await page.waitForSelector('//div[contains(@aria-label, "Results")]', { timeout: 5000 });
-            const searchResult = page.locator('//a[contains(@class, "hfpxzc")]').first();
-            await searchResult.click();
-            // Wait for place page to load
-            await page.waitForSelector('//button[contains(@aria-label, "Reviews")]', { timeout: 5000 });
-        } catch {
-            // Continue if we're already on place page
-        }
+        // try {
+        //     // Wait for either search results or direct place page
+        //     await page.waitForSelector('//div[contains(@aria-label, "Results")]', { timeout: 5000 });
+        //     const searchResult = page.locator('//a[contains(@class, "hfpxzc")]').first();
+        //     await searchResult.click();
+        //     // Wait for place page to load
+        //     await page.waitForSelector('//button[contains(@aria-label, "Reviews")]', { timeout: 5000 });
+        // } catch {
+        //     // Continue if we're already on place page
+        // }
 
         // Open reviews section
         try {
@@ -71,7 +71,7 @@ export async function scrapeGoogleMapsReviews(placeName: string, maxScrolls: num
         console.error("Error during scraping:", error);
         await browser.close();
         return {
-            place:"",
+            place:placeName,
             reviews:[]
         };
     }
