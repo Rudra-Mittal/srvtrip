@@ -1,47 +1,56 @@
 import React, { useState } from "react";
-import { APIProvider, Map, AdvancedMarker, Pin, MapMouseEvent } from "@vis.gl/react-google-maps";
+import { APIProvider, Map, AdvancedMarker, InfoWindow , Pin } from "@vis.gl/react-google-maps";
 
-const App: React.FC = () => {
-  const [markers, setMarkers] = useState<{ lat: number; lng: number }[]>([]);
+const MapComponent: React.FC = () => {
+  const [infoOpen, setInfoOpen] = useState<number | null>(null);
 
-  const handleMapClick = (event: MapMouseEvent) => {
-    if (!event.detail.latLng) return;
-    setMarkers((prev) => [...prev, { lat: event.detail.latLng.lat, lng: event.detail.latLng.lng }]);
-  };
+  const predefinedMarkers = [
+    { lat: -33.8688, lng: 151.2093 }, // Sydney
+    { lat: 40.712776, lng: -74.005974 }, // New York
+  ];
 
-  const handleMarkerDrag = (index: number, lat: number, lng: number) => {
-    setMarkers((prev) =>
-      prev.map((marker, i) => (i === index ? { lat, lng } : marker))
-    );
-  };
+  const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+  const mapId = import.meta.env.VITE_GOOGLE_MAP_ID;
+
+  if (!apiKey || !mapId) {
+    return <div>Error: Missing Google API Key or Map ID</div>;
+  }
 
   return (
-    <APIProvider apiKey={import.meta.env.VITE_GOOGLE_API_KEY}>
+    <APIProvider apiKey={apiKey} version="beta">
       <div className="h-screen w-full">
         <Map
-          mapId={import.meta.env.VITE_GOOGLE_MAP_ID}  // ✅ Add Map ID here
+          mapId={mapId}
           defaultZoom={5}
           defaultCenter={{ lat: -33.860664, lng: 151.208138 }}
-          onClick={handleMapClick}
         >
-          {markers.map((marker, index) => (
+          {predefinedMarkers.map((position, index) => (
             <AdvancedMarker
               key={index}
-              position={marker}
-              draggable
-              onDragEnd={(ev) => {
-                if (ev.detail.latLng) {
-                  handleMarkerDrag(index, ev.detail.latLng.lat, ev.detail.latLng.lng);
-                }
-              }}
+              position={position}
+              onClick={() => setInfoOpen(index)}
             >
-              <Pin background={"red"} borderColor={"black"} glyphColor={"white"} />
+              {/* Custom marker content */}
+              <Pin background={"#FF0000"} borderColor={"#FFFFFF"} glyphColor={"#000000"} />
             </AdvancedMarker>
           ))}
+
+          {infoOpen !== null && (
+            <InfoWindow
+              position={predefinedMarkers[infoOpen]}
+              onCloseClick={() => setInfoOpen(null)}
+            >
+              <div>
+                <h3>Advanced Marker</h3>
+                <p>Latitude: {predefinedMarkers[infoOpen].lat}</p>
+                <p>Longitude: {predefinedMarkers[infoOpen].lng}</p>
+              </div>
+            </InfoWindow>
+          )}
         </Map>
       </div>
     </APIProvider>
   );
 };
 
-export default App;
+export default MapComponent;
