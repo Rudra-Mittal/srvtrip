@@ -109,7 +109,7 @@ export async function generateItinerary(
       }),
     });
 
-    const data = await response.json();
+    const data = await response.json() as any;
     if (!data.choices || !data.choices[0]?.message?.content) {
       throw new Error("Invalid response from AI API");
     }

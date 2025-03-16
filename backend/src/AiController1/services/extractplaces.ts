@@ -2,7 +2,7 @@ export async function extractPlaces(itenary: any): Promise<string[]> {
   try {
     const jsonData = JSON.parse(itenary);
     const placeMap = new Map<string, string>(); // To avoid near-duplicates
-    const regex = /🗺\[(.*?)\]/g;
+    const regex = /🗺\[\[(.*?)\]/g;
 
     jsonData.itinerary.forEach((day: any) => {
       for (const period of ["morning", "afternoon", "evening"]) {

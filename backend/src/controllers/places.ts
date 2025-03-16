@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-export async function placeInfo(placename: string,photonum=3,photwidth=600): Promise<any> {
+export async function placeInfo(placename: string): Promise<any> {
 
     return fetch('https://places.googleapis.com/v1/places:searchText', {
         method: 'POST',
@@ -13,8 +13,7 @@ export async function placeInfo(placename: string,photonum=3,photwidth=600): Pro
         }
     }).
         then(async (da) => {
-            const data = await da.json();
-            console.log(data)
+            const data = await da.json() as any;
             const place= data.places[0];
             // check if this place exist already in db
             return {
@@ -34,7 +33,7 @@ export async function placeInfo(placename: string,photonum=3,photwidth=600): Pro
 export async function getPhotoUri(photoreference:string,photwidth=600):Promise<string>{
     return fetch(`https://places.googleapis.com/v1/${photoreference}/media?key=${process.env.GOOGLE_PLACES_API_KEY}&maxWidthPx=${photwidth}&skipHttpRedirect=true`)
     .then(async (data) => {
-        const res = await data.json();
+        const res = await data.json() as any;
         return res.photoUri;
     })
     .catch((err) => {
