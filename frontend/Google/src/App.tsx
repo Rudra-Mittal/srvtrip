@@ -5,8 +5,10 @@ const App: React.FC = () => {
   const [markers, setMarkers] = useState<{ lat: number; lng: number }[]>([]);
 
   const handleMapClick = (event: MapMouseEvent) => {
-    if (!event.detail.latLng) return;
-    setMarkers((prev) => [...prev, { lat: event.detail.latLng.lat, lng: event.detail.latLng.lng }]);
+    const latLng = event.detail?.latLng;
+    if (!latLng) return; // Ensure latLng is valid before accessing its properties
+
+    setMarkers((prev) => [...prev, { lat: latLng.lat, lng: latLng.lng }]);
   };
 
   const handleMarkerDrag = (index: number, lat: number, lng: number) => {
@@ -15,11 +17,18 @@ const App: React.FC = () => {
     );
   };
 
+  const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+  const mapId = import.meta.env.VITE_GOOGLE_MAP_ID;
+
+  if (!apiKey || !mapId) {
+    return <div>Error: Missing Google API Key or Map ID</div>;
+  }
+
   return (
-    <APIProvider apiKey={import.meta.env.VITE_GOOGLE_API_KEY}>
+    <APIProvider apiKey={apiKey}>
       <div className="h-screen w-full">
         <Map
-          mapId={import.meta.env.VITE_GOOGLE_MAP_ID}  // ✅ Add Map ID here
+          mapId={mapId}
           defaultZoom={5}
           defaultCenter={{ lat: -33.860664, lng: 151.208138 }}
           onClick={handleMapClick}
@@ -30,8 +39,9 @@ const App: React.FC = () => {
               position={marker}
               draggable
               onDragEnd={(ev) => {
-                if (ev.detail.latLng) {
-                  handleMarkerDrag(index, ev.detail.latLng.lat, ev.detail.latLng.lng);
+                const latLng = ev.latLng;
+                if (latLng) {
+                  handleMarkerDrag(index, latLng.lat(), latLng.lng());
                 }
               }}
             >
