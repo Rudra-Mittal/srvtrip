@@ -12,7 +12,7 @@ export async function replacePlace(itenary:string,places:string[],displayName:st
         console.log(newItenary)
         return newItenary;
     } catch (error) {
-        console.error("❌ Error replacing places:", error);
+        console.error("Error replacing places:", error);
         return JSON.stringify({ error: "Internal Server Error" });
     }
 }

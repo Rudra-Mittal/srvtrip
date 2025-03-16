@@ -2,7 +2,10 @@ import { insertData } from "./controllers/insertReview";
 import express from "express";
 import { scrapeGoogleMapsReviews } from "./controllers/reviewsScrapper";
 import { searchQuery } from "./controllers/getSimilar";
-// const places=["Taj mahal","Marine Drive","Dominos, Chandigarh"];
+import dotenv from 'dotenv';
+import { migrateData } from "./controllers/migrate";
+import { updateEnv } from "./utils/updateEnv";
+dotenv.config();
 const app= express();
 app.use(express.json())
 
@@ -11,7 +14,7 @@ app.use(express.json())
 app.post('/scraper',async (req,res)=>{
     const {placeName,maxScrolls}=req.body;
     const review=await scrapeGoogleMapsReviews(placeName,maxScrolls);
-    // if(review.reviews.length>0) insertData(review)
+    if(review.reviews.length>0) insertData(review)
     res.send(review)
 })
 app.listen(3000,()=>{
@@ -27,4 +30,26 @@ app.post('/query',(req,res)=>{
         console.log(err)
         res.json({"error":"Server err"})
     })
+})
+
+app.post('/migrate',async (req,res)=>{
+    const {serverPassword,WEAVIATE_URL,WEAVIATE_API_KEY}=req.body;
+    
+    if(serverPassword!=process.env.MIGRATE_PASSWORD){
+        res.status(401).json({"error":"Invalid password"})
+        return
+    }
+    migrateData(WEAVIATE_URL,WEAVIATE_API_KEY)
+    .then((result:any)=>{
+            updateEnv(WEAVIATE_URL,WEAVIATE_API_KEY)
+            res.json(result)
+            return 
+        }
+    )
+    .catch((err:any)=>{
+        console.log(err)
+        res.json({"error":"Server err"}).status(500)
+        return ;
+    }
+)
 })

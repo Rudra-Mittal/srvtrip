@@ -51,7 +51,7 @@ app.post('/api/itenary', async(req,res)=>{
         //   save all the data in db
     }
     // insert display name into jsonItenary
-    replacePlace(itenary,places,placeData.map(place=>`place.displayName`))
+    replacePlace(itenary,places,placeData.map(place=>place.displayName))
     
     // convert the json into text via AI
     res.send(JSON.stringify({itenary,placeData,photos}));
