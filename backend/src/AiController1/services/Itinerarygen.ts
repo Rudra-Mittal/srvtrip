@@ -135,7 +135,6 @@ export async function generateItinerary(
 
     try {
       const itineraryJSON = JSON.parse(cleanedText);
-      console.log("🗺[ AI-Generated JSON Itinerary:\n", JSON.stringify(itineraryJSON, null, 2));
       return itineraryJSON;
     } catch (parseError) {
       console.error("❌ Error parsing cleaned JSON:", cleanedText);

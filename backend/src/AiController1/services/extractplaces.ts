@@ -1,10 +1,6 @@
-import fs from "fs/promises";
-
-export async function extractPlaces(filePath: string): Promise<string[]> {
+export async function extractPlaces(itenary: any): Promise<string[]> {
   try {
-    const data = await fs.readFile(filePath, "utf-8");
-    const jsonData = JSON.parse(data);
-
+    const jsonData = JSON.parse(itenary);
     const placeMap = new Map<string, string>(); // To avoid near-duplicates
     const regex = /🗺\[(.*?)\]/g;
 
@@ -36,7 +32,6 @@ export async function extractPlaces(filePath: string): Promise<string[]> {
     });
 
     const places = Array.from(placeMap.values()); // Get unique places with the most detailed names
-    await fs.writeFile("places.json", JSON.stringify(places, null, 2));
     return places;
   } catch (error) {
     console.error("❌ Error reading or extracting places:", error);
