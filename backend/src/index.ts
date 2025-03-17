@@ -54,6 +54,7 @@ app.post('/api/itenary', async(req,res)=>{
     replacePlace(itenary,places,placeData.map(place=>place.displayName))
     
     // convert the json into text via AI
+
     res.send(JSON.stringify({itenary,placeData,photos}));
 })
 
