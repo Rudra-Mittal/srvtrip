@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-export async function placeInfo(placename: string): Promise<any> {
+export async function placeInfo(placename: string,photoLimit=5): Promise<any> {
 
     return fetch('https://places.googleapis.com/v1/places:searchText', {
         method: 'POST',
@@ -21,7 +21,7 @@ export async function placeInfo(placename: string): Promise<any> {
                 formattedAddress:place.formattedAddress,
                 displayName:place.displayName.text,
                 location:place.location,
-                photos:place.photos.map((photo:any)=>photo.name)
+                photos:place.photos.slice(0,photoLimit).map((photo:any)=>photo.name)
             };
         })
         .catch((err) => {

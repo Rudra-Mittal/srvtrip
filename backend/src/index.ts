@@ -32,17 +32,12 @@ app.post('/api/itenary', async(req,res)=>{
 
     // extracting places
 
-    console.log(itenary)
-    // const places= await extractPlaces(itenary)
+    console.log(await JSON.parse(itenary))
     const places=  extractPlacesByRegex(itenary)
-    console.log(places)
     // getting places info
     const placeData= await Promise.all((places.map(place=>placeInfo(place))))
     // check if the place Exist in db if no make a call to photos API and a scrapper API to get the place reviews
     const photos=[] as any
-    for(const place of placeData){
-        console.log(place.displayName);
-    }
     for(const place of placeData){
         // check if it exist in db by compairing with place id
         // console.log(place.photos)
@@ -50,6 +45,7 @@ app.post('/api/itenary', async(req,res)=>{
         // calling the photos API
          const placePhotos=await Promise.all((place.photos?.map((reference:string)=>getPhotoUri(reference))))
          photos.push(placePhotos)
+         place.photos=placePhotos
          //  console.log(place.displayName,photos)
 
          // make call to web scrapper and get summarized review
@@ -57,12 +53,13 @@ app.post('/api/itenary', async(req,res)=>{
 
         //   save all the data in db
     }
+    for(const place of placeData){
+        console.log(place);
+    }
     // insert display name into jsonItenary
 //    const newItenary= replacePlace(itenary,places,placeData.map(place=>place.displayName))
   const newItenary =replacePlace(itenary,places,placeData.map(place=>place.displayName))
-    console.log(await convertItineraryToPara(await JSON.parse(newItenary)))
     // convert the json into text via AI
-    console.log(newItenary)
     res.send(newItenary);
 })
 
