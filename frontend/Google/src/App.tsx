@@ -1,28 +1,93 @@
 import React, { useState, useEffect } from "react";
-import { APIProvider, Map, AdvancedMarker, InfoWindow, Pin } from "@vis.gl/react-google-maps";
-import "./index.css"; // Ensure animation styles are included
+import {
+  APIProvider,
+  Map,
+  AdvancedMarker,
+  InfoWindow,
+  Pin,
+  useMapsLibrary,
+  useMap,
+} from "@vis.gl/react-google-maps";
+import "./index.css";
+
+const predefinedMarkers = [
+  { lat: 31.0857947, lng: 77.0661085 },
+  { lat: 31.1008914, lng: 77.1763562 },
+  { lat: 31.1040341, lng: 77.1755249 },
+  { lat: 31.1009306, lng: 77.1763075 },
+  { lat: 31.1013414, lng: 77.1835041 },
+  { lat: 31.1034073, lng: 77.1508082 },
+];
+
+const DirectionsRendererComponent: React.FC<{ triggerDirections: boolean }> = ({ triggerDirections }) => {
+  const [directionsRenderers, setDirectionsRenderers] = useState<google.maps.DirectionsRenderer[]>([]);
+  const routesLibrary = useMapsLibrary("routes");
+  const map = useMap();
+
+  useEffect(() => {
+    if (!routesLibrary || !map || !triggerDirections) return;
+
+    const newDirectionsRenderers: google.maps.DirectionsRenderer[] = [];
+
+    predefinedMarkers.forEach((_, index) => {
+      if (index < predefinedMarkers.length - 1) {
+        setTimeout(() => {
+          const directionsService = new routesLibrary.DirectionsService();
+          const directionsRenderer = new routesLibrary.DirectionsRenderer({
+            map,
+            suppressMarkers: true,
+            polylineOptions: {
+              strokeColor: "#FF5733",
+              strokeWeight: 4,
+            },
+            preserveViewport: true,
+          });
+
+          newDirectionsRenderers.push(directionsRenderer);
+
+          directionsService.route(
+            {
+              origin: predefinedMarkers[index],
+              destination: predefinedMarkers[index + 1],
+              travelMode: google.maps.TravelMode.DRIVING,
+            },
+            (response, status) => {
+              if (status === google.maps.DirectionsStatus.OK && response) {
+                directionsRenderer.setDirections(response);
+              } else {
+                console.error("Directions request failed due to " + status);
+              }
+            }
+          );
+
+          setDirectionsRenderers([...newDirectionsRenderers]);
+        }, 500 + index * 500);
+      }
+    });
+  }, [routesLibrary, map, triggerDirections]);
+
+  return null;
+};
 
 const MapComponent: React.FC = () => {
-  const [infoOpen, setInfoOpen] = useState<number | null>(null);
+  const [infoOpen, setInfoOpen] = useState<{ lat: number; lng: number } | null>(null);
   const [visibleMarkers, setVisibleMarkers] = useState<{ lat: number; lng: number }[]>([]);
-
-  const predefinedMarkers = [
-    { lat: 28.6139, lng: 77.2090 }, // India Gate
-    { lat: 28.5245, lng: 77.1855 }, // Qutub Minar
-    { lat: 28.6562, lng: 77.2410 }, // Red Fort
-    { lat: 28.5535, lng: 77.2588 }, // Lotus Temple
-    { lat: 28.5921, lng: 77.0460 }, // Akshardham Temple
-  ];
+  const [allMarkersVisible, setAllMarkersVisible] = useState(false);
 
   const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
   const mapId = import.meta.env.VITE_GOOGLE_MAP_ID;
 
-  // Sequentially show markers with delay
   useEffect(() => {
     predefinedMarkers.forEach((marker, index) => {
       setTimeout(() => {
-        setVisibleMarkers((prev) => [...prev, marker]);
-      }, 2000 + index * 500); // First marker at 2s, then each after 500ms
+        setVisibleMarkers((prev) => {
+          const newMarkers = [...prev, marker];
+          if (newMarkers.length === predefinedMarkers.length) {
+            setAllMarkersVisible(true);
+          }
+          return newMarkers;
+        });
+      }, 1000 + index * 200);
     });
   }, []);
 
@@ -33,24 +98,39 @@ const MapComponent: React.FC = () => {
   return (
     <APIProvider apiKey={apiKey} version="beta">
       <div className="h-screen w-full">
-        <Map mapId={mapId} defaultZoom={10} defaultCenter={{ lat: 28.6139, lng: 77.2090 }}>
-          {visibleMarkers.map((position, index) => (
-            <AdvancedMarker key={index} position={position} onClick={() => setInfoOpen(index)} className="drop-bounce-animation">
-              <div className="drop-bounce-animation">
-                <Pin background={"#FF0000"} borderColor={"#FFFFFF"} glyphColor={"#000000"} />
-              </div>
-            </AdvancedMarker>
+        <Map mapId={mapId} defaultZoom={12} defaultCenter={predefinedMarkers[0]}>
+          {predefinedMarkers.map((position, index) => (
+            visibleMarkers.includes(position) && (
+              <AdvancedMarker
+                key={index}
+                position={position}
+                className="drop-bounce-animation"
+                onClick={() => {
+                  setInfoOpen(position);
+                }}
+              >
+                <div className="drop-bounce-animation">
+                  <Pin 
+                    background={"#FF0000"} 
+                    borderColor={"#FFFFFF"}
+                    glyphColor={"#FFFFFF"} 
+                    glyph={(index + 1).toString()} 
+                  />
+                </div>
+              </AdvancedMarker>
+            )
           ))}
 
-          {infoOpen !== null && (
-            <InfoWindow position={predefinedMarkers[infoOpen]} onCloseClick={() => setInfoOpen(null)}>
-              <div>
-                <h3>Advanced Marker</h3>
-                <p>Latitude: {predefinedMarkers[infoOpen].lat}</p>
-                <p>Longitude: {predefinedMarkers[infoOpen].lng}</p>
+          {infoOpen && (
+            <InfoWindow position={infoOpen} disableAutoPan={true}>
+              <div className="info-window">
+                <h3 className="text-lg font-bold text-gray-800">📍 Marker {predefinedMarkers.findIndex(marker => marker.lat === infoOpen.lat && marker.lng === infoOpen.lng) + 1}</h3>
+                <p className="text-sm text-gray-600">🌍 Lat: {infoOpen.lat.toFixed(6)}</p>
+                <p className="text-sm text-gray-600">📏 Lng: {infoOpen.lng.toFixed(6)}</p>
               </div>
             </InfoWindow>
           )}
+          {allMarkersVisible && <DirectionsRendererComponent triggerDirections={allMarkersVisible} />}
         </Map>
       </div>
     </APIProvider>

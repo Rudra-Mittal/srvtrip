@@ -23,8 +23,29 @@
 
 .drop-bounce-animation {
   opacity: 0;
-  animation: drop-bounce 0.8s ease-out forwards;
+  animation: drop-bounce 0.5s linear forwards;
 }
+
+.info-window {
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  animation: fadeInScale 0.3s ease-in-out;
+}
+
+@keyframes fadeInScale {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+
 
 
 
