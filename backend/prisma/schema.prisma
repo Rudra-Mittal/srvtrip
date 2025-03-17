@@ -38,7 +38,7 @@ model Day {
   morning     String
   afternoon   String
   evening     String
-  proTip      String
+  proTip      String?
   places      Place[]
 }
 
@@ -47,14 +47,17 @@ model Place {
   name      String    // Display name
   placeId   String    @unique// Places API ID
   address   String    //formatted address
+  latitude  Float
+  longitude Float
   url       String    
   images    Image[]
   dayId     Int
   day       Day       @relation(fields: [dayId], references: [id])
+  summarizedReview String?
 }
 
 model Image {
-  id       String  @id @default(uuid())
+  id       Int       @id @default(autoincrement())
   imageUrl String
   placeId  String
   place    Place   @relation(fields: [placeId], references: [placeId])

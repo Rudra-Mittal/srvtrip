@@ -9,6 +9,7 @@ import { createSchema } from '../utils/schema';
 interface Review {
   reviews: string[];
   place: string;
+  placeId: string;  
 }
 export async function insertData(reviews: Review):Promise<void> {
     const client = await weaviate.connectToWeaviateCloud(
@@ -24,7 +25,7 @@ export async function insertData(reviews: Review):Promise<void> {
     await createSchema(client,schemaName);
     const reviewSchema =  client.collections.get(schemaName);
      for(let i=0;i<reviews.reviews.length;i++){
-      const uuid=await reviewSchema.data.insert({review:reviews.reviews[i],place:reviews.place});
+      const uuid=await reviewSchema.data.insert({review:reviews.reviews[i],place:reviews.placeId});
       console.log(uuid)
      }
     console.log("Data inserted successfully!");

@@ -5,6 +5,7 @@ import { replacePlace } from './utils/replaceName';
 import { extract2, generate2 } from './AIController2';
 import { extractPlacesByRegex } from './AIController2/services/extractPlacesbyRegex';
 import { convertItineraryToPara } from './AIController2/services/convertItineraryToPara';
+import callWebScrapper from './controllers/callWebScrapper';
 
 const app = express();
 const PORT = 3000;
@@ -28,6 +29,7 @@ app.post('/api/itenary', async(req,res)=>{
     console.log(prompt)
     // const itenary=await generate(prompt)
     const itenary=await generate2(prompt)
+
     // extracting places
 
     console.log(itenary)
@@ -51,6 +53,7 @@ app.post('/api/itenary', async(req,res)=>{
          //  console.log(place.displayName,photos)
 
          // make call to web scrapper and get summarized review
+         const summarizedReview=callWebScrapper(place.displayName,2,place.id);
 
         //   save all the data in db
     }
