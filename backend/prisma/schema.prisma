@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int        @id @default(autoincrement())
+  email       String     @unique
+  password    String
+  itineraries Itinerary[]
+}
+
+model Itinerary {
+  id             Int       @id @default(autoincrement())
+  destination    String
+  duration       Int
+  budget         Float
+  description    String
+  numberOfPersons Int
+  interests      String[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  userId         Int
+  user           User      @relation(fields: [userId], references: [id])
+  days           Day[]
+}
+
+model Day {
+  id          Int       @id @default(autoincrement())
+  dayNumber   Int
+  itineraryId Int
+  itinerary   Itinerary @relation(fields: [itineraryId], references: [id])
+  morning     String
+  afternoon   String
+  evening     String
+  proTip      String
+  places      Place[]
+}
+
+model Place {
+  id        Int       @id @default(autoincrement())
+  name      String    // Display name
+  placeId   String    @unique// Places API ID
+  address   String    //formatted address
+  url       String    
+  images    Image[]
+  dayId     Int
+  day       Day       @relation(fields: [dayId], references: [id])
+}
+
+model Image {
+  id       String  @id @default(uuid())
+  imageUrl String
+  placeId  String
+  place    Place   @relation(fields: [placeId], references: [placeId])
+}
+
