@@ -24,6 +24,8 @@ export async function migrateData(WEAVIATE_URL:string, WEAVIATE_API_KEY:string){
       );
       const reviews= client.collections.get("ReviewSchema");
       await newClient.collections.create(reviewSchema)
+      const exists= await newClient.collections.exists("ReviewSchema");
+      if(!exists) return {"error":"Collection not created"}
       const newCollection= newClient.collections.get("ReviewSchema");
       const reviewData=await reviews.query.fetchObjects({includeVector:true,limit:100000});
         for(const review of reviewData.objects){
