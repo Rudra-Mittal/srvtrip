@@ -3,7 +3,6 @@ import fs from "fs";
 import path from "path";
 import dotenv from "dotenv";
 import { generateItinerary } from "./services/Itinerarygen";
-import { extractPlaces } from "./services/extractplaces";
 import { convertItineraryToText } from "./services/jsontoparagraph";
 
 dotenv.config();
@@ -35,23 +34,4 @@ export async function generate(req:ReqBody){
     return JSON.stringify({ error: "Internal Server Error" });
   }
 }
- export async function extract(req:{itenary:string}){
-
-    try {
-      const places = await extractPlaces(req.itenary);
-      return JSON.stringify({ success: true, places });
-    } catch (error) {
-      console.error("❌ Error extracting places:", error);
-      JSON.stringify({ error: "Internal Server Error" });
-    }
-  };
-
-  export async function convertToText(req:any) {
-    try {
-      const itineraryText = await convertItineraryToText(req.itineraryJSON);  
-      return JSON.stringify({ success: true, message: "Itinerary converted and saved successfully!", itineraryText });
-    } catch (error) {
-      console.error("❌ Error converting itinerary to text:", error);
-      JSON.stringify({ error: "Internal Server Error" });
-    }
-  }
+ 

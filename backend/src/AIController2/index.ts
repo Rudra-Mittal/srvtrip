@@ -15,7 +15,7 @@ interface ReqBody {
   interests?: string;
 }
 
-export async function generate(req:ReqBody){
+export async function generate2(req:ReqBody){
   try {
     const { destination, number_of_days, budget, number_of_persons, interests } = req;
     if (!destination || !number_of_days || !budget || !number_of_persons) {
@@ -23,7 +23,7 @@ export async function generate(req:ReqBody){
     }
 
     const itinerary = await generateItinerary(destination, number_of_days, budget, number_of_persons, interests);
-
+      
     return JSON.stringify(itinerary);
   } catch (error) {
     console.error("Error generating itinerary:", error);
@@ -31,7 +31,7 @@ export async function generate(req:ReqBody){
   }
 }
 
-export function extract(req:{itinerary:string}){
+export function extract2(req:{itinerary:string}){
     try {
       const places = extractPlacesByRegex(req.itinerary);
       return JSON.stringify({ success: true, places });

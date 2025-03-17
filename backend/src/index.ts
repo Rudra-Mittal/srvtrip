@@ -1,8 +1,10 @@
 import express from 'express';
 import { getPhotoUri, placeInfo } from './controllers/places';
 import { generate } from './AiController1/main';
-import { extractPlaces } from './AiController1/services/extractplaces';
 import { replacePlace } from './utils/replaceName';
+import { extract2, generate2 } from './AIController2';
+import { extractPlacesByRegex } from './AIController2/services/extractPlacesbyRegex';
+import { convertItineraryToPara } from './AIController2/services/convertItineraryToPara';
 
 const app = express();
 const PORT = 3000;
@@ -24,18 +26,20 @@ app.post('/api/itenary', async(req,res)=>{
     const {prompt} = req.body;
     //generating itenary
     console.log(prompt)
-    const itenary=await generate(prompt)
+    // const itenary=await generate(prompt)
+    const itenary=await generate2(prompt)
     // extracting places
 
     console.log(itenary)
-    const places= await extractPlaces(itenary)
+    // const places= await extractPlaces(itenary)
+    const places=  extractPlacesByRegex(itenary)
     console.log(places)
     // getting places info
     const placeData= await Promise.all((places.map(place=>placeInfo(place))))
     // check if the place Exist in db if no make a call to photos API and a scrapper API to get the place reviews
     const photos=[] as any
     for(const place of placeData){
-        console.log(place.photos,place.displayName);
+        console.log(place.displayName);
     }
     for(const place of placeData){
         // check if it exist in db by compairing with place id
@@ -51,11 +55,12 @@ app.post('/api/itenary', async(req,res)=>{
         //   save all the data in db
     }
     // insert display name into jsonItenary
-    replacePlace(itenary,places,placeData.map(place=>place.displayName))
-    
+//    const newItenary= replacePlace(itenary,places,placeData.map(place=>place.displayName))
+  const newItenary =replacePlace(itenary,places,placeData.map(place=>place.displayName))
+    console.log(await convertItineraryToPara(await JSON.parse(newItenary)))
     // convert the json into text via AI
-
-    res.send(JSON.stringify({itenary,placeData,photos}));
+    console.log(newItenary)
+    res.send(newItenary);
 })
 
 app.listen(PORT, () => {
