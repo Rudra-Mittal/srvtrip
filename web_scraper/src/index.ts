@@ -5,6 +5,7 @@ import { searchQuery } from "./controllers/getSimilar";
 import dotenv from 'dotenv';
 import { migrateData } from "./controllers/migrate";
 import { updateEnv } from "./utils/updateEnv";
+import summarizeReview from "./controllers/summarizeReview";
 dotenv.config();
 const app= express();
 app.use(express.json())
@@ -12,9 +13,23 @@ app.use(express.json())
 
 // auth middleware pending
 app.post('/scraper',async (req,res)=>{
-    const {placeName,maxScrolls}=req.body;
+    const {placeName,maxScrolls,placeId}=req.body;
     const review=await scrapeGoogleMapsReviews(placeName,maxScrolls);
-    if(review.reviews.length>0) insertData(review)
+
+    const query=`You are an advanced AI trained to summarize user reviews with precision. 
+        Your task is to create a **120-word summary** strictly based **only on the given reviews**.
+        
+        **Rules:**
+        - Do **NOT** add any extra details or assumptions.
+        - The summary **must only include information found in the provided reviews**.
+        - Identify recurring themes, both positive and negative.
+        - Do **not** include generic opinions or external knowledge.
+        - Ensure the summary is **cohesive, engaging, and maintains a fluent structure**`;
+        
+    if(review.reviews.length>0) insertData({...review,placeId}).then(()=>{
+        summarizeReview(query,placeId);
+    })
+    
     res.send(review)
 })
 app.listen(3000,()=>{

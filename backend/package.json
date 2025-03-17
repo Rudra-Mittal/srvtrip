@@ -12,11 +12,15 @@
   "type": "commonjs",
   "dependencies": {
     "@google/generative-ai": "^0.24.0",
+    "@prisma/client": "^6.5.0",
+    "axios": "^1.8.3",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "typescript": "^5.8.2"
   },
   "devDependencies": {
-    "@types/express": "^5.0.0"
+    "@types/axios": "^0.9.36",
+    "@types/express": "^5.0.0",
+    "prisma": "^6.5.0"
   }
 }

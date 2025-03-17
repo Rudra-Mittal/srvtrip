@@ -9,6 +9,10 @@ export const reviewSchema = {
         dataType: dataType.TEXT,
       },
       {
+        name:'placeId',
+        dataType:dataType.TEXT,
+      },
+      {
         name: 'review',
         dataType: dataType.TEXT,
       },
