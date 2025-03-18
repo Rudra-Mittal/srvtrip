@@ -9,6 +9,7 @@ import {
   useMap,
 } from "@vis.gl/react-google-maps";
 import "./index.css";
+import { div } from "framer-motion/client";
 
 const predefinedMarkers = [
   { lat: 31.0857947, lng: 77.0661085 },
@@ -99,37 +100,72 @@ const MapComponent: React.FC = () => {
     <APIProvider apiKey={apiKey} version="beta">
       <div className="h-screen w-full">
         <Map mapId={mapId} defaultZoom={12} defaultCenter={predefinedMarkers[0]}>
-          {predefinedMarkers.map((position, index) => (
-            visibleMarkers.includes(position) && (
-              <AdvancedMarker
-                key={index}
-                position={position}
-                className="drop-bounce-animation"
-                onClick={() => {
-                  setInfoOpen(position);
-                }}
-              >
-                <div className="drop-bounce-animation">
-                  <Pin 
-                    background={"#FF0000"} 
-                    borderColor={"#FFFFFF"}
-                    glyphColor={"#FFFFFF"} 
-                    glyph={(index + 1).toString()} 
-                  />
-                </div>
-              </AdvancedMarker>
-            )
-          ))}
+{predefinedMarkers.map((position, index) => (
+  visibleMarkers.includes(position) && (
+    <div onMouseEnter={() => setInfoOpen(position)}
+    onMouseLeave={(e) => {
+        if (
+          e instanceof MouseEvent &&
+          (!e.relatedTarget || !(e.relatedTarget as Element).closest(".custom-infowindow"))
+        ) {
+          setInfoOpen(null);
+        }
+    }}>
+    <AdvancedMarker
+      key={index}
+      position={position}
+      className="drop-bounce-animation"
+    >
+      <div className="drop-bounce-animation">
+        <Pin 
+          background={"#FF0000"} 
+          borderColor={"#FFFFFF"}
+          glyphColor={"#FFFFFF"} 
+          glyph={(index + 1).toString()} 
+        />
+      </div>
+    </AdvancedMarker>
+    </div>
+  )
+))}
 
-          {infoOpen && (
-            <InfoWindow position={infoOpen} disableAutoPan={true}>
-              <div className="info-window">
-                <h3 className="text-lg font-bold text-gray-800">📍 Marker {predefinedMarkers.findIndex(marker => marker.lat === infoOpen.lat && marker.lng === infoOpen.lng) + 1}</h3>
-                <p className="text-sm text-gray-600">🌍 Lat: {infoOpen.lat.toFixed(6)}</p>
-                <p className="text-sm text-gray-600">📏 Lng: {infoOpen.lng.toFixed(6)}</p>
-              </div>
-            </InfoWindow>
-          )}
+{infoOpen && (
+  <InfoWindow position={infoOpen} pixelOffset={[0, 0]}>
+    <div
+      className="custom-infowindow"
+      onMouseEnter={() => setInfoOpen(infoOpen)} // Keep open when hovered
+      onMouseLeave={() => setInfoOpen(null)} // Close when cursor leaves
+      style={{
+        width: "100%",
+        height: "100%",
+        maxWidth: "350px",
+        maxHeight: "auto",
+        fontFamily: "Arial, sans-serif",
+        overflow: "hidden",
+      }}
+    >
+      <img
+        src="./pexels-pixabay-533769.jpg"
+        alt="Location"
+        style={{
+          width: "100%",
+          height: "200px",
+          objectFit: "cover",
+          borderRadius: "5px",
+        }}
+      />
+      <div style={{ padding: "10px" }}>
+        <p style={{ fontSize: "16px", color: "#333", margin: "5px 0" }}>
+          🌍 Lat: {infoOpen.lat.toFixed(6)}
+        </p>
+        <p style={{ fontSize: "16px", color: "#333", margin: "5px 0" }}>
+          📏 Lng: {infoOpen.lng.toFixed(6)}
+        </p>
+      </div>
+    </div>
+  </InfoWindow>
+)}
+
           {allMarkersVisible && <DirectionsRendererComponent triggerDirections={allMarkersVisible} />}
         </Map>
       </div>
