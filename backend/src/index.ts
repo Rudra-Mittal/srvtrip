@@ -47,7 +47,7 @@ app.post('/api/itenary', async(req,res)=>{
         for(const place of day){
 
             //     // check if it exist in db by compairing with place id
-            //     // console.log(place.photos)
+            
             //     // if not
             //     // calling the photos API
             const placePhotos=await Promise.all((place.photos?.map((reference:string)=>getPhotoUri(reference))))
