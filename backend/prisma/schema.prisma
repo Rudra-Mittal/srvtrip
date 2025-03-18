@@ -9,57 +9,56 @@ datasource db {
 }
 
 model User {
-  id          Int        @id @default(autoincrement())
+  id          String        @id @default(uuid())
   email       String     @unique
   password    String
   itineraries Itinerary[]
 }
 
 model Itinerary {
-  id             Int       @id @default(autoincrement())
-  destination    String
-  duration       Int
-  budget         Float
-  description    String
-  numberOfPersons Int
-  interests      String[]
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  userId         Int
-  user           User      @relation(fields: [userId], references: [id])
-  days           Day[]
+  id                String       @id @default(uuid())
+  destination       String
+  duration          Int
+  budget            Float
+  description       String?
+  numberOfPersons   Int
+  interests         String[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  userId            String
+  user              User      @relation(fields: [userId], references: [id])
+  days              Day[]
 }
 
 model Day {
-  id          Int       @id @default(autoincrement())
-  dayNumber   Int
-  itineraryId Int
-  itinerary   Itinerary @relation(fields: [itineraryId], references: [id])
-  morning     String
-  afternoon   String
-  evening     String
-  proTip      String?
-  places      Place[]
+  id              String       @id @default(uuid())
+  dayNumber       Int
+  morning         String
+  afternoon       String
+  evening         String
+  proTip          String?
+  places          Place[]
+  itineraryId     String
+  itinerary       Itinerary @relation(fields: [itineraryId], references: [id])
 }
 
 model Place {
-  id        Int       @id @default(autoincrement())
-  name      String    // Display name
-  placeId   String    @unique// Places API ID
-  address   String    //formatted address
-  latitude  Float
-  longitude Float
-  url       String    
-  images    Image[]
-  dayId     Int
-  day       Day       @relation(fields: [dayId], references: [id])
-  summarizedReview String?
+  id                String       @id @default(uuid())
+  name              String    // Display name
+  placeId           String    @unique// Places API ID
+  address           String    //formatted address
+  latitude          Float
+  longitude         Float
+  url               String?   
+  images            Image[]
+  summarizedReview  String?
+  day               Day[] 
 }
 
 model Image {
-  id       Int       @id @default(autoincrement())
-  imageUrl String
-  placeId  String
-  place    Place   @relation(fields: [placeId], references: [placeId])
+  id            String       @id @default(uuid())
+  imageUrl      String
+  placeId       String
+  place         Place   @relation(fields: [placeId], references: [placeId])
 }
 

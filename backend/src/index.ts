@@ -49,16 +49,16 @@ app.post('/api/itenary', async(req,res)=>{
          //  console.log(place.displayName,photos)
 
          // make call to web scrapper and get summarized review
-         const summarizedReview=callWebScrapper(place.displayName,2,place.id);
+        //  const summarizedReview=callWebScrapper(place.displayName,2,place.id);
 
         //   save all the data in db
     }
-    for(const place of placeData){
-        console.log(place);
-    }
+    // for(const place of placeData){
+    //     console.log(place);
+    // }
     // insert display name into jsonItenary
 //    const newItenary= replacePlace(itenary,places,placeData.map(place=>place.displayName))
-  const newItenary =replacePlace(itenary,places,placeData.map(place=>place.displayName))
+  const newItenary =replacePlace(itenary,places,placeData.map(place=>place.id))
     // convert the json into text via AI
     res.send(newItenary);
 })
