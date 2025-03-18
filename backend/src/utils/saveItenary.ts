@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-export async function saveItenary(itenaryString:string,placeData:any,userId:string) {
+export async function saveItenary(itenaryString:string,allDayPlaces:any,userId:string) {
     const prisma = new PrismaClient();
     const itenaryJ=await JSON.parse(itenaryString);
     try{
@@ -19,11 +19,37 @@ export async function saveItenary(itenaryString:string,placeData:any,userId:stri
                 interests:itenaryJ.interests||[],
             }
         })
-        const days= await prisma.day.createManyAndReturn({
-            data:[
-
-            ]
-        })
+        for(const dayPlaces of allDayPlaces){
+            for(const place of dayPlaces){
+                const dayD= await prisma.day.create({
+                    data:{
+                        dayNumber:place.dayNum,
+                        itineraryId:itenaryD.id,
+                        morning:JSON.stringify(itenaryJ.days[place.dayNum-1].morning),
+                        afternoon:JSON.stringify(itenaryJ.days[place.dayNum-1].afternoon),
+                        evening:JSON.stringify(itenaryJ.days[place.dayNum-1].evening),
+                        proTip:itenaryJ.days[place.dayNum-1].tips
+                    }
+                })
+                const placeD= await prisma.place.create({
+                    data:{
+                        name:place.displayName,
+                        address:place.formattedAddress,
+                        latitude:place.location.latitude,
+                        longitude:place.location.longitude,
+                        placeId:place.place_id,
+                    }
+                })
+                for(const img of place.photos){
+                    await prisma.image.create({
+                        data:{
+                            placeId:placeD.id,
+                            imageUrl:img
+                        }
+                    })
+                }
+            } 
+        }
 
     }catch(err){
         
