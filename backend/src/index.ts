@@ -42,7 +42,6 @@ app.post('/api/itenary', async(req,res)=>{
         )
     );
     // check if the place Exist in db if no make a call to photos API and a scrapper API to get the place reviews
-    // const photos=[] as any
     for(const day of placesData){
         for(const place of day){
 

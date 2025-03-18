@@ -28,9 +28,10 @@ export async function saveItenary(itenaryString:string,allDayPlaces:any,userId:s
                         morning:JSON.stringify(itenaryJ.days[place.dayNum-1].morning),
                         afternoon:JSON.stringify(itenaryJ.days[place.dayNum-1].afternoon),
                         evening:JSON.stringify(itenaryJ.days[place.dayNum-1].evening),
-                        proTip:itenaryJ.days[place.dayNum-1].tips
+                        proTip:itenaryJ.days[place.dayNum-1].tips,
                     }
                 })
+
                 const placeD= await prisma.place.create({
                     data:{
                         name:place.displayName,
@@ -38,6 +39,11 @@ export async function saveItenary(itenaryString:string,allDayPlaces:any,userId:s
                         latitude:place.location.latitude,
                         longitude:place.location.longitude,
                         placeId:place.place_id,
+                        day:{
+                            connect:{
+                                id:dayD.id
+                            }
+                        }
                     }
                 })
                 for(const img of place.photos){
