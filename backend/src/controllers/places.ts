@@ -1,8 +1,8 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-export async function placeInfo(placename: string,photoLimit=5): Promise<any> {
-
+export async function placeInfo(placename: string,dayNum:number,photoLimit=5): Promise<any> {
+    console.log(placename)
     return fetch('https://places.googleapis.com/v1/places:searchText', {
         method: 'POST',
         body: JSON.stringify({ textQuery: placename }),
@@ -17,6 +17,7 @@ export async function placeInfo(placename: string,photoLimit=5): Promise<any> {
             const place= data.places[0];
             // check if this place exist already in db
             return {
+                dayNum,
                 id:place.id,
                 formattedAddress:place.formattedAddress,
                 displayName:place.displayName.text,

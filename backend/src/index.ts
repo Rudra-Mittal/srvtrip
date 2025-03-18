@@ -33,34 +33,42 @@ app.post('/api/itenary', async(req,res)=>{
     // extracting places
 
     console.log(await JSON.parse(itenary))
-    const places=  extractPlacesByRegex(itenary)
+    const allDayPlaces=  extractPlacesByRegex(itenary)//get the 2d array of places (daywise places)
     // getting places info
-    const placeData= await Promise.all((places.map(place=>placeInfo(place))))
+    
+    const placesData= await Promise.all(
+        allDayPlaces.map((dayPlaces, index) => 
+            Promise.all(dayPlaces.map((place) => placeInfo(place, index + 1)))
+        )
+    );
     // check if the place Exist in db if no make a call to photos API and a scrapper API to get the place reviews
-    const photos=[] as any
-    for(const place of placeData){
-        // check if it exist in db by compairing with place id
-        // console.log(place.photos)
-        // if not
-        // calling the photos API
-         const placePhotos=await Promise.all((place.photos?.map((reference:string)=>getPhotoUri(reference))))
-         photos.push(placePhotos)
-         place.photos=placePhotos
-         //  console.log(place.displayName,photos)
+    // const photos=[] as any
+    for(const day of placesData){
+        for(const place of day){
 
-         // make call to web scrapper and get summarized review
-        //  const summarizedReview=callWebScrapper(place.displayName,2,place.id);
-
-        //   save all the data in db
-    }
+            //     // check if it exist in db by compairing with place id
+            //     // console.log(place.photos)
+            //     // if not
+            //     // calling the photos API
+            const placePhotos=await Promise.all((place.photos?.map((reference:string)=>getPhotoUri(reference))))
+            //      photos.push(placePhotos)
+                 place.photos=placePhotos
+            //      //  console.log(place.displayName,photos)
+            
+            //      // make call to web scrapper and get summarized review
+            //     //  const summarizedReview=callWebScrapper(place.displayName,2,place.id);
+            
+            //     //   save all the data in db
+        }
+        }
     // for(const place of placeData){
     //     console.log(place);
     // }
     // insert display name into jsonItenary
 //    const newItenary= replacePlace(itenary,places,placeData.map(place=>place.displayName))
-  const newItenary =replacePlace(itenary,places,placeData.map(place=>place.id))
+//   const newItenary =replacePlace(itenary,places,placeData.map(place=>place.id))
     // convert the json into text via AI
-    res.send(newItenary);
+    res.send(placesData);
 })
 
 app.listen(PORT, () => {
