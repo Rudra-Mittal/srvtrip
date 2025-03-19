@@ -6,6 +6,9 @@ import { extract2, generate2 } from './AIController2';
 import { extractPlacesByRegex } from './AIController2/services/extractPlacesbyRegex';
 import { convertItineraryToPara } from './AIController2/services/convertItineraryToPara';
 import callWebScrapper from './controllers/callWebScrapper';
+import checkPlaceInDb from './controllers/checkPlaceInDb';
+import { saveItenary } from './utils/saveItenary';
+import { placesData } from './utils/types';
 import signup from './controllers/auth/signup';
 import { signin } from './controllers/auth/signin';
 
@@ -58,31 +61,37 @@ app.post('/api/itenary', async(req,res)=>{
         allDayPlaces.map((dayPlaces, index) => 
             Promise.all(dayPlaces.map((place) => placeInfo(place, index + 1)))
         )
-    );
+    ) as placesData;
     // check if the place Exist in db if no make a call to photos API and a scrapper API to get the place reviews
+
     for(const day of placesData){
         for(const place of day){
 
-            //     // check if it exist in db by compairing with place id
-            //     // console.log(place.photos)
-            //     // if not
-            //     // calling the photos API
-            const placePhotos=await Promise.all((place.photos?.map((reference:string)=>getPhotoUri(reference))))
-            //      photos.push(placePhotos)
-                 place.photos=placePhotos
-            //      //  console.log(place.displayName,photos)
-            
-            //      // make call to web scrapper and get summarized review
-            await callWebScrapper(place.displayName,6,place.id).then((review:any)=>{
-                console.log(review)
-                    if(review.reviews.length==0){
-                        callWebScrapper(`${place.displayName},${place.formattedAddress}`,6,place.id)
-                    }
-            });
-            
-            //     //   save all the data in db
+                // check if it exist in db by comparing with place id
+                const checkPlace=await checkPlaceInDb(place.id);
+                if(checkPlace){
+                    //replace the place object with only place id in placesData
+                    place.new=false;
+                }
+                else{
+                    //call the photos api
+                    const placePhotos=await Promise.all((place.photos?.map((reference:string)=>getPhotoUri(reference))));
+                    //replace the photos ref url with actual url in place object
+                    place.photos=placePhotos;
+
+                    // make call to web scrapper and get summarized review
+                    await callWebScrapper(place.displayName,6,place.id).then((review:any)=>{
+                        console.log(review)
+                            if(review.reviews.length==0){
+                                callWebScrapper(`${place.displayName},${place.formattedAddress}`,6,place.id)
+                            }
+                    });
+                }
         }
-        }
+    }
+    //   save all the data in db using saveItinerary function
+    const response=saveItenary(itenary,placesData,"jnwdk");//last arg is userid
+
     // for(const place of placeData){
     //     console.log(place);
     // }

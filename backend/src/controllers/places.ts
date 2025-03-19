@@ -17,6 +17,7 @@ export async function placeInfo(placename: string,dayNum:number,photoLimit=5): P
             const place= data.places[0];
             // check if this place exist already in db
             return {
+                new:true,
                 dayNum,
                 id:place.id,
                 formattedAddress:place.formattedAddress,
