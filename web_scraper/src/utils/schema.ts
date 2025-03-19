@@ -24,7 +24,9 @@ export const reviewSchema = {
         model:'jina-embeddings-v3'
       })
     ],
-    generative: weaviate.configure.generative.mistral()
+    generative: weaviate.configure.generative.google({
+      modelId:'gemini-1.5-flash-latest'
+    })
   };
 
   export async function createSchema(client: WeaviateClient,schemaName:string): Promise<boolean> {

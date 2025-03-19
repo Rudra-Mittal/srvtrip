@@ -56,7 +56,7 @@ app.post('/api/itenary', async(req,res)=>{
             await callWebScrapper(place.displayName,6,place.id).then((review:any)=>{
                 console.log(review)
                     if(review.reviews.length==0){
-                        callWebScrapper(`${place.displayName}+${place.formattedAddress}`,6,place.id)
+                        callWebScrapper(`${place.displayName},${place.formattedAddress}`,6,place.id)
                     }
             });
             
@@ -66,10 +66,12 @@ app.post('/api/itenary', async(req,res)=>{
     // for(const place of placeData){
     //     console.log(place);
     // }
+    console.log(placesData)
     // insert display name into jsonItenary
 //   const newItenary =replacePlace(itenary,places,placeData.map(place=>place.id))
     // convert the json into text via AI
     res.send(placesData);
+    return 
 })
 
 app.listen(PORT, () => {
