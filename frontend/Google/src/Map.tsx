@@ -24,7 +24,7 @@ const predefinedMarkers = [
 const DirectionsRenderer = ({ triggerDirections }: { triggerDirections: boolean }) => {
   const routesLibrary = useMapsLibrary("routes");
   const map = useMap();
-
+  console.log("map",map)
   useEffect(() => {
     if (!routesLibrary || !map || !triggerDirections) return;
 
@@ -83,60 +83,21 @@ const MapComponent = () => {
     return <div>Error: Missing Google API Key or Map ID</div>;
   }
 
-  // Function to handle text link hover
-  const handleLocationHover = (location:any) => {
-    setHoveredMarker(location);
-    setInfoOpen(location);
-  };
-
-  // Function to handle mouse leave
-  const handleLocationLeave = () => {
-    setHoveredMarker(null);
-    // Only close the info window if there's no selected marker
-    if (!selectedMarker) {
-      setInfoOpen(null);
-    }
-  };
-
-  // Function to handle text link clicks
-  const handleLocationClick = (location:any) => {
-    setSelectedMarker(location);
-    setInfoOpen(location);
-  };
-
   return (
-    <div className="flex flex-col md:flex-row h-screen w-screen">
-      {/* Sidebar with location text links */}
-      <div className="w-full md:w-1/4 bg-gray-100 p-4 overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">Popular Locations in Shimla</h2>
-        <div className="space-y-2">
-          {predefinedMarkers.map((marker, index) => (
-            <div 
-              key={index}
-              className="p-2 bg-white shadow rounded cursor-pointer hover:bg-blue-50 transition-colors"
-              onMouseEnter={() => handleLocationHover(marker)}
-              onMouseLeave={handleLocationLeave}
-              onClick={() => handleLocationClick(marker)}
-            >
-              <h3 className="font-medium text-blue-600">{marker.name}</h3>
-              <p className="text-xs text-gray-500">Lat: {marker.lat.toFixed(6)}, Lng: {marker.lng.toFixed(6)}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-      {/* Map Container */}
-      <div className="w-full md:w-3/4 h-full">
+    <div className="h-screen w-full">
+      {/* Map Container - now takes full width */}
+      <div className="w-full h-1/2">
         <APIProvider apiKey={apiKey} version="beta">
           <Map
             mapId={mapId}
-            defaultZoom={defaultZoom}
+            // defaultZoom={defaultZoom}
             defaultCenter={defaultCenter}
             mapTypeControl={false}
             disableDefaultUI={false}
             zoomControl={true}
             scrollwheel={true}
             gestureHandling={"cooperative"}
-            style={{ width: '100%', height: '100%' }} // Explicit dimensions
+            style={{ width: '100%', height: '100%' }}
           >
             <MarkerManager 
               setAllMarkersVisible={setAllMarkersVisible} 
@@ -153,6 +114,7 @@ const MapComponent = () => {
     </div>
   );
 };
+
 // Component to manage markers and their animations
 const MarkerManager = ({ 
   setAllMarkersVisible, 
@@ -178,12 +140,13 @@ const MarkerManager = ({
   const isMouseOverPopupRef = useRef(false);
   const isMouseOverMarkerRef = useRef(false);
   const defaultZoom = 12;
+  // const defaultCenter = predefinedMarkers[0];
   const clickZoom = 14;
   const zoomDuration = 300; // ms for zoom animation
   const mouseTrackingDelay = 1500; // 1.5 sec delay before tracking mouse position
   const currentZoomRef = useRef(defaultZoom);
   
-  // Effect for watching selected marker changes from text links
+  // Effect for watching selected marker changes
   useEffect(() => {
     if (selectedMarker && map) {
       // Smooth zoom animation to the selected marker
@@ -218,6 +181,7 @@ const MarkerManager = ({
       }, 1000 + index * 200);
     });
   }, [setAllMarkersVisible]);
+
   // Cleanup timeouts and animation frames on unmount
   useEffect(() => {
     return () => {
@@ -226,6 +190,7 @@ const MarkerManager = ({
       if (zoomOutTimeoutRef.current) clearTimeout(zoomOutTimeoutRef.current);
     };
   }, []);
+
   // Track mouse movement to detect if outside of both marker and popup
   useEffect(() => {
     const trackMouseMovement = (e: any) => {
@@ -242,6 +207,7 @@ const MarkerManager = ({
       document.removeEventListener('mousemove', trackMouseMovement);
     };
   }, []);
+
   // Handle map click to close info windows if clicking away from markers
   useEffect(() => {
     if (map) {
@@ -261,6 +227,7 @@ const MarkerManager = ({
       };
     }
   }, [map]);
+
   // Smoothly animate zoom level
   interface AnimateZoomParams {
     start: number;
@@ -268,6 +235,7 @@ const MarkerManager = ({
     position: google.maps.LatLngLiteral;
     duration: number;
   }
+  
   const animateZoom = (
     start: AnimateZoomParams["start"],
     end: AnimateZoomParams["end"],
@@ -300,6 +268,7 @@ const MarkerManager = ({
     }
     animationFrameRef.current = requestAnimationFrame(animate);
   };
+
   // Handle marker click
   const handleMarkerClick = (position: any) => {
     if (selectedMarker === position) {
@@ -334,6 +303,7 @@ const MarkerManager = ({
       }, mouseTrackingDelay); // 1.5 seconds delay
     }
   };
+
   // Handle zoom out
   const handleZoomOut = () => {
     // Clear any tracking timeouts
@@ -351,11 +321,13 @@ const MarkerManager = ({
       animateZoom(currentZoomRef.current, defaultZoom, predefinedMarkers[0], zoomDuration);
     }
   };
+
   // Handle marker mouse enter
   const handleMarkerMouseEnter = () => {
     isMouseOverMarkerRef.current = true;
     isTrackingMouseRef.current = false; // Stop tracking when mouse enters marker
   };
+
   // Handle marker mouse leave
   const handleMarkerMouseLeave = () => {
     isMouseOverMarkerRef.current = false;
@@ -364,11 +336,13 @@ const MarkerManager = ({
       isTrackingMouseRef.current = true;
     }
   };
+
   // Handle popup mouse enter
   const handlePopupMouseEnter = () => {
     isMouseOverPopupRef.current = true;
     isTrackingMouseRef.current = false; // Stop tracking when mouse enters popup
   };
+
   // Handle popup mouse leave
   const handlePopupMouseLeave = () => {
     isMouseOverPopupRef.current = false;
@@ -378,6 +352,7 @@ const MarkerManager = ({
       isTrackingMouseRef.current = true;
     }
   };
+
   // Calculate adjusted position for InfoWindow (directly above marker)
   const getInfoWindowPosition = (position: any) => {
     if (!position) return null;
@@ -388,12 +363,13 @@ const MarkerManager = ({
       lng: position.lng
     };
   };
+
   return (
-    <>
+    <div className="info-win">
       {/* Render visible markers */}
       {predefinedMarkers.map((position, index) => 
         visibleMarkers.includes(position) && (
-          <div 
+          <div  className=""
             key={index} 
             onMouseEnter={handleMarkerMouseEnter}
             onMouseLeave={handleMarkerMouseLeave}
@@ -420,13 +396,15 @@ const MarkerManager = ({
           </div>
         )
       )}
+
       {/* Info Window - positioned directly above marker */}
       {infoOpen && (
         <InfoWindow 
           position={getInfoWindowPosition(infoOpen)}
-          pixelOffset={[0, -50]} // Increase vertical offset to position higher above marker
+          pixelOffset={[0, 160]} // Increase vertical offset to position higher above marker
           onCloseClick={handleZoomOut}
           disableAutoPan={true} // Prevent automatic panning
+          className=""
         >
           <div 
             className="custom-infowindow"
@@ -458,7 +436,8 @@ const MarkerManager = ({
           </div>
         </InfoWindow>
       )}
-    </>
+    </div>
   );
 };
+
 export default MapComponent;

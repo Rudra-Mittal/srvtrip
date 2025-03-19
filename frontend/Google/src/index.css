@@ -27,10 +27,9 @@
 }
 
 .gm-style-iw {
-  width: 300px !important;  /* Set a fixed width similar to Google Maps */
-  max-width: 320px !important; /* Prevents excessive width */
-  
-  height: auto !important; /* Adjust height dynamically */
+  position: relative !important; 
+  max-width: 3% !important; /* Adjust width dynamically */
+  height: 3%!important; /* Adjust height dynamically */
   max-height: 200px !important; /* Keeps it compact */
   
   border-radius: 12px !important; /* Rounded corners */
@@ -58,16 +57,14 @@
 /* Optional: If there's an image, set a fixed height */
 .gm-style-iw img {
   width: 100% !important;
-  height: 120px !important;
+  height: 100px !important;
   object-fit: cover !important; /* Ensure it looks clean */
   border-top-left-radius: 12px;
   border-top-right-radius: 12px;
 }
 
-.gm-style .gm-style-iw-c 
-{ 
-  padding: 0;
-  
+.gm-style-iw .gm-style-iw-c{
+  width: 50px !important;
 }
 
 .gm-style-iw-chr
