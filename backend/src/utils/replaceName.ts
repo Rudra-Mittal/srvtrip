@@ -1,11 +1,13 @@
-export function    replacePlace(itenary:string,places:string[],placeId:string[]) {
+import { placesData } from "./types";
+
+export function   replacePlace(itenary:string,placesData:placesData) {
     console.log(itenary);
-    console.log(places);
-    console.log(placeId)
     try {
         let newItenary = itenary;
-        for (let i = 0; i < places.length; i++) {
-        newItenary = newItenary.replaceAll(`#${places[i]}#`, `#${placeId[i]}#`);
+        for (const day of placesData) {
+            for(const place of day){
+                newItenary = newItenary.replaceAll(`#${place.placename}#`, `#${place.id}#`);
+            }
         }
         return newItenary;
     } catch (error) {
@@ -13,5 +15,4 @@ export function    replacePlace(itenary:string,places:string[],placeId:string[])
         return JSON.stringify({ error: "Internal Server Error" });
     }
 }
-
 

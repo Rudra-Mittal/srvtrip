@@ -3,6 +3,7 @@
 export interface place{
     new:boolean,//differentiator
     dayNum:number,
+    placename:string,
     id:string,
     formattedAddress:string,
     displayName:string,
@@ -11,6 +12,7 @@ export interface place{
         longitude:number
     },
     photos:string[],
+    summarizedReview:string
 }
 export type day= place[];
 //placesData will array of type day

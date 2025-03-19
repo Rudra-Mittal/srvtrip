@@ -8,7 +8,7 @@ import { convertItineraryToPara } from './AIController2/services/convertItinerar
 import callWebScrapper from './controllers/callWebScrapper';
 import checkPlaceInDb from './controllers/checkPlaceInDb';
 import { saveItenary } from './utils/saveItenary';
-import { placesData } from './utils/types';
+import { place, placesData } from './utils/types';
 import signup from './controllers/auth/signup';
 import { signin } from './controllers/auth/signin';
 
@@ -47,7 +47,7 @@ app.post('/api/auth/signin',(req,res)=>{
 })
 // app.use(authMiddleware);
 app.post('/api/itenary', async(req,res)=>{
-    const {prompt} = req.body;
+    const {prompt,userId} = req.body;
     //generating itenary
     // const itenary=await generate(prompt)
     const itenary=await generate2(prompt)
@@ -80,26 +80,36 @@ app.post('/api/itenary', async(req,res)=>{
                     place.photos=placePhotos;
 
                     // make call to web scrapper and get summarized review
-                    await callWebScrapper(place.displayName,6,place.id).then((review:any)=>{
-                        console.log(review)
-                            if(review.reviews.length==0){
-                                callWebScrapper(`${place.displayName},${place.formattedAddress}`,6,place.id)
-                            }
-                    });
                 }
-        }
+            }
+            await Promise.all((day.map((place:place)=>{
+                if(place.new){
+                    return callWebScrapper(place.displayName,5,place.id)
+                    .then((res:any)=>{
+                        place.summarizedReview=res.summarizedReview;
+                    }).catch((err)=>{
+                        console.log(err)
+                        callWebScrapper(place.displayName+' , '+place.formattedAddress,5,place.id).then((res:any)=>{
+                            place.summarizedReview=res.summarizedReview;
+                        }).catch((err)=>{
+                            console.log(err)
+                            place.summarizedReview="No reviews found";
+                        })
+                    })
+                }
+            }))) 
     }
     //   save all the data in db using saveItinerary function
-    const response=saveItenary(itenary,placesData,"jnwdk");//last arg is userid
+      const newItenary =replacePlace(itenary,placesData)
+    const response=saveItenary(newItenary,placesData,userId);//last arg is userid
 
     // for(const place of placeData){
     //     console.log(place);
     // }
-    console.log(placesData)
+    console.log(response)
     // insert display name into jsonItenary
-//   const newItenary =replacePlace(itenary,places,placeData.map(place=>place.id))
     // convert the json into text via AI
-    res.send(placesData);
+    res.send(response);
     return 
 })
 

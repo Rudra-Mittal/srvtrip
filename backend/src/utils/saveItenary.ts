@@ -2,7 +2,8 @@ import { PrismaClient } from "@prisma/client";
 import { placesData } from "./types";
 export async function saveItenary(itenaryString:string,allDayPlaces:placesData,userId:string) {
     const prisma = new PrismaClient();
-    const itenaryJ=await JSON.parse(itenaryString);
+    const itenaryJ=await JSON.parse(itenaryString).itinerary;
+    console.log("itenaryJ",itenaryJ);
     try{
         const user= await prisma.user.findFirst({
             where:{
@@ -41,6 +42,7 @@ export async function saveItenary(itenaryString:string,allDayPlaces:placesData,u
                             latitude:place.location.latitude,
                             longitude:place.location.longitude,
                             placeId:place.id,
+                            summarizedReview:place.summarizedReview,
                             day:{
                                 connect:{
                                     id:dayD.id
@@ -51,7 +53,7 @@ export async function saveItenary(itenaryString:string,allDayPlaces:placesData,u
                     for(const img of place.photos){
                         await prisma.image.create({
                             data:{
-                                placeId:placeD.id,
+                                placeId:placeD.placeId,
                                 imageUrl:img
                             }
                         })
@@ -81,7 +83,7 @@ export async function saveItenary(itenaryString:string,allDayPlaces:placesData,u
                 
             } 
         }
-
+        return JSON.stringify({"success":"Itinerary saved successfully"})
     }catch(err){
         console.log(err);
         return JSON.stringify({"error":err})

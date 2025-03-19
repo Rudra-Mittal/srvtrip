@@ -26,11 +26,18 @@ app.post('/scraper',async (req,res)=>{
         - Do **not** include generic opinions or external knowledge.
         - Ensure the summary is **cohesive, engaging, and maintains a fluent structure**`;
         
-    if(review.reviews.length>0) insertData({...review,placeId}).then(()=>{
-        summarizeReview(query,placeId);
-    })
+    if(review.reviews.length>0) {
+        insertData({...review,placeId}).then(()=>{
+            summarizeReview(query,placeId).then((summarizedReview)=>{
+                 res.json({summarizedReview,placeId})
+                 return
+            })
+        })
+    }else{
+        res.status(404).json({message:"No reviews found"})
+        return
+    }
     
-    res.send(review)
 })
 app.listen(3000,()=>{
     console.log("Server is running on port 3000")

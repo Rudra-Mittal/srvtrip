@@ -24,5 +24,5 @@ export default async function summarizeReview(query:string,placeId:string):Promi
       filters: jeopardy.filter.byProperty('place').containsAny([placeId]),
     })
     console.log("\nReposne of summarized review\n",resGen.generated);
-    return JSON.stringify([resGen.objects,resGen.generated], null, 5);
+    return resGen.generated as string
 }
