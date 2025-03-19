@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
-export async function saveItenary(itenaryString:string,allDayPlaces:any,userId:string) {
+import { placesData } from "./types";
+export async function saveItenary(itenaryString:string,allDayPlaces:placesData,userId:string) {
     const prisma = new PrismaClient();
     const itenaryJ=await JSON.parse(itenaryString);
     try{
@@ -32,33 +33,58 @@ export async function saveItenary(itenaryString:string,allDayPlaces:any,userId:s
                     }
                 })
 
-                const placeD= await prisma.place.create({
-                    data:{
-                        name:place.displayName,
-                        address:place.formattedAddress,
-                        latitude:place.location.latitude,
-                        longitude:place.location.longitude,
-                        placeId:place.place_id,
-                        day:{
-                            connect:{
-                                id:dayD.id
+                if(place.new){
+                    const placeD= await prisma.place.create({
+                        data:{
+                            name:place.displayName,
+                            address:place.formattedAddress,
+                            latitude:place.location.latitude,
+                            longitude:place.location.longitude,
+                            placeId:place.id,
+                            day:{
+                                connect:{
+                                    id:dayD.id
+                                }
                             }
                         }
+                    })
+                    for(const img of place.photos){
+                        await prisma.image.create({
+                            data:{
+                                placeId:placeD.id,
+                                imageUrl:img
+                            }
+                        })
                     }
-                })
-                for(const img of place.photos){
-                    await prisma.image.create({
+                }
+                else{
+                    const placeD= await prisma.place.findUnique({
+                        where:{
+                            placeId:place.id
+                        }
+                    })
+                    if(placeD)
+                    await prisma.day.update({
+                        where:{
+                            id:dayD.id
+                        },
                         data:{
-                            placeId:placeD.id,
-                            imageUrl:img
+                            places:{
+                                connect:{
+                                    id:placeD.id
+                                }
+                            }
                         }
                     })
                 }
+
+                
             } 
         }
 
     }catch(err){
-        
+        console.log(err);
+        return JSON.stringify({"error":err})
     }
 
 
