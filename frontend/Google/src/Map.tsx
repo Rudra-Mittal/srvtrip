@@ -21,7 +21,7 @@ const predefinedMarkers = [
 ];
 
 // Component to render directions between markers
-const DirectionsRenderer = ({ triggerDirections }) => {
+const DirectionsRenderer = ({ triggerDirections }: { triggerDirections: boolean }) => {
   const routesLibrary = useMapsLibrary("routes");
   const map = useMap();
 
@@ -68,7 +68,6 @@ const DirectionsRenderer = ({ triggerDirections }) => {
 // Main Map Component
 const MapComponent = () => {
   const [infoOpen, setInfoOpen] = useState(null);
-  const [visibleMarkers, setVisibleMarkers] = useState([]);
   const [allMarkersVisible, setAllMarkersVisible] = useState(false);
   const [selectedMarker, setSelectedMarker] = useState(null);
   
@@ -91,12 +90,10 @@ const MapComponent = () => {
           defaultZoom={defaultZoom}
           defaultCenter={defaultCenter}
           mapTypeControl={false}
-          options={{
-            disableDefaultUI: false,
-            zoomControl: true,
-            scrollwheel: true,
-            gestureHandling: "cooperative"
-          }}
+          disableDefaultUI={false}
+          zoomControl={true}
+          scrollwheel={true}
+          gestureHandling={"cooperative"}
         >
           <MarkerManager 
             setAllMarkersVisible={setAllMarkersVisible} 
@@ -119,22 +116,27 @@ const MarkerManager = ({
   infoOpen, 
   selectedMarker, 
   setSelectedMarker,
+}: {
+  setAllMarkersVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setInfoOpen: React.Dispatch<React.SetStateAction<any>>;
+  infoOpen: any;
+  selectedMarker: any;
+  setSelectedMarker: React.Dispatch<React.SetStateAction<any>>;
 }) => {
-  const [visibleMarkers, setVisibleMarkers] = useState([]);
+  const [visibleMarkers, setVisibleMarkers] = useState<{ lat: number; lng: number }[]>([]);
   const map = useMap();
-  const animationFrameRef = useRef(null);
-  const mouseTrackingTimeoutRef = useRef(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const mouseTrackingTimeoutRef = useRef<number | null>(null);
   const zoomOutTimeoutRef = useRef(null);
   const isTrackingMouseRef = useRef(false);
   const isMouseOverPopupRef = useRef(false);
   const isMouseOverMarkerRef = useRef(false);
-  
   const defaultZoom = 12;
   const clickZoom = 14;
   const zoomDuration = 300; // ms for zoom animation
-  const mouseTrackingDelay = 2000; // ms before starting to track mouse position
+  const mouseTrackingDelay = 1500; // 1.5 sec delay before tracking mouse position
   const currentZoomRef = useRef(defaultZoom);
-  
+
   // Animate markers appearing
   useEffect(() => {
     predefinedMarkers.forEach((marker, index) => {
@@ -161,18 +163,16 @@ const MarkerManager = ({
 
   // Track mouse movement to detect if outside of both marker and popup
   useEffect(() => {
-    const trackMouseMovement = (e) => {
+    const trackMouseMovement = (e: any) => {
       if (isTrackingMouseRef.current) {
-        // If not over marker or popup, trigger zoom out
+        // If not over marker or popup, trigger zoom out on mouse movement
         if (!isMouseOverMarkerRef.current && !isMouseOverPopupRef.current) {
           handleZoomOut();
           isTrackingMouseRef.current = false;
         }
       }
     };
-
     document.addEventListener('mousemove', trackMouseMovement);
-    
     return () => {
       document.removeEventListener('mousemove', trackMouseMovement);
     };
@@ -181,19 +181,17 @@ const MarkerManager = ({
   // Handle map click to close info windows if clicking away from markers
   useEffect(() => {
     if (map) {
-      const listener = map.addListener("click", (e) => {
+      const listener = map.addListener("click", (e: any) => {
         // Check if clicking away from markers
         const isClickingMarker = predefinedMarkers.some(
           marker => 
             Math.abs(e.latLng.lat - marker.lat) < 0.0005 && 
             Math.abs(e.latLng.lng - marker.lng) < 0.0005
         );
-        
         if (!isClickingMarker) {
           handleZoomOut();
         }
       });
-      
       return () => {
         google.maps.event.removeListener(listener);
       };
@@ -201,24 +199,32 @@ const MarkerManager = ({
   }, [map]);
 
   // Smoothly animate zoom level
-  const animateZoom = (start, end, position, duration) => {
+  interface AnimateZoomParams {
+    start: number;
+    end: number;
+    position: google.maps.LatLngLiteral;
+    duration: number;
+  }
+
+  const animateZoom = (
+    start: AnimateZoomParams["start"],
+    end: AnimateZoomParams["end"],
+    position: AnimateZoomParams["position"],
+    duration: AnimateZoomParams["duration"]
+  ): void => {
     const startTime = performance.now();
-    const animate = (currentTime) => {
+    const animate = (currentTime: number): void => {
       const elapsedTime = currentTime - startTime;
       const progress = Math.min(elapsedTime / duration, 1);
-      
       // Easing function for smoother animation
-      const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+      const easeOutCubic = (t: number): number => 1 - Math.pow(1 - t, 3);
       const easedProgress = easeOutCubic(progress);
-      
       const newZoom = start + (end - start) * easedProgress;
       currentZoomRef.current = newZoom;
-      
       if (map) {
         map.setZoom(newZoom);
         map.panTo(position);
       }
-      
       if (progress < 1) {
         animationFrameRef.current = requestAnimationFrame(animate);
       } else {
@@ -226,40 +232,27 @@ const MarkerManager = ({
         animationFrameRef.current = null;
       }
     };
-    
     // Cancel any existing animation
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }
-    
     animationFrameRef.current = requestAnimationFrame(animate);
   };
 
-  // Start mouse tracking after delay
-  const startMouseTracking = () => {
-    // Clear any existing timeout
-    if (mouseTrackingTimeoutRef.current) {
-      clearTimeout(mouseTrackingTimeoutRef.current);
-    }
-    
-    // Set timeout to start tracking mouse after delay
-    mouseTrackingTimeoutRef.current = setTimeout(() => {
-      isTrackingMouseRef.current = true;
-    }, mouseTrackingDelay);
-  };
-
   // Handle marker click
-  const handleMarkerClick = (position) => {
+  const handleMarkerClick = (position: any) => {
     if (selectedMarker === position) {
       // If already selected, deselect it
       handleZoomOut();
     } else {
-      // Cancel any existing tracking
+      // Cancel any existing tracking or timeouts
       if (mouseTrackingTimeoutRef.current) {
         clearTimeout(mouseTrackingTimeoutRef.current);
+        mouseTrackingTimeoutRef.current = null;
       }
       if (zoomOutTimeoutRef.current) {
         clearTimeout(zoomOutTimeoutRef.current);
+        zoomOutTimeoutRef.current = null;
       }
       isTrackingMouseRef.current = false;
       
@@ -273,8 +266,14 @@ const MarkerManager = ({
         animateZoom(currentZoomRef.current, clickZoom, position, zoomDuration);
       }
       
-      // Start tracking mouse after delay
-      startMouseTracking();
+      // Start a 1.5 second timer before we start tracking mouse movement
+      mouseTrackingTimeoutRef.current = setTimeout(() => {
+        mouseTrackingTimeoutRef.current = null;
+        // Only start tracking mouse if not over marker or popup
+        if (!isMouseOverMarkerRef.current && !isMouseOverPopupRef.current) {
+          isTrackingMouseRef.current = true;
+        }
+      }, mouseTrackingDelay); // 1.5 seconds delay
     }
   };
 
@@ -285,14 +284,11 @@ const MarkerManager = ({
       clearTimeout(mouseTrackingTimeoutRef.current);
       mouseTrackingTimeoutRef.current = null;
     }
-    
     isTrackingMouseRef.current = false;
     isMouseOverPopupRef.current = false;
     isMouseOverMarkerRef.current = false;
-    
     setSelectedMarker(null);
-    setInfoOpen(null);
-    
+    setInfoOpen(null); 
     // Smoothly zoom out to default view
     if (map) {
       animateZoom(currentZoomRef.current, defaultZoom, predefinedMarkers[0], zoomDuration);
@@ -302,28 +298,45 @@ const MarkerManager = ({
   // Handle marker mouse enter
   const handleMarkerMouseEnter = () => {
     isMouseOverMarkerRef.current = true;
+    isTrackingMouseRef.current = false; // Stop tracking when mouse enters marker
   };
 
   // Handle marker mouse leave
   const handleMarkerMouseLeave = () => {
     isMouseOverMarkerRef.current = false;
+    // If we've passed the 1.5 second delay and not over popup, start tracking mouse
+    if (mouseTrackingTimeoutRef.current === null && !isMouseOverPopupRef.current) {
+      isTrackingMouseRef.current = true;
+    }
   };
 
   // Handle popup mouse enter
   const handlePopupMouseEnter = () => {
     isMouseOverPopupRef.current = true;
+    isTrackingMouseRef.current = false; // Stop tracking when mouse enters popup
   };
 
   // Handle popup mouse leave
   const handlePopupMouseLeave = () => {
     isMouseOverPopupRef.current = false;
     
-    // Small delay to allow for mouse movement between popup and marker
-    setTimeout(() => {
-      if (!isMouseOverMarkerRef.current && isTrackingMouseRef.current) {
-        handleZoomOut();
-      }
-    }, 1600);
+    // If we've passed the 1.5 second delay, start tracking mouse
+    // This ensures we don't zoom out immediately, but wait for actual mouse movement
+    if (mouseTrackingTimeoutRef.current === null) { // Timer has completed
+      isTrackingMouseRef.current = true;
+    }
+  };
+
+  // Calculate adjusted position for InfoWindow (directly above marker)
+  const getInfoWindowPosition = (position: any) => {
+    if (!position) return null;
+    
+    // Create a slightly offset position to place the InfoWindow above the marker
+    // Adjust the latitude slightly upward to position above the marker
+    return {
+      lat: position.lat + 0.0005, // Small offset upward
+      lng: position.lng
+    };
   };
 
   return (
@@ -362,12 +375,10 @@ const MarkerManager = ({
       {/* Info Window - positioned directly above marker */}
       {infoOpen && (
         <InfoWindow 
-          position={infoOpen} 
-          pixelOffset={[0, -5]} // Minimal offset for close positioning
+          position={getInfoWindowPosition(infoOpen)}
+          pixelOffset={[0, -30]} // Increase vertical offset to position higher above marker
           onCloseClick={handleZoomOut}
-          options={{
-            disableAutoPan: true, // Prevent automatic panning
-          }}
+          disableAutoPan={true} // Prevent automatic panning
         >
           <div 
             className="custom-infowindow"
