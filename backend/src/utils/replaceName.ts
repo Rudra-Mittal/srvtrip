@@ -1,4 +1,4 @@
-export function replacePlace(itenary:string,places:string[],placeId:string[]) {
+export function    replacePlace(itenary:string,places:string[],placeId:string[]) {
     console.log(itenary);
     console.log(places);
     console.log(placeId)

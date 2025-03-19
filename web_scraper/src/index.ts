@@ -15,7 +15,7 @@ app.use(express.json())
 app.post('/scraper',async (req,res)=>{
     const {placeName,maxScrolls,placeId}=req.body;
     const review=await scrapeGoogleMapsReviews(placeName,maxScrolls);
-
+    console.log(review)
     const query=`You are an advanced AI trained to summarize user reviews with precision. 
         Your task is to create a **120-word summary** strictly based **only on the given reviews**.
         
