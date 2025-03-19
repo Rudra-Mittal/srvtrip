@@ -15,16 +15,16 @@ export async function scrapeGoogleMapsReviews(placeName: string, maxScrolls: num
         await page.keyboard.press('Enter');
         
         // Handle search results
-        // try {
-        //     // Wait for either search results or direct place page
-        //     await page.waitForSelector('//div[contains(@aria-label, "Results")]', { timeout: 5000 });
-        //     const searchResult = page.locator('//a[contains(@class, "hfpxzc")]').first();
-        //     await searchResult.click();
-        //     // Wait for place page to load
-        //     await page.waitForSelector('//button[contains(@aria-label, "Reviews")]', { timeout: 5000 });
-        // } catch {
-        //     // Continue if we're already on place page
-        // }
+        try {
+            // Wait for either search results or direct place page
+            await page.waitForSelector('//div[contains(@aria-label, "Results")]', { timeout: 5000 });
+            const searchResult = page.locator('//a[contains(@class, "hfpxzc")]').first();
+            await searchResult.click();
+            // Wait for place page to load
+            await page.waitForSelector('//button[contains(@aria-label, "Reviews")]', { timeout: 5000 });
+        } catch {
+            // Continue if we're already on place page
+        }
 
         // Open reviews section
         try {
