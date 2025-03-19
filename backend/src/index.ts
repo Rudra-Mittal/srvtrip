@@ -8,7 +8,7 @@ import { convertItineraryToPara } from './AIController2/services/convertItinerar
 import callWebScrapper from './controllers/callWebScrapper';
 
 const app = express();
-const PORT = 3000;
+const PORT = 4000;
 app.use(express.json());
 
 
@@ -26,13 +26,11 @@ app.post('/api/auth',(req,res)=>{
 app.post('/api/itenary', async(req,res)=>{
     const {prompt} = req.body;
     //generating itenary
-    console.log(prompt)
     // const itenary=await generate(prompt)
     const itenary=await generate2(prompt)
 
     // extracting places
 
-    console.log(await JSON.parse(itenary))
     const allDayPlaces=  extractPlacesByRegex(itenary)//get the 2d array of places (daywise places)
     // getting places info
     
@@ -55,7 +53,12 @@ app.post('/api/itenary', async(req,res)=>{
             //      //  console.log(place.displayName,photos)
             
             //      // make call to web scrapper and get summarized review
-            //     //  const summarizedReview=callWebScrapper(place.displayName,2,place.id);
+            await callWebScrapper(place.displayName,6,place.id).then((review:any)=>{
+                console.log(review)
+                    if(review.reviews.length==0){
+                        callWebScrapper(`${place.displayName}+${place.formattedAddress}`,6,place.id)
+                    }
+            });
             
             //     //   save all the data in db
         }
@@ -64,7 +67,6 @@ app.post('/api/itenary', async(req,res)=>{
     //     console.log(place);
     // }
     // insert display name into jsonItenary
-//    const newItenary= replacePlace(itenary,places,placeData.map(place=>place.displayName))
 //   const newItenary =replacePlace(itenary,places,placeData.map(place=>place.id))
     // convert the json into text via AI
     res.send(placesData);

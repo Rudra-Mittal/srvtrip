@@ -5,7 +5,7 @@ const weaviateURL = process.env.WEAVIATE_URL as string
 const weaviateApiKey = process.env.WEAVIATE_API_KEY as string
 const jinaaiApiKey = process.env.JINAAI_API_KEY as string
 const mistralapikey= process.env.MISTRAL_API_KEY as string
-export async function searchQuery(query:string,place:string, limit:number):Promise<String>{
+export async function searchQuery(query:string,placeId:string, limit:number):Promise<String>{
   const client = await weaviate.connectToWeaviateCloud(
     weaviateURL,
     { authCredentials: new weaviate.ApiKey(weaviateApiKey),
@@ -19,7 +19,7 @@ export async function searchQuery(query:string,place:string, limit:number):Promi
     const resGen= await jeopardy.generate.nearText([query],{
       groupedTask:`Provide the answer to the query ${query} according to these reviews `
     },{
-      filters: jeopardy.filter.byProperty('place').containsAny([place]),
+      filters: jeopardy.filter.byProperty('place').containsAny([placeId]),
       returnMetadata:['distance'],
       limit
     })

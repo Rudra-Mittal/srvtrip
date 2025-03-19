@@ -1,5 +1,5 @@
 export default async function callWebScrapper(placeName:string,maxScrolls:Number,placeId:string){
-    fetch("http://localhost:3000/scraper",{
+   return fetch("http://localhost:3000/scraper",{
         method:'POST',
         headers:{
             'Content-Type':'application/json'
