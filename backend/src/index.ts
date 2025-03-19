@@ -6,6 +6,8 @@ import { extract2, generate2 } from './AIController2';
 import { extractPlacesByRegex } from './AIController2/services/extractPlacesbyRegex';
 import { convertItineraryToPara } from './AIController2/services/convertItineraryToPara';
 import callWebScrapper from './controllers/callWebScrapper';
+import signup from './controllers/auth/signup';
+import { signin } from './controllers/auth/signin';
 
 const app = express();
 const PORT = 4000;
@@ -16,11 +18,29 @@ app.get('/', (req, res) => {
     res.send('Hello World!');
 })
 
-app.post('/api/auth',(req,res)=>{
-    // const {username,password} = req.body;
-    // console.log(username,password)
+app.post('/api/auth/signup',(req,res)=>{
+    const {email,password,name} = req.body;
     // doing some authentication generating token and saving to db
-    res.send('Hello World!');
+    signup(email,password,name).then((token)=>{
+        res.cookie('token',token,{httpOnly:true});
+        res.status(200).json({token,"message":"User created successfully"});
+    }).catch((err)=>{
+        console.log(err)
+        res.status(403).json({"error":err.message});
+    })
+})
+app.post('/api/auth/signin',(req,res)=>{
+    const {email,password} = req.body;
+
+    signin(email,password).then((token)=>{
+        res.cookie('token',token,{httpOnly:true});
+
+        res.status(200).json({token,"message":"User signed in successfully"});
+    }).catch((err)=>{
+        console.log(err)
+        res.clearCookie('token');
+        res.status(403).json({"error":err.message});
+    })
 })
 // app.use(authMiddleware);
 app.post('/api/itenary', async(req,res)=>{
