@@ -5,14 +5,14 @@ const weaviateURL = process.env.WEAVIATE_URL as string
 const weaviateApiKey = process.env.WEAVIATE_API_KEY as string
 const jinaaiApiKey = process.env.JINAAI_API_KEY as string
 const mistralapikey= process.env.MISTRAL_API_KEY as string
-
+const studioapikey= process.env.GOOGLE_API_KEY as string
 export default async function summarizeReview(query:string,placeId:string):Promise<String>{
   const client = await weaviate.connectToWeaviateCloud(
     weaviateURL,
     { authCredentials: new weaviate.ApiKey(weaviateApiKey),
       headers:{
         'X-JinaAI-Api-Key': jinaaiApiKey,
-        'X-Mistral-Api-Key': mistralapikey
+        'X-Goog-Studio-Api-Key': studioapikey 
       }
      }
   );
