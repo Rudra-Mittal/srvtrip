@@ -1,8 +1,7 @@
 //types for placesData (2D array having each idx as array of places of that day and places is in object)
 
 export interface place{
-    new:boolean,//differentiator
-    dayNum:number,
+    dbId:string,//differentiator
     placename:string,
     id:string,
     formattedAddress:string,

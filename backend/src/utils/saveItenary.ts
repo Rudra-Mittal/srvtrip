@@ -21,42 +21,26 @@ export async function saveItenary(itenaryString:string,allDayPlaces:placesData,u
                 interests:itenaryJ.interests||[],
             }
         })
-        for(const dayPlaces of allDayPlaces){
-            for(const place of dayPlaces){
-                let dayD= await prisma.day.findFirst({
-                        where:{
-                            dayNumber:place.dayNum,
-                            itineraryId:itenaryD.id
-                        }
-                    })                
-                if(!dayD) {
-                    const dayD= await prisma.day.create({
-                        data:{
-                            dayNumber:place.dayNum,
-                            itineraryId:itenaryD.id,
-                            morning:JSON.stringify(itenaryJ.days[place.dayNum-1].morning),
-                            afternoon:JSON.stringify(itenaryJ.days[place.dayNum-1].afternoon),
-                            evening:JSON.stringify(itenaryJ.days[place.dayNum-1].evening),
-                            proTip:itenaryJ.days[place.dayNum-1].tips,
-                        }
-                    })
-                    
-                }
-                dayD = await prisma.day.findFirst({
-                    where:{
-                        dayNumber:place.dayNum,
-                        itineraryId:itenaryD.id
+        let dayNum=0
+        for(const dayPlaces of allDayPlaces){               
+                const dayD= await prisma.day.create({
+                    data:{
+                        dayNumber:dayNum+1,
+                        itineraryId:itenaryD.id,
+                        morning:JSON.stringify(itenaryJ.days[dayNum].morning),
+                        afternoon:JSON.stringify(itenaryJ.days[dayNum].afternoon),
+                        evening:JSON.stringify(itenaryJ.days[dayNum].evening),
+                        proTip:itenaryJ.days[dayNum].tips,
                     }
                 })
-                if(place.new){
+            for(const place of dayPlaces){
+                if(place.dbId!=""){
                     console.log("place",place);
-                    const placeD= await prisma.place.create({
+                    const placeD= await prisma.place.update({
+                        where:{
+                            id:place.dbId
+                        },
                         data:{
-                            name:place.displayName,
-                            address:place.formattedAddress,
-                            latitude:place.location.latitude,
-                            longitude:place.location.longitude,
-                            placeId:place.id,
                             summarizedReview:place.summarizedReview,
                             day:{
                                 connect:{
@@ -74,29 +58,8 @@ export async function saveItenary(itenaryString:string,allDayPlaces:placesData,u
                         })
                     }
                 }
-                else{
-                    const placeD= await prisma.place.findUnique({
-                        where:{
-                            placeId:place.id
-                        }
-                    })
-                    if(placeD)
-                    await prisma.day.update({
-                        where:{
-                            id:dayD?.id
-                        },
-                        data:{
-                            places:{
-                                connect:{
-                                    id:placeD.id
-                                }
-                            }
-                        }
-                    })
-                }
-
-                
             } 
+            dayNum++;
         }
         return JSON.stringify({"success":"Itinerary saved successfully"})
     }catch(err){

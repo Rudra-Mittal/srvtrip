@@ -11,6 +11,7 @@ import { saveItenary } from './utils/saveItenary';
 import { place, placesData } from './utils/types';
 import signup from './controllers/auth/signup';
 import { signin } from './controllers/auth/signin';
+import insertPlace from './controllers/checkPlaceInDb';
 
 const app = express();
 const PORT = 4000;
@@ -63,47 +64,40 @@ app.post('/api/itenary', async(req,res)=>{
         )
     ) as placesData;
     // check if the place Exist in db if no make a call to photos API and a scrapper API to get the place reviews
-    const set= new Set();
-    for(let day of placesData){
-        for(let place of day){
-
-                if(set.has(place.id)){
-                    place.new=false;
-                }else {
-                    // check if it exist in db by comparing with place id
-                    const checkPlace=await checkPlaceInDb(place.id);
-                    if(checkPlace){
-                        //replace the place object with only place id in placesData
-                        place.new=false;
-                        console.log(place)
-                    }
-                    else{
-                        //call the photos api
-                        set.add(place.id);
-                        const placePhotos=await Promise.all((place.photos?.map((reference:string)=>getPhotoUri(reference))));
-                        //replace the photos ref url with actual url in place object
-                        place.photos=placePhotos;
-                        
-                    }
-                    // make call to web scrapper and get summarized review
-                }
+    for(const day of placesData){
+        for(const place of day){
+            // check if it exist in db by comparing with place id
+            const checkPlace=await insertPlace(place);
+            place.dbId=checkPlace.id;
+            if(checkPlace.exist){
+                console.log("Place already exist in db")
+                //replace the place object with only place id in placesData
             }
-            await Promise.all((day.map((place:place)=>{
-                if(place.new){
-                    return callWebScrapper(place.displayName,5,place.id)
-                    .then((res:any)=>{
-                        place.summarizedReview=res.summarizedReview;
-                    }).catch((err)=>{
-                        console.log(err)
-                        callWebScrapper(place.displayName+' , '+place.formattedAddress,5,place.id).then((res:any)=>{
-                            place.summarizedReview=res.summarizedReview;
-                        }).catch((err)=>{
-                            console.log(err)
-                            place.summarizedReview="No reviews found";
-                        })
-                    })
-                }
-            }))) 
+            else  {
+                //call the photos api
+                const placePhotos=await Promise.all((place.photos?.map((reference:string)=>getPhotoUri(reference))));
+                //replace the photos ref url with actual url in place object
+                place.photos=placePhotos;
+                
+            }
+            // make call to web scrapper and get summarized review
+            }
+            // await Promise.all((day.map((place:place)=>{
+            //     if(place.new){
+            //         return callWebScrapper(place.displayName,5,place.id)
+            //         .then((res:any)=>{
+            //             place.summarizedReview=res.summarizedReview;
+            //         }).catch((err)=>{
+            //             console.log(err)
+            //             callWebScrapper(place.displayName+' , '+place.formattedAddress,5,place.id).then((res:any)=>{
+            //                 place.summarizedReview=res.summarizedReview;
+            //             }).catch((err)=>{
+            //                 console.log(err)
+            //                 place.summarizedReview="No reviews found";
+            //             })
+            //         })
+            //     }
+            // }))) 
     }
     //   save all the data in db using saveItinerary function
       const newItenary =replacePlace(itenary,placesData)
