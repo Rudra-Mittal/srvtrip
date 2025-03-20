@@ -63,22 +63,28 @@ app.post('/api/itenary', async(req,res)=>{
         )
     ) as placesData;
     // check if the place Exist in db if no make a call to photos API and a scrapper API to get the place reviews
+    const set= new Set();
+    for(let day of placesData){
+        for(let place of day){
 
-    for(const day of placesData){
-        for(const place of day){
-
-                // check if it exist in db by comparing with place id
-                const checkPlace=await checkPlaceInDb(place.id);
-                if(checkPlace){
-                    //replace the place object with only place id in placesData
+                if(set.has(place.id)){
                     place.new=false;
-                }
-                else{
-                    //call the photos api
-                    const placePhotos=await Promise.all((place.photos?.map((reference:string)=>getPhotoUri(reference))));
-                    //replace the photos ref url with actual url in place object
-                    place.photos=placePhotos;
-
+                }else {
+                    // check if it exist in db by comparing with place id
+                    const checkPlace=await checkPlaceInDb(place.id);
+                    if(checkPlace){
+                        //replace the place object with only place id in placesData
+                        place.new=false;
+                        console.log(place)
+                    }
+                    else{
+                        //call the photos api
+                        set.add(place.id);
+                        const placePhotos=await Promise.all((place.photos?.map((reference:string)=>getPhotoUri(reference))));
+                        //replace the photos ref url with actual url in place object
+                        place.photos=placePhotos;
+                        
+                    }
                     // make call to web scrapper and get summarized review
                 }
             }

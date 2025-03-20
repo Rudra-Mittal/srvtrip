@@ -13,9 +13,9 @@ app.use(express.json())
 
 // auth middleware pending
 app.post('/scraper',async (req,res)=>{
-    const {placeName,maxScrolls,placeId}=req.body;
-    const review=await scrapeGoogleMapsReviews(placeName,maxScrolls);
-    console.log(review)
+    // const {placeName,maxScrolls,placeId}=req.body;
+    // const review=await scrapeGoogleMapsReviews(placeName,maxScrolls);
+    // console.log(review)
     const query = `You are an advanced AI trained to analyze and summarize user reviews with precision. 
                 Your task is to generate a **concise (around 100-120 words) review summary** and a **final rating** based strictly on the provided reviews.
 
@@ -27,22 +27,22 @@ app.post('/scraper',async (req,res)=>{
                 - Return the result in **JSON format** with two fields: 
                 - **summarizedReview**: A well-structured, precise summary of the reviews.
                 - **finalRating**: The calculated overall rating from the reviews.`;
-            summarizeReview(query,placeId).then(()=>{
-                res.json(summarizeReview)
-                return
-            })
+            const response=await summarizeReview(query,"ChIJaXD1f0yxbTkRvquNoSkESuk");
+            //console.log(response);
+            res.send(response);
+
         
-    if(review.reviews.length>0) {
-        insertData({...review,placeId}).then(()=>{
-            summarizeReview(query,placeId).then((summarizedReview)=>{
-                 res.json({summarizedReview,placeId})
-                 return
-            })
-        })
-    }else{
-        res.status(404).json({message:"No reviews found"})
-        return
-    }
+    // if(review.reviews.length>0) {
+    //     insertData({...review,placeId}).then(()=>{
+    //         summarizeReview(query,placeId).then((summarizedReview)=>{
+    //              res.json({summarizedReview,placeId})
+    //              return
+    //         })
+    //     })
+    // }else{
+    //     res.status(404).json({message:"No reviews found"})
+    //     return
+    // }
     
 })
 app.listen(3000,()=>{

@@ -23,18 +23,33 @@ export async function saveItenary(itenaryString:string,allDayPlaces:placesData,u
         })
         for(const dayPlaces of allDayPlaces){
             for(const place of dayPlaces){
-                const dayD= await prisma.day.create({
-                    data:{
+                let dayD= await prisma.day.findFirst({
+                        where:{
+                            dayNumber:place.dayNum,
+                            itineraryId:itenaryD.id
+                        }
+                    })                
+                if(!dayD) {
+                    const dayD= await prisma.day.create({
+                        data:{
+                            dayNumber:place.dayNum,
+                            itineraryId:itenaryD.id,
+                            morning:JSON.stringify(itenaryJ.days[place.dayNum-1].morning),
+                            afternoon:JSON.stringify(itenaryJ.days[place.dayNum-1].afternoon),
+                            evening:JSON.stringify(itenaryJ.days[place.dayNum-1].evening),
+                            proTip:itenaryJ.days[place.dayNum-1].tips,
+                        }
+                    })
+                    
+                }
+                dayD = await prisma.day.findFirst({
+                    where:{
                         dayNumber:place.dayNum,
-                        itineraryId:itenaryD.id,
-                        morning:JSON.stringify(itenaryJ.days[place.dayNum-1].morning),
-                        afternoon:JSON.stringify(itenaryJ.days[place.dayNum-1].afternoon),
-                        evening:JSON.stringify(itenaryJ.days[place.dayNum-1].evening),
-                        proTip:itenaryJ.days[place.dayNum-1].tips,
+                        itineraryId:itenaryD.id
                     }
                 })
-
                 if(place.new){
+                    console.log("place",place);
                     const placeD= await prisma.place.create({
                         data:{
                             name:place.displayName,
@@ -45,7 +60,7 @@ export async function saveItenary(itenaryString:string,allDayPlaces:placesData,u
                             summarizedReview:place.summarizedReview,
                             day:{
                                 connect:{
-                                    id:dayD.id
+                                    id:dayD?.id
                                 }
                             }
                         }
@@ -68,7 +83,7 @@ export async function saveItenary(itenaryString:string,allDayPlaces:placesData,u
                     if(placeD)
                     await prisma.day.update({
                         where:{
-                            id:dayD.id
+                            id:dayD?.id
                         },
                         data:{
                             places:{
