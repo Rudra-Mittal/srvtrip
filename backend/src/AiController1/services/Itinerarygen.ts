@@ -1,5 +1,13 @@
 import "dotenv/config";
 
+interface AIResponse {
+  choices: {
+    message: {
+      content: string;
+    };
+  }[];
+}
+
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const MODEL = "mixtral-8x7b-32768"; // Alternative: "llama3-70b-8192"
@@ -34,7 +42,7 @@ export async function generateItinerary(
       ### **🎯 Itinerary Guidelines:**
       1. **Accurate Locations:** Every location (**attraction, restaurant, hotel, etc.**) **must exist on Google Maps** with **its full address or a recognizable landmark**.
       2. **Use a Unique Symbol:** Always enclose locations inside **# #** to clearly differentiate them.  
-         **Example:**#Har Ki Pauri, Near Ganges Ghat, Haridwar, Uttarakhand, India#
+         **Example:** #Har Ki Pauri, Near Ganges Ghat, Haridwar, Uttarakhand, India#
       3. **Daily Plan Structure:** Each day must have **morning, afternoon, and evening** activities.
       4. **Local Food & Culture:** Include **authentic experiences** such as local cuisine, street food, or cultural events.
       5. **Budget Breakdown:** Provide the cost per activity, food, and transport. **Multiply costs by ${persons} people** if applicable.
@@ -45,53 +53,41 @@ export async function generateItinerary(
       ### **🚀 JSON Response Format (Strict)**
       \`\`\`json
       {
-        "trip_overview": {
+        "itinerary": {
           "destination": "${destination}",
-          "duration": "${days} days",
-          "travelers": "${persons} person(s)",
-          "total_budget": "₹${totalBudget}",
-          "special_interests": "${interestText}"
-        },
-        "itinerary": [
-          {
-            "day": 1,
-            "morning": {
-              "activities": "Arrive in #Shimla Airport (Jubberhatti), Shimla, Himachal Pradesh, India#, check into #Hotel Combermere, The Mall, Shimla#, and explore #Mall Road, Shimla, Himachal Pradesh, India#.",
-              "food": "Breakfast at #Indian Coffee House, The Mall, Shimla, Himachal Pradesh, India# (₹250 per person).",
-              "transport": "Taxi from #Shimla Airport (Jubberhatti), Shimla, Himachal Pradesh , India# to hotel (₹800 total).",
-              "cost": "₹1,050"
-            },
-            "afternoon": {
-              "activities": "Visit #The Ridge, The Mall Road, Shimla# and #Christ Church, The Mall, Shimla# for scenic views.",
-              "food": "Lunch at #Wake & Bake Café, 34 Mall Road, Shimla# (₹600 per person).",
-              "transport": "Walking tour.",
-              "cost": "₹600"
-            },
-            "evening": {
-              "activities": "Dinner at #8INE Rooftop Restaurant, The Mall, Shimla#, offering a beautiful mountain view.",
-              "food": "North Indian & Chinese cuisine (₹800 per person).",
-              "transport": "Auto-rickshaw to #8INE Rooftop Restaurant, The Mall, Shimla# (₹150).",
-              "cost": "₹950"
-            },
-            "budget_breakdown": "₹3,100",
-            "tips": "Best to explore #Mall Road, Shimla# in the evening for a lively atmosphere."
-          }
-        #
+          "number_of_days": ${days},
+          "budget": ${totalBudget},
+          "number_of_persons": ${persons},
+          "days": [
+            {
+              "day": 1,
+              "morning": {
+                "activities": "Arrive in #Hotel Combermere, Shimla# and explore #Mall Road, Shimla#.",
+                "food": "Breakfast at #Indian Coffee House, Shimla# - ₹250 per person.",
+                "transport": "Taxi from #Jubbarhatti Airport, Shimla# to #Hotel Combermere, Shimla# - ₹800 total.",
+                "cost": "₹1,050"
+              },
+              "afternoon": {
+                "activities": "Visit #The Ridge, Shimla# and #Christ Church, Shimla# for scenic views and photography.",
+                "food": "Lunch at #Wake & Bake Café, Shimla# - ₹600 per person.",
+                "transport": "Walking tour.",
+                "cost": "₹600"
+              },
+              "evening": {
+                "activities": "Enjoy a fine dining experience at #Eighteen71 Cookhouse & Bar, Shimla#.",
+                "food": "North Indian & Chinese cuisine - ₹800 per person.",
+                "transport": "Auto-rickshaw from #The Ridge, Shimla# to #Eighteen71 Cookhouse & Bar, Shimla# - ₹150.",
+                "cost": "₹950"
+              },
+              "budget_breakdown": "₹3,100",
+              "tips": "Explore #Mall Road, Shimla# in the evening for a lively atmosphere. Arrive early at #The Ridge, Shimla# for better photos."
+            }
+          ],
+          "total_budget_used": "₹X,XXX",
+          "remaining_budget": "₹X,XXX"
+        }
       }
       \`\`\`
-
-      ### **🚦 Response Instructions:**
-      - The response **must be valid JSON** with **no extra text, explanations, or formatting**.
-      - Do **not** include phrases like “Here’s your itinerary” or “I hope this helps.”
-      - The JSON **must start with { and end with }**.
-      - Ensure the itinerary includes:
-        - **Morning, Afternoon, and Evening activities**
-        - **Accurate places (must exist on Google Maps)**
-        - **Food recommendations with restaurant names & prices**
-        - **Transport details**
-        - **Total daily cost breakdown**
-        - **Local travel tips**
-      - **Multiply costs by ${persons} people** where necessary.
 
       **Strictly return valid JSON with no extra text.**
     `;
@@ -109,7 +105,12 @@ export async function generateItinerary(
       }),
     });
 
-    const data = await response.json() as any;
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`API request failed: ${response.status} - ${errorText}`);
+    }
+
+    const data = (await response.json()) as AIResponse;
     if (!data.choices || !data.choices[0]?.message?.content) {
       throw new Error("Invalid response from AI API");
     }
@@ -145,3 +146,8 @@ export async function generateItinerary(
     throw error;
   }
 }
+
+// Example Usage
+generateItinerary("Shimla", 3, 10000, 2, ["Adventure", "Cultural"])
+  // .then((itinerary) => console.log("✅ Final Itinerary:", itinerary))
+  // .catch((err) => console.error("🚨 Failed to generate itinerary:", err));
