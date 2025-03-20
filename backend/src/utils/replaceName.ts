@@ -1,7 +1,6 @@
 import { placesData } from "./types";
 
 export function   replacePlace(itenary:string,placesData:placesData) {
-    console.log(itenary);
     try {
         let newItenary = itenary;
         for (const day of placesData) {

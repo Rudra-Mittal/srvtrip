@@ -35,7 +35,6 @@ export async function saveItenary(itenaryString:string,allDayPlaces:placesData,u
                 })
             for(const place of dayPlaces){
                 if(place.dbId!=""){
-                    console.log("place",place);
                     const placeD= await prisma.place.update({
                         where:{
                             id:place.dbId
@@ -44,7 +43,7 @@ export async function saveItenary(itenaryString:string,allDayPlaces:placesData,u
                             summarizedReview:place.summarizedReview,
                             day:{
                                 connect:{
-                                    id:dayD?.id
+                                    id:dayD.id
                                 }
                             }
                         }

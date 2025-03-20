@@ -2,6 +2,7 @@
 
 export interface place{
     dbId:string,//differentiator
+    exist:boolean,
     placename:string,
     id:string,
     formattedAddress:string,

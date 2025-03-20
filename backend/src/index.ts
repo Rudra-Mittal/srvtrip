@@ -70,10 +70,12 @@ app.post('/api/itenary', async(req,res)=>{
             const checkPlace=await insertPlace(place);
             place.dbId=checkPlace.id;
             if(checkPlace.exist){
+                place.exist=true;
                 console.log("Place already exist in db")
                 //replace the place object with only place id in placesData
             }
             else  {
+                place.exist=false;
                 //call the photos api
                 const placePhotos=await Promise.all((place.photos?.map((reference:string)=>getPhotoUri(reference))));
                 //replace the photos ref url with actual url in place object
@@ -82,31 +84,30 @@ app.post('/api/itenary', async(req,res)=>{
             }
             // make call to web scrapper and get summarized review
             }
-            // await Promise.all((day.map((place:place)=>{
-            //     if(place.new){
-            //         return callWebScrapper(place.displayName,5,place.id)
-            //         .then((res:any)=>{
-            //             place.summarizedReview=res.summarizedReview;
-            //         }).catch((err)=>{
-            //             console.log(err)
-            //             callWebScrapper(place.displayName+' , '+place.formattedAddress,5,place.id).then((res:any)=>{
-            //                 place.summarizedReview=res.summarizedReview;
-            //             }).catch((err)=>{
-            //                 console.log(err)
-            //                 place.summarizedReview="No reviews found";
-            //             })
-            //         })
-            //     }
-            // }))) 
+            await Promise.all((day.map((place:place)=>{
+                if(!place.exist){
+                    return callWebScrapper(place.displayName,5,place.id)
+                    .then((res:any)=>{
+                        place.summarizedReview=res.summarizedReview;
+                    }).catch((err)=>{
+                        console.log(err)
+                        callWebScrapper(place.displayName+' , '+place.formattedAddress,5,place.id).then((res:any)=>{
+                            place.summarizedReview=res.summarizedReview;
+                        }).catch((err)=>{
+                            console.log(err)
+                            place.summarizedReview="No reviews found";
+                        })
+                    })
+                }
+            }))) 
     }
     //   save all the data in db using saveItinerary function
       const newItenary =replacePlace(itenary,placesData)
-    const response=saveItenary(newItenary,placesData,userId);//last arg is userid
+    const response=await saveItenary(newItenary,placesData,userId);//last arg is userid
 
     // for(const place of placeData){
     //     console.log(place);
     // }
-    console.log(response)
     // insert display name into jsonItenary
     // convert the json into text via AI
     res.send(response);
