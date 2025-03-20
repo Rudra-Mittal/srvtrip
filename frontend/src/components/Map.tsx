@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
-  APIProvider,
   Map,
   AdvancedMarker,
   InfoWindow,
@@ -10,21 +9,19 @@ import {
 } from "@vis.gl/react-google-maps";
 import "./index.css";
 
-// Predefined marker locations with names
-const predefinedMarkers = [
-  { lat: 31.0857947, lng: 77.0661085, name: "Shimla" },
-  { lat: 31.1008914, lng: 77.1763562, name: "The Ridge" },
-  { lat: 31.1040341, lng: 77.1755249, name: "Mall Road" },
-  { lat: 31.1009306, lng: 77.1763075, name: "Christ Church" },
-  { lat: 31.1013414, lng: 77.1835041, name: "Jakhu Temple" },
-  { lat: 31.1034073, lng: 77.1508082, name: "Viceregal Lodge" },
-];
+// Interface for animation parameters
+interface AnimateZoomParams {
+  start: number;
+  end: number;
+  position: google.maps.LatLngLiteral;
+  duration: number;
+}
 
 // Component to render directions between markers
-const DirectionsRenderer = ({ triggerDirections }: { triggerDirections: boolean }) => {
+const DirectionsRenderer = ({predefinedMarkers,triggerDirections }: { predefinedMarkers: any[],triggerDirections: boolean }) => {
   const routesLibrary = useMapsLibrary("routes");
   const map = useMap();
-  console.log("map",map)
+  // console.log("map",map)
   useEffect(() => {
     if (!routesLibrary || !map || !triggerDirections) return;
 
@@ -64,52 +61,55 @@ const DirectionsRenderer = ({ triggerDirections }: { triggerDirections: boolean 
   
   return null;
 };
-
 // Main Map Component
-const MapComponent = () => {
-  const [infoOpen, setInfoOpen] = useState(null);
+const MapComponent = ({ 
+  predefinedMarkers,
+  hoveredMarker,
+  selectedMarker,
+  setSelectedMarker,
+  infoOpen,
+  setInfoOpen
+}: { 
+  predefinedMarkers: { lat: number; lng: number; name?: string }[];
+  hoveredMarker: { lat: number; lng: number; name?: string } | null;
+  selectedMarker: { lat: number; lng: number; name?: string } | null;
+  setSelectedMarker: any
+  infoOpen: boolean | null;
+  setInfoOpen: any;
+}) => {
+  
   const [allMarkersVisible, setAllMarkersVisible] = useState(false);
-  const [selectedMarker, setSelectedMarker] = useState(null);
-  const [hoveredMarker, setHoveredMarker] = useState(null);
   
-  const defaultZoom = 12;
   const defaultCenter = predefinedMarkers[0];
+  const defaultZoom = 12;
   
-  const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
   const mapId = import.meta.env.VITE_GOOGLE_MAP_ID;
   
-  // Show error if API key or Map ID is missing
-  if (!apiKey || !mapId) {
-    return <div>Error: Missing Google API Key or Map ID</div>;
-  }
-
   return (
-    <div className="h-screen w-full">
-      {/* Map Container - now takes full width */}
-      <div className="w-full h-1/2">
-        <APIProvider apiKey={apiKey} version="beta">
-          <Map
-            mapId={mapId}
-            // defaultZoom={defaultZoom}
-            defaultCenter={defaultCenter}
-            mapTypeControl={false}
-            disableDefaultUI={false}
-            zoomControl={true}
-            scrollwheel={true}
-            gestureHandling={"cooperative"}
-            style={{ width: '100%', height: '100%' }}
-          >
-            <MarkerManager 
-              setAllMarkersVisible={setAllMarkersVisible} 
-              setInfoOpen={setInfoOpen}
-              infoOpen={infoOpen}
-              selectedMarker={selectedMarker}
-              setSelectedMarker={setSelectedMarker}
-              hoveredMarker={hoveredMarker}
-            />
-            {allMarkersVisible && <DirectionsRenderer triggerDirections={true} />}
-          </Map>
-        </APIProvider>
+    <div className="h-full w-full">
+      <div className="w-full h-full">
+        <Map
+          mapId={mapId}
+          defaultCenter={defaultCenter}
+          defaultZoom={defaultZoom}
+          mapTypeControl={false}
+          disableDefaultUI={false}
+          zoomControl={true}
+          scrollwheel={true}
+          gestureHandling={"cooperative"}
+          style={{ width: '100%', height: '100%' }}
+        >
+          <MarkerManager 
+            predefinedMarkers={predefinedMarkers}
+            setAllMarkersVisible={setAllMarkersVisible} 
+            setInfoOpen={setInfoOpen}
+            infoOpen={infoOpen}
+            selectedMarker={selectedMarker}
+            setSelectedMarker={setSelectedMarker}
+            hoveredMarker={hoveredMarker}
+          />
+          {allMarkersVisible && <DirectionsRenderer predefinedMarkers={predefinedMarkers} triggerDirections={true} />}
+        </Map>
       </div>
     </div>
   );
@@ -122,16 +122,21 @@ const MarkerManager = ({
   infoOpen, 
   selectedMarker, 
   setSelectedMarker,
-  hoveredMarker
+  hoveredMarker,
+  predefinedMarkers
 }: {
   setAllMarkersVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setInfoOpen: React.Dispatch<React.SetStateAction<any>>;
   infoOpen: any;
   selectedMarker: any;
-  setSelectedMarker: React.Dispatch<React.SetStateAction<any>>;
+  setSelectedMarker: any;
   hoveredMarker: any;
+  predefinedMarkers: any[];
 }) => {
-  const [visibleMarkers, setVisibleMarkers] = useState<{ lat: number; lng: number; name?: string }[]>([]);
+  console.log("selected",selectedMarker)
+  const [visibleMarkerIndices, setVisibleMarkerIndices] = useState<number[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isInfoWindowHovered, setIsInfoWindowHovered] = useState(false);
   const map = useMap();
   const animationFrameRef = useRef<number | null>(null);
   const mouseTrackingTimeoutRef = useRef<number | null>(null);
@@ -140,11 +145,18 @@ const MarkerManager = ({
   const isMouseOverPopupRef = useRef(false);
   const isMouseOverMarkerRef = useRef(false);
   const defaultZoom = 12;
-  // const defaultCenter = predefinedMarkers[0];
   const clickZoom = 14;
   const zoomDuration = 300; // ms for zoom animation
   const mouseTrackingDelay = 1500; // 1.5 sec delay before tracking mouse position
   const currentZoomRef = useRef(defaultZoom);
+  
+  // Images for carousel
+  const carouselImages = [
+    "./pexels-pixabay-533769.jpg",
+    "./download.jpeg", // Replace with your actual second image
+    "./download (1).jpeg"
+    // Add more images as needed
+  ];
   
   // Effect for watching selected marker changes
   useEffect(() => {
@@ -169,14 +181,14 @@ const MarkerManager = ({
   
   // Animate markers appearing
   useEffect(() => {
-    predefinedMarkers.forEach((marker, index) => {
+    predefinedMarkers.forEach((_, index) => {
       setTimeout(() => {
-        setVisibleMarkers(prev => {
-          const newMarkers = [...prev, marker];
-          if (newMarkers.length === predefinedMarkers.length) {
+        setVisibleMarkerIndices(prev => {
+          const newIndices = [...prev, index];
+          if (newIndices.length === predefinedMarkers.length) {
             setAllMarkersVisible(true);
           }
-          return newMarkers;
+          return newIndices;
         });
       }, 1000 + index * 200);
     });
@@ -193,7 +205,7 @@ const MarkerManager = ({
 
   // Track mouse movement to detect if outside of both marker and popup
   useEffect(() => {
-    const trackMouseMovement = (e: any) => {
+    const trackMouseMovement = () => {
       if (isTrackingMouseRef.current) {
         // If not over marker or popup, trigger zoom out on mouse movement
         if (!isMouseOverMarkerRef.current && !isMouseOverPopupRef.current) {
@@ -229,13 +241,6 @@ const MarkerManager = ({
   }, [map]);
 
   // Smoothly animate zoom level
-  interface AnimateZoomParams {
-    start: number;
-    end: number;
-    position: google.maps.LatLngLiteral;
-    duration: number;
-  }
-  
   const animateZoom = (
     start: AnimateZoomParams["start"],
     end: AnimateZoomParams["end"],
@@ -271,6 +276,7 @@ const MarkerManager = ({
 
   // Handle marker click
   const handleMarkerClick = (position: any) => {
+    console.log("ssss",selectedMarker)
     if (selectedMarker === position) {
       // If already selected, deselect it
       handleZoomOut();
@@ -286,7 +292,10 @@ const MarkerManager = ({
       }
       isTrackingMouseRef.current = false;
       // Select new marker
+      console.log("selectedMarker",selectedMarker)
       setSelectedMarker(position);
+      console.log("selectedMarkersdsdr",selectedMarker)
+      console.log("position",position)
       setInfoOpen(position);
       // Smooth zoom animation to the selected marker
       if (map) {
@@ -341,16 +350,30 @@ const MarkerManager = ({
   const handlePopupMouseEnter = () => {
     isMouseOverPopupRef.current = true;
     isTrackingMouseRef.current = false; // Stop tracking when mouse enters popup
+    setIsInfoWindowHovered(true);
   };
 
   // Handle popup mouse leave
   const handlePopupMouseLeave = () => {
     isMouseOverPopupRef.current = false;
+    setIsInfoWindowHovered(false);
     // If we've passed the 1.5 second delay, start tracking mouse
     // This ensures we don't zoom out immediately, but wait for actual mouse movement
     if (mouseTrackingTimeoutRef.current === null) { // Timer has completed
       isTrackingMouseRef.current = true;
     }
+  };
+
+  // Handle next image in carousel
+  const handleNextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % carouselImages.length);
+  };
+
+  // Handle previous image in carousel
+  const handlePrevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prevIndex) => (prevIndex - 1 + carouselImages.length) % carouselImages.length);
   };
 
   // Calculate adjusted position for InfoWindow (directly above marker)
@@ -367,41 +390,43 @@ const MarkerManager = ({
   return (
     <div className="info-win">
       {/* Render visible markers */}
-      {predefinedMarkers.map((position, index) => 
-        visibleMarkers.includes(position) && (
-          <div  className=""
+      {predefinedMarkers.map((position, index) => {
+        console.log("positionnn",position)
+        console.log("sdsdsd",selectedMarker)
+        return (
+          visibleMarkerIndices.includes(index) && (
+            <div className=""
             key={index} 
             onMouseEnter={handleMarkerMouseEnter}
             onMouseLeave={handleMarkerMouseLeave}
-          >
+            >
             <AdvancedMarker
               position={position}
               className="drop-bounce-animation cursor-pointer"
               onClick={() => handleMarkerClick(position)}
-            >
-              <div
-                className={`drop-bounce-animation transition-transform duration-300 ${
-                  selectedMarker === position || hoveredMarker === position ? "scale-124" : "scale-100"
-                }`}
               >
+              <div
+                className={`drop-bounce-animation transition-transform duration-300`}
+                  >
                 <Pin 
-                  background={selectedMarker === position || hoveredMarker === position ? "#0000FF" : "#FF0000"}
+                  background={selectedMarker?.lat === position.lat && selectedMarker?.lng === position.lng && selectedMarker?.name === position.name  || hoveredMarker?.lat === position.lat && hoveredMarker?.lng === position.lng && hoveredMarker?.name === position.name ? "#0000FF" : "#FF0000"}
                   borderColor="#FFFFFF"
                   glyphColor="#FFFFFF"
                   glyph={(index + 1).toString()}
-                  scale={selectedMarker === position || hoveredMarker === position ? 1.5 : 1}
-                />
+                  scale={selectedMarker?.lat === position.lat && selectedMarker?.lng === position.lng && selectedMarker?.name === position.name  || hoveredMarker?.lat === position.lat && hoveredMarker?.lng === position.lng && hoveredMarker?.name === position.name? 1.5 : 1}
+                  />
               </div>
             </AdvancedMarker>
           </div>
         )
-      )}
+        )
+      })}
 
       {/* Info Window - positioned directly above marker */}
       {infoOpen && (
         <InfoWindow 
           position={getInfoWindowPosition(infoOpen)}
-          pixelOffset={[0, 160]} // Increase vertical offset to position higher above marker
+          pixelOffset={[0, 100]} // Increase vertical offset to position higher above marker
           onCloseClick={handleZoomOut}
           disableAutoPan={true} // Prevent automatic panning
           className=""
@@ -411,27 +436,82 @@ const MarkerManager = ({
             onMouseEnter={handlePopupMouseEnter}
             onMouseLeave={handlePopupMouseLeave}
           >
-            <img
-              src="./pexels-pixabay-533769.jpg"
-              alt="Location"
-              style={{
-                width: "100%",
-                height: "150px",
-                objectFit: "cover",
-                borderRadius: "5px 5px 0 0",
-                marginBottom: "0"
-              }}
-            />
+            <div style={{ position: "relative" ,  overflow: "hidden" , height: "100px"}}>
+              {/* Carousel container */}
+              {carouselImages.map((image, index) => (
+                <img
+                  key={index}
+                  src={image}
+                  alt={`Location ${index + 1}`}
+                  style={{
+                    width: "100%",
+                    height: "150px",
+                    objectFit: "cover",
+                    borderRadius: "5px 5px 0 0",
+                    marginBottom: "0",
+                    position: 'absolute', // Make images absolute positioned
+                    top: 0,
+                    left: 0,
+                    opacity: currentImageIndex === index ? 1 : 0,
+                    transition: "opacity 0.5s ease-in-out",
+                  }}
+                />
+              ))}
+              
+              {/* Left arrow */}
+              <div
+                onClick={handlePrevImage}
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "10px",
+                  transform: "translateY(-50%)",
+                  backgroundColor: "rgba(255, 255, 255, 0.7)",
+                  borderRadius: "50%",
+                  width: "30px",
+                  height: "30px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  opacity: isInfoWindowHovered ? 1 : 0,
+                  transition: "opacity 0.3s ease",
+                  zIndex: 10
+                }}
+              >
+                <span style={{ fontSize: "18px", fontWeight: "bold" }}>←</span>
+              </div>
+              
+              {/* Right arrow */}
+              <div
+                onClick={handleNextImage}
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  right: "10px",
+                  transform: "translateY(-50%)",
+                  backgroundColor: "rgba(255, 255, 255, 0.7)",
+                  borderRadius: "50%",
+                  width: "30px",
+                  height: "30px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  opacity: isInfoWindowHovered ? 1 : 0,
+                  transition: "opacity 0.3s ease",
+                  zIndex: 10
+                }}
+              >
+                <span style={{ fontSize: "18px", fontWeight: "bold" }}>→</span>
+              </div>
+            </div>
+            
             <div style={{ padding: "8px", marginTop: "0" }}>
               <h3 style={{ fontSize: "16px", fontWeight: "bold", margin: "3px 0" }}>
                 {infoOpen.name || "Location"}
               </h3>
-              <p style={{ fontSize: "14px", color: "#333", margin: "3px 0" }}>
-                🌍 Lat: {infoOpen.lat.toFixed(6)}
-              </p>
-              <p style={{ fontSize: "14px", color: "#333", margin: "3px 0" }}>
-                📏 Lng: {infoOpen.lng.toFixed(6)}
-              </p>
+              
             </div>
           </div>
         </InfoWindow>
