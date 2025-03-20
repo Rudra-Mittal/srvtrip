@@ -16,15 +16,21 @@ app.post('/scraper',async (req,res)=>{
     const {placeName,maxScrolls,placeId}=req.body;
     const review=await scrapeGoogleMapsReviews(placeName,maxScrolls);
     console.log(review)
-    const query=`You are an advanced AI trained to summarize user reviews with precision. 
-        Your task is to create a **120-word summary** strictly based **only on the given reviews**.
-        
-        **Rules:**
-        - Do **NOT** add any extra details or assumptions.
-        - The summary **must only include information found in the provided reviews**.
-        - Identify recurring themes, both positive and negative.
-        - Do **not** include generic opinions or external knowledge.
-        - Ensure the summary is **cohesive, engaging, and maintains a fluent structure**`;
+    const query = `You are an advanced AI trained to analyze and summarize user reviews with precision. 
+                Your task is to generate a **concise (around 100-120 words) review summary** and a **final rating** based strictly on the provided reviews.
+
+                **Instructions:**
+                - Extract key points from the reviews, identifying common themes (both positive and negative).
+                - Ensure the summary is **clear, engaging, and based only on the provided reviews**.
+                - Assign a **final rating (out of 5)** by averaging the ratings from all reviews.
+                - Do **NOT** include any assumptions, external knowledge, or generic opinions.
+                - Return the result in **JSON format** with two fields: 
+                - **summarizedReview**: A well-structured, precise summary of the reviews.
+                - **finalRating**: The calculated overall rating from the reviews.`;
+            summarizeReview(query,placeId).then(()=>{
+                res.json(summarizeReview)
+                return
+            })
         
     if(review.reviews.length>0) {
         insertData({...review,placeId}).then(()=>{
