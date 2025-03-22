@@ -13,6 +13,7 @@ export const ThreeDMarquee = ({
   const chunkSize = Math.ceil(images.length / 4);
   const chunks = Array.from({ length: 4 }, (_, colIndex) => {
     const start = colIndex * chunkSize;
+    console.log(images);
     return images.slice(start, start + chunkSize);
   });
   return (

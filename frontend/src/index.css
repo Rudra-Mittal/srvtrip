@@ -1,7 +1,7 @@
 @import "tailwindcss";
-@import "tw-animate-css";
+/* @import "tw-animate-css"; */
 
-@custom-variant dark (&:is(.dark *));
+/* @custom-variant dark (&:is(.dark *));
 
 :root {
   --radius: 0.625rem;
@@ -91,7 +91,7 @@
 }
 
 /* Gold color utility classes */
-.text-gold-300 { color: var(--gold-300); }
+/* .text-gold-300 { color: var(--gold-300); }
 .text-gold-400 { color: var(--gold-400); }
 .text-gold-500 { color: var(--gold-500); }
 .text-gold-900 { color: var(--gold-900); }
@@ -170,4 +170,4 @@
     opacity: 1;
     transform: translate(-50%, -40%) scale(1);
   }
-}
+} */
