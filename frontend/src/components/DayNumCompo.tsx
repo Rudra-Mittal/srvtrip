@@ -29,7 +29,7 @@ export const DayNumCompo = () => {
       };
     
     return (
-      <div className="space-y-3">
+      <div className="space-y-4 md:space-y-3">
         {/* Activities - Card style */}
         <div className="rounded-lg overflow-hidden border border-zinc-800 shadow-sm transform transition-all duration-300 hover:shadow-blue-900/30 hover:shadow-lg hover:-translate-y-1">
           <div className="px-3 py-2 flex items-center justify-between bg-black">
