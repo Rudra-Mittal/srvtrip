@@ -77,6 +77,7 @@ export function Globe({ globeConfig, data }: WorldProps) {
     if (!globeRef.current && groupRef.current) {
       globeRef.current = new ThreeGlobe();
       (groupRef.current as any).add(globeRef.current);
+      
       setIsInitialized(true);
     }
   }, []);
@@ -92,13 +93,15 @@ export function Globe({ globeConfig, data }: WorldProps) {
       shininess: number;
       transparent: boolean;
       opacity: number;
+      size: number;
     };
     globeMaterial.color = new Color(globeConfig.globeColor);
     globeMaterial.emissive = new Color(globeConfig.emissive);
     globeMaterial.emissiveIntensity = globeConfig.emissiveIntensity || 0.1;
     globeMaterial.shininess = globeConfig.shininess || 0.9;
     globeMaterial.transparent = true; // Enable transparency
-    globeMaterial.opacity = 0.7; //
+    globeMaterial.opacity = 1; //
+    globeMaterial.size = 50;
   }, [
     isInitialized,
     globeConfig.globeColor,
@@ -214,7 +217,7 @@ export function Globe({ globeConfig, data }: WorldProps) {
     };
   }, [isInitialized, data]);
 
-  return <group ref={groupRef} />;
+  return <group ref={groupRef} scale={[1, 1, 1]} />;
 }
 
 export function WebGLRendererConfig() {
