@@ -77,7 +77,6 @@ app.post('/api/itenary', async(req,res)=>{
     for(const day of placesData){
         const dayId= await createDay(dayNum,itenaryid,newItenary);
         for(const place of day){
-            // check if it exist in db by comparing with place id
             const placeId=await checkPlace(place);
             if(placeId.id){
                 console.log("Place already exist in db")
@@ -85,13 +84,11 @@ app.post('/api/itenary', async(req,res)=>{
                 if(!id){
                     console.log("Error connecting place")
                 }
-                //replace the place object with only place id in placesData
             }
             else  {
                 //call the photos api
                 const placePhotos=await Promise.all((place.photos?.map((reference:string)=>getPhotoUri(reference))));
-                //replace the photos ref url with actual url in place object
-                place.photos=placePhotos;
+             
                 const placeD= createPlace(place,dayId,placePhotos);
                 if(!placeD){
                     console.log("Error creating place")
@@ -116,10 +113,8 @@ app.post('/api/itenary', async(req,res)=>{
             //         })
             //     }
             // }))) 
-    }
-    //   save all the data in db using saveItinerary function
-      
-    // const response=await saveItenary(newItenary,placesData,userId);//last arg is userid
+    } 
+
     res.send(newItenary);
     return 
 })
