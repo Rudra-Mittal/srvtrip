@@ -18,7 +18,7 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          {/* <Route path="/" element={<LandingPage />} />  */}
+          <Route path="/" element={<Loader />} /> 
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/signin" element={<SigninPage/>} />
           <Route path="/day/:daynumber" element={<DayNumPage/>} />
