@@ -7,6 +7,7 @@ import Middle from './components/middlepage'
 import { Globe } from './ui/globe'
 import { GlobeDemo } from './components/globeDemo'
 
+
 function App() {
 
   return (
