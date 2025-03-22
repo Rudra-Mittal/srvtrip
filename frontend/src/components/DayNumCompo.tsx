@@ -18,7 +18,7 @@ export const DayNumCompo = () => {
   // Function to render the section content
   const renderSectionContent = (section: string, data: { activities: any; food: any; transport: any; cost: any; }) => {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         
         {/* Activities */}
         <div>
