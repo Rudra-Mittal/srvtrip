@@ -7,10 +7,18 @@ import { extractPlacesByRegex } from './AIController2/services/extractPlacesbyRe
 import { convertItineraryToPara } from './AIController2/services/convertItineraryToPara';
 import callWebScrapper from './controllers/callWebScrapper';
 import checkPlaceInDb from './controllers/checkPlaceInDb';
-import { saveItenary } from './utils/saveItenary';
+// import { saveItenary } from './utils/saveItenary';
 import { place, placesData } from './utils/types';
 import signup from './controllers/auth/signup';
 import { signin } from './controllers/auth/signin';
+import insertPlace from './controllers/checkPlaceInDb';
+import { Prisma, PrismaClient } from '@prisma/client';
+import saveItenary from './utils/createItenary';
+import checkPlace from './controllers/checkPlaceInDb';
+import connectPlace from './utils/connectPlace';
+import createPlace from './utils/createPlace';
+import createItenary from './utils/createItenary';
+import createDay from './utils/createDay';
 
 const app = express();
 const PORT = 4000;
@@ -52,64 +60,62 @@ app.post('/api/itenary', async(req,res)=>{
     // const itenary=await generate(prompt)
     const itenary=await generate2(prompt)
 
-    // extracting places
-
     const allDayPlaces=  extractPlacesByRegex(itenary)//get the 2d array of places (daywise places)
-    // getting places info
     
     const placesData= await Promise.all(
         allDayPlaces.map((dayPlaces, index) => 
             Promise.all(dayPlaces.map((place) => placeInfo(place, index + 1)))
         )
     ) as placesData;
-    // check if the place Exist in db if no make a call to photos API and a scrapper API to get the place reviews
-
+    let dayNum=0
+    const newItenary =replacePlace(itenary,placesData)
+    const itenaryid= await createItenary(newItenary,userId);
+    if(!itenaryid)  {
+        res.status(403).json({"error":"User not found"});
+        return
+    }
     for(const day of placesData){
+        const dayId= await createDay(dayNum,itenaryid,newItenary);
         for(const place of day){
-
-                // check if it exist in db by comparing with place id
-                const checkPlace=await checkPlaceInDb(place.id);
-                if(checkPlace){
-                    //replace the place object with only place id in placesData
-                    place.new=false;
-                }
-                else{
-                    //call the photos api
-                    const placePhotos=await Promise.all((place.photos?.map((reference:string)=>getPhotoUri(reference))));
-                    //replace the photos ref url with actual url in place object
-                    place.photos=placePhotos;
-
-                    // make call to web scrapper and get summarized review
+            const placeId=await checkPlace(place);
+            if(placeId.id){
+                console.log("Place already exist in db")
+                const id= connectPlace(placeId.id,dayId);
+                if(!id){
+                    console.log("Error connecting place")
                 }
             }
-            await Promise.all((day.map((place:place)=>{
-                if(place.new){
-                    return callWebScrapper(place.displayName,5,place.id)
-                    .then((res:any)=>{
-                        place.summarizedReview=res.summarizedReview;
-                    }).catch((err)=>{
-                        console.log(err)
-                        callWebScrapper(place.displayName+' , '+place.formattedAddress,5,place.id).then((res:any)=>{
-                            place.summarizedReview=res.summarizedReview;
-                        }).catch((err)=>{
-                            console.log(err)
-                            place.summarizedReview="No reviews found";
-                        })
-                    })
+            else  {
+                //call the photos api
+                const placePhotos=await Promise.all((place.photos?.map((reference:string)=>getPhotoUri(reference))));
+             
+                const placeD= createPlace(place,dayId,placePhotos);
+                if(!placeD){
+                    console.log("Error creating place")
                 }
-            }))) 
-    }
-    //   save all the data in db using saveItinerary function
-      const newItenary =replacePlace(itenary,placesData)
-    const response=saveItenary(newItenary,placesData,userId);//last arg is userid
+            }
+            // make call to web scrapper and get summarized review
+            }
+            dayNum++;
+            // await Promise.all((day.map((place:place)=>{
+            //     if(!place.exist){
+            //         return callWebScrapper(place.displayName,5,place.id)
+            //         .then((res:any)=>{
+            //             place.summarizedReview=res.summarizedReview;
+            //         }).catch((err)=>{
+            //             console.log(err)
+            //             callWebScrapper(place.displayName+' , '+place.formattedAddress,5,place.id).then((res:any)=>{
+            //                 place.summarizedReview=res.summarizedReview;
+            //             }).catch((err)=>{
+            //                 console.log(err)
+            //                 place.summarizedReview="No reviews found";
+            //             })
+            //         })
+            //     }
+            // }))) 
+    } 
 
-    // for(const place of placeData){
-    //     console.log(place);
-    // }
-    console.log(response)
-    // insert display name into jsonItenary
-    // convert the json into text via AI
-    res.send(response);
+    res.send(newItenary);
     return 
 })
 

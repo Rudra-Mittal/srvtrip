@@ -4,6 +4,10 @@ import LandingPage from './pages/LandingPage'
 import SignupPage from './pages/SignupPage'
 import SigninPage from './pages/SigninPage'
 import { DayNumPage } from './pages/DayNumPage'
+import Middle from './components/middlepage'
+import { Globe } from './ui/globe'
+import { GlobeDemo } from './components/globeDemo'
+
 
 function App() {
 
@@ -15,6 +19,7 @@ function App() {
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/signin" element={<SigninPage/>} />
           <Route path="/day/:daynumber" element={<DayNumPage/>} />
+          <Route path="/middle" element= {<Middle/>}/>
         </Routes>
       
       </BrowserRouter>

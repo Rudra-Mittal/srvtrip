@@ -41,6 +41,7 @@ model Day {
   places          Place[]
   itineraryId     String
   itinerary       Itinerary @relation(fields: [itineraryId], references: [id])
+  @@unique([dayNumber, itineraryId])
 }
 
 model Place {
