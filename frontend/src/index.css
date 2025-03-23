@@ -187,6 +187,21 @@
   }
 }
 
+@keyframes spotlight-vertical {
+  0% {
+    opacity: 0;
+    transform: translateY(-100%) scale(0.6, 0.2);
+  }
+  30% {
+    opacity: 0.6;
+    transform: translateY(-50%) scale(0.8, 0.6);
+  }
+  100% {
+    opacity: 0.9;
+    transform: translateY(0%) scale(1, 1);
+  }
+}
+
 /* Add new keyframes for spotlight-x effect */
 @keyframes spotlight-left {
   0% {

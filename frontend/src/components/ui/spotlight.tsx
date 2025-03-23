@@ -31,48 +31,36 @@ export const Spotlight = ({
 
   return (
     <svg
-      className={cn(
-        "animate-spotlight pointer-events-none absolute z-[1]  h-[169%] w-[138%] lg:w-[84%] opacity-100",
-        className
-      )}
+      className={className}
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 3787 2842"
-      fill="none"
+      viewBox="0 0 100 100"
+      width="600"
+      height="600"
     >
-      <g filter="url(#filter)">
-        <ellipse
-          cx="1924.71"
-          cy="273.501"
-          rx="1924.71"
-          ry="273.501"
-          transform={getTransform()}
-          fill={fill || "white"}
-          fillOpacity="0.30"
-        ></ellipse>
-      </g>
       <defs>
-        <filter
-          id="filter"
-          x="0.860352"
-          y="0.838989"
-          width="5000.16"
-          height="2090.26"
-          filterUnits="userSpaceOnUse"
-          colorInterpolationFilters="sRGB"
-        >
-          <feFlood floodOpacity="0" result="BackgroundImageFix"></feFlood>
-          <feBlend
-            mode="normal"
-            in="SourceGraphic"
-            in2="BackgroundImageFix"
-            result="shape"
-          ></feBlend>
-          <feGaussianBlur
-            stdDeviation="151"
-            result="effect1_foregroundBlur_1065_8"
-          ></feGaussianBlur>
+        <radialGradient id="spotlightGradient" cx="50%" cy="30%" r="70%" fx="50%" fy="30%">
+          <stop offset="0%" stopColor="white" stopOpacity="1" />
+          <stop offset="60%" stopColor="white" stopOpacity="0.6" />
+          <stop offset="100%" stopColor="white" stopOpacity="0" />
+        </radialGradient>
+        
+        <filter id="blurFilter">
+          <feGaussianBlur stdDeviation="2.5" />
         </filter>
       </defs>
+    
+      <path
+        d="M50 10 
+           C47 20, 42 25, 35 35
+           C28 45, 20 55, 15 70
+           C25 85, 35 90, 50 90
+           C65 90, 75 85, 85 70
+           C80 55, 72 45, 65 35
+           C58 25, 53 20, 50 10"
+        fill="url(#spotlightGradient)"
+        filter="url(#blurFilter)"
+        opacity="0.35"
+      />
     </svg>
   );
 };
