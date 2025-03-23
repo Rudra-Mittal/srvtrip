@@ -5,7 +5,7 @@ import SignupPage from './pages/SignupPage'
 import SigninPage from './pages/SigninPage'
 import { DayNumPage } from './pages/DayNumPage'
 import Middle from './components/middlepage'
-import { Globe } from './ui/globe'
+import { Globe } from './components/ui/globe'
 import { GlobeDemo } from './components/globeDemo'
 
 
