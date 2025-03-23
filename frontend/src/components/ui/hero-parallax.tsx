@@ -9,6 +9,7 @@ import {
   MotionValue,
 } from "motion/react";
 import { Spotlight } from "./spotlight";
+import { Spotlightb } from "./spotlightb";
 const words=["Extraordinary", "Stunning", "Unforgettable", "Next-Gen"];
 
 export const HeroParallax = ({
@@ -196,53 +197,47 @@ export const HeroParallax = ({
 export const Header = ({ spotlightActive = false, textVisible = false }) => {
   return (
     <div className="absolute top-0 left-0 w-full z-20 flex flex-col justify-center items-center py-10 sm:py-16 md:py-20 pointer-events-none">
-      {/* First spotlight - adjusted to better target SrvTrip on mobile */}
-      {spotlightActive && (
-        <>
-          <Spotlight
-            className="animate-[spotlight-left_4s_ease_0.0s_forwards] top-[5%] -left-10 xs:top-[7%] xs:-left-16 sm:-top-30 sm:-left-30 md:-top-40 md:-left-40 
-                       absolute translate-x-[15%] xs:translate-x-[20%] sm:translate-x-10 translate-y-[5%] xs:translate-y-[10%] sm:translate-y-0"
-            fill="rgb(255, 255, 255)"
-            direction="top-left"
-          />
-          <Spotlight
-            className="animate-[spotlight-right_4s_ease_0.0s_forwards] top-[5%] -right-10 xs:top-[7%] xs:-right-16 sm:-top-30 sm:-right-30 md:-top-40 md:-right-40 
-                       absolute translate-x-[-15%] xs:translate-x-[-20%] sm:translate-x-0"
-            fill="rgb(255, 255, 255)"
-            direction="top-right"
-          />
-        </>
-      )}
-    
-      {/* Text container with better spacing for mobile */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: textVisible ? 1 : 0 }}
-        transition={{ duration: 1.5 }}
-        className="translate-y-[2rem] xs:translate-y-[2.5rem] sm:translate-y-[4rem] md:translate-y-[6rem] relative z-30 px-4 sm:px-6 md:px-0"
-      >
-        <div className="mb-4 sm:mb-6 md:mb-8 text-3xl font-bold tracking-tight sm:text-5xl md:text-6xl justify-center items-center text-center">
-          {/* Larger SrvTrip text with animated gradient */}
-          <motion.div 
-            className="text-transparent bg-clip-text"
-            animate={{ 
-              backgroundImage: [
-                "linear-gradient(to right, #3b82f6, #6366f1, #a855f7)",
-                "linear-gradient(to right, #8b5cf6, #3b82f6, #06b6d4)",
-                "linear-gradient(to right, #6366f1, #a855f7, #ec4899)",
-                "linear-gradient(to right, #3b82f6, #6366f1, #a855f7)"
-              ]
-            }}
-            transition={{ 
-              duration: 10, 
-              repeat: Infinity,
-              repeatType: "mirror" 
-            }}
-          >
-            <span className="text-5xl xs:text-6xl sm:text-7xl md:text-8xl">
-              SrvTrip
-            </span>
-          </motion.div>
+    {/* Center spotlight with vertical animation */}
+    {spotlightActive && (
+      <>
+        <Spotlight
+          className="animate-[spotlight-vertical_4s_ease_0.0s_forwards] absolute top-[-15%] inset-x-0 mx-auto 
+                    sm:top-[-25%] md:top-[-30%] w-[600px] h-[600px] sm:w-[800px] sm:h-[800px]"
+          fill="rgb(255, 255, 255)"
+        />
+      </>
+    )}
+  
+    {/* Text container with better spacing for mobile */}
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: textVisible ? 1 : 0 }}
+      transition={{ duration: 1.5 }}
+      className="translate-y-[2rem] xs:translate-y-[2.5rem] sm:translate-y-[4rem] md:translate-y-[6rem] relative z-30 px-4 sm:px-6 md:px-0"
+    >
+      {/* The rest of your Header content remains the same */}
+      <div className="mb-4 sm:mb-6 md:mb-8 text-3xl font-bold tracking-tight sm:text-5xl md:text-6xl justify-center items-center text-center">
+        {/* Larger SrvTrip text with animated gradient */}
+        <motion.div 
+          className="text-transparent bg-clip-text"
+          animate={{ 
+            backgroundImage: [
+              "linear-gradient(to right, #3b82f6, #6366f1, #a855f7)",
+              "linear-gradient(to right, #8b5cf6, #3b82f6, #06b6d4)",
+              "linear-gradient(to right, #6366f1, #a855f7, #ec4899)",
+              "linear-gradient(to right, #3b82f6, #6366f1, #a855f7)"
+            ]
+          }}
+          transition={{ 
+            duration: 10, 
+            repeat: Infinity,
+            repeatType: "mirror" 
+          }}
+        >
+          <span className="text-5xl xs:text-6xl sm:text-7xl md:text-8xl">
+            SrvTrip
+          </span>
+        </motion.div>
           
           {/* Insert the component here */}
           <div className="h-[15rem] flex flex-col justify-center items-center px-4 mt-4">
