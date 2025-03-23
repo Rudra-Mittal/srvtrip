@@ -56,7 +56,7 @@ export const Spotlight = ({
           x="0.860352"
           y="0.838989"
           width="5000.16"
-          height="2040.26"
+          height="2090.26"
           filterUnits="userSpaceOnUse"
           colorInterpolationFilters="sRGB"
         >
