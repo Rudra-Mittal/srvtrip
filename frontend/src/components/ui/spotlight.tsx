@@ -4,13 +4,35 @@ import { cn } from "@/lib/utils";
 type SpotlightProps = {
   className?: string;
   fill?: string;
+  direction?: "top-left" | "top-right" | "bottom-left" | "bottom-right";
 };
 
-export const Spotlight = ({ className, fill }: SpotlightProps) => {
+export const Spotlight = ({ 
+  className, 
+  fill, 
+  direction = "top-left" 
+}: SpotlightProps) => {
+  
+  // This determines the transform matrix based on the desired direction
+  const getTransform = () => {
+    switch (direction) {
+      case "top-left": // diagonal from top-left to bottom-right
+        return "matrix(-0.822377 -0.568943 -0.568943 0.822377 3631.88 2291.09)";
+      case "top-right": // diagonal from top-right to bottom-left
+        return "matrix(0.822377 -0.568943 0.568943 0.822377 155.12 2291.09)";
+      case "bottom-left": // diagonal from bottom-left to top-right
+        return "matrix(-0.822377 0.568943 -0.568943 -0.822377 3631.88 550.91)";
+      case "bottom-right": // diagonal from bottom-right to top-left
+        return "matrix(0.822377 0.568943 0.568943 -0.822377 155.12 550.91)";
+      default:
+        return "matrix(-0.822377 -0.568943 -0.568943 0.822377 3631.88 2291.09)";
+    }
+  };
+
   return (
     <svg
       className={cn(
-        "animate-spotlight pointer-events-none absolute z-[1]  h-[169%] w-[138%] lg:w-[84%] opacity-0",
+        " pointer-events-none absolute z-[1] h-[100%] w-[120%] lg:w-[110%]",
         className
       )}
       xmlns="http://www.w3.org/2000/svg"
@@ -23,9 +45,9 @@ export const Spotlight = ({ className, fill }: SpotlightProps) => {
           cy="273.501"
           rx="1924.71"
           ry="273.501"
-          transform="matrix(-0.822377 -0.568943 -0.568943 0.822377 3631.88 2291.09)"
+          transform={getTransform()}
           fill={fill || "white"}
-          fillOpacity="0.21"
+          fillOpacity="0.30"
         ></ellipse>
       </g>
       <defs>
@@ -33,8 +55,8 @@ export const Spotlight = ({ className, fill }: SpotlightProps) => {
           id="filter"
           x="0.860352"
           y="0.838989"
-          width="3785.16"
-          height="2840.26"
+          width="5000.16"
+          height="2040.26"
           filterUnits="userSpaceOnUse"
           colorInterpolationFilters="sRGB"
         >

@@ -1,5 +1,8 @@
 "use client";
 import React from "react";
+import { FlipWords } from "./flip-words";
+import { TextGenerateEffect } from "./text-generate-effect";
+import { HoverBorderGradient } from "./hover-border-gradient";
 import {
   motion,
   useScroll,
@@ -7,6 +10,7 @@ import {
   useSpring,
   MotionValue,
 } from "motion/react";
+import { Spotlight } from "./spotlight";
 
 export const HeroParallax = ({
   products,
@@ -67,7 +71,7 @@ export const HeroParallax = ({
         }}
         className=""
       >
-        <motion.div className="flex flex-row-reverse space-x-reverse space-x-20 mb-20">
+        <motion.div className="flex flex-row-reverse space-x-reverse space-x-20 mb-20 opacity-50">
           {firstRow.map((product) => (
             <ProductCard
               product={product}
@@ -76,7 +80,7 @@ export const HeroParallax = ({
             />
           ))}
         </motion.div>
-        <motion.div className="flex flex-row  mb-20 space-x-20 ">
+        <motion.div className="flex flex-row  mb-20 space-x-20 opacity-50">
           {secondRow.map((product) => (
             <ProductCard
               product={product}
@@ -85,7 +89,7 @@ export const HeroParallax = ({
             />
           ))}
         </motion.div>
-        <motion.div className="flex flex-row-reverse space-x-reverse space-x-20">
+        <motion.div className="flex flex-row-reverse space-x-reverse space-x-20 opacity-50">
           {thirdRow.map((product) => (
             <ProductCard
               product={product}
@@ -101,19 +105,83 @@ export const HeroParallax = ({
 
 export const Header = () => {
   return (
-    <div className="max-w-7xl relative mx-auto py-20 md:py-40 px-4 w-full  left-0 top-0">
-      <h1 className="text-2xl md:text-7xl font-bold dark:text-white">
-        The Ultimate <br /> development studio
-      </h1>
-      <p className="max-w-2xl text-base md:text-xl mt-8 dark:text-neutral-200">
-        We build beautiful products with the latest technologies and frameworks.
-        We are a team of passionate developers and designers that love to build
-        amazing products.
-      </p>
+    <div className="absolute top-0 left-0 w-full z-20 flex flex-col justify-center items-center py-20">
+      {/* First spotlight - top left to bottom right */}
+      <Spotlight
+        className="animate-[spotlight-left_4s_ease_0.0s_forwards] -top-40 left-0 md:left-0 md:-top-20 -translate-x-[10rem]"
+        fill="rgb(255, 255, 255)"
+        direction="top-left"
+      />
+
+      {/* Second spotlight - top right to bottom left */}
+      <Spotlight
+        className="animate-[spotlight-right_4s_ease_0.0s_forwards] -top-40 right-0 md:right-0 md:-top-20 translate-x-[10rem]"
+        fill="rgb(255, 255, 255)"
+        direction="top-right"
+      />
+    
+      {/* Text container with initial opacity 0 and animated entrance */}
+      <motion.div 
+        initial={{ opacity: 0.2 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 2, delay: 1.2, ease: "easeInOut" }}
+        className="translate-y-[8rem] relative z-30"
+      >
+        <div className="mb-8 text-6xl font-bold tracking-tight sm:text-7xl md:text-8xl justify-center items-center text-center">
+          <TextGenerateEffect
+            words="SrvTrip"
+            className="bg-gradient-to-b from-blue-200 to-blue-600 bg-clip-text text-transparent text-xl"
+          />
+          <div className="my-4 justify-center items-center text-center ">
+            <FlipWords
+              words={["Extraordinary", "Stunning", "Unforgettable", "Next-Gen"]}
+              duration={2500}
+              className="bg-gradient-to-r from-violet-400 to-indigo-600 bg-clip-text py-2 text-transparent"
+            />
+          </div>
+          <TextGenerateEffect
+            words="Travel Itineraries with AI"
+            className="bg-gradient-to-b from-blue-200 to-blue-600 bg-clip-text text-transparent "
+          />
+        </div>
+        
+        {/* Subtitle with separate entrance animation */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.5, delay: 1.8 }}
+          className="mx-auto mb-10 max-w-2xl text-lg text-neutral-300 sm:text-xl md:text-2xl "
+        >
+          Experience the future of travel planning powered by cutting-edge artificial intelligence
+        </motion.p>
+
+        {/* CTAs with final entrance animation */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 2.2 }}
+          className="flex flex-col items-center justify-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0 "
+        >
+          <HoverBorderGradient
+            as="button"
+            className="bg-black px-8 py-3 text-lg font-medium text-white transition-all duration-300 hover:scale-105"
+            containerClassName="rounded-full"
+          >
+            Get Started
+          </HoverBorderGradient>
+          
+          <HoverBorderGradient
+            as="button"
+            className="bg-black px-8 py-3 text-lg font-medium text-blue-300 transition-all duration-300 hover:scale-105"
+            containerClassName="rounded-full"
+          >
+            Explore Destinations
+          </HoverBorderGradient>
+        </motion.div>
+      </motion.div>
     </div>
   );
 };
-
 export const ProductCard = ({
   product,
   translate,
@@ -136,7 +204,7 @@ export const ProductCard = ({
       key={product.title}
       className="group/product h-96 w-[30rem] relative shrink-0"
     >
-      
+     
         <img
           src={product.thumbnail}
           height="600"
@@ -144,6 +212,7 @@ export const ProductCard = ({
           className="object-cover object-left-top absolute h-full w-full inset-0"
           alt={product.title}
         />
+      
       <div className="absolute inset-0 h-full w-full opacity-0 group-hover/product:opacity-80 bg-black pointer-events-none"></div>
       <h2 className="absolute bottom-4 left-4 opacity-0 group-hover/product:opacity-100 text-white">
         {product.title}
