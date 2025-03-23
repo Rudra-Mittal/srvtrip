@@ -5,11 +5,9 @@ import SignupPage from './pages/SignupPage'
 import SigninPage from './pages/SigninPage'
 import { DayNumPage } from './pages/DayNumPage'
 import Middle from './components/middlepage'
-import { Globe } from './components/ui/globe'
-import { GlobeDemo } from './components/globeDemo'
-import Loader from './components/Loader'
+import Loader from './pages/loader'
 import Features from './components/Features'
-// import Features2 from './components/Features2'
+import LandingPage from './pages/LandingPage'
 
 
 function App() {
