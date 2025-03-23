@@ -7,7 +7,6 @@ import {
   useMotionValueEvent,
 } from "motion/react";
 import { cn } from "@/lib/utils";
-// import Link from "next/link";
 
 export const FloatingNav = ({
   navItems,
