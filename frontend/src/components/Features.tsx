@@ -1,18 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
-import {
-  MapPin,
-  Calendar,
-  DollarSign,
-  Users,
-  Star,
-  Clock,
-  ArrowRight,
-  Heart,
-  TrendingUp,
-  ChevronRight,
-  ExternalLink
-} from "lucide-react";
+import {ArrowRight} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Import Aceternity UI components
@@ -28,168 +16,20 @@ import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MacbookScroll } from "@/components/ui/macbook-scroll";
-import { Button } from "./ui/moving-border";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SparklesCore } from "@/components/ui/sparkles";
-import { Spotlight } from "@/components/ui/spotlight";
-import { TextGenerateEffect } from "@/components/ui/text-generate-effect"; 
 import { TextRevealCard } from "@/components/ui/text-reveal-card";
 import { ThreeDMarquee } from "@/components/ui/3d-marquee";
 // import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
 import { Timeline } from "./ui/timeline";
 import { FlipWords } from "@/components/ui/flip-words";
-import { InfiniteMovingCards } from "@/components/ui/infinite-moving-cards";
+import { FaCommentDots } from "react-icons/fa";
+import { popularDestinations } from "@/MockPlacesData";
+import { TypewriterEffect } from "./ui/typewriter-effect";
+import { itineraryData } from "@/sample_itineraryData";
+import Reviews from "./reviews";
+import { Textarea } from "./ui/textarea";
+import { Link } from "react-router-dom";
 
-// Mock data for itinerary
-const itineraryData = [
-  {
-    day: 1,
-    location: "Paris",
-    title: "Iconic Landmarks & Cultural Immersion",
-    image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=2073&auto=format&fit=crop",
-    description: "Begin your Paris adventure with the city's most iconic landmarks.",
-    activities: [
-      { time: "09:00", title: "Eiffel Tower", type: "Must-Visit | Landmark", description: "Beat the crowds with an early morning visit to the Eiffel Tower. Pro tip: Book skip-the-line tickets in advance." },
-      { time: "12:30", title: "Lunch at Café de Flore", type: "Authentic | Cuisine", description: "Experience a quintessential Parisian café with excellent pastries and people watching." },
-      { time: "14:30", title: "Louvre Museum", type: "Cultural | Historical", description: "Explore the world's largest art museum, home to thousands of works including the Mona Lisa." },
-      { time: "18:00", title: "Seine River Sunset Cruise", type: "Scenic | Romantic", description: "See Paris from the water during golden hour for spectacular views of major landmarks." }
-    ]
-  },
-  {
-    day: 2,
-    location: "Paris",
-    title: "Hidden Gems & Local Experiences",
-    image: "https://images.unsplash.com/photo-1551887196-9b6c26118711?q=80&w=2029&auto=format&fit=crop",
-    description: "Discover Paris beyond the tourist track with these local favorites.",
-    activities: [
-      { time: "10:00", title: "Montmartre Walking Tour", type: "Local | Artistic", description: "Wander through the charming streets and visit Sacré-Cœur Basilica for panoramic city views." },
-      { time: "13:00", title: "Le Petit Marché", type: "Hidden Gem | Cuisine", description: "Enjoy lunch at this local favorite known for authentic French cuisine at reasonable prices." },
-      { time: "15:00", title: "Centre Pompidou", type: "Modern | Cultural", description: "Explore Europe's largest modern art museum housed in an architectural marvel." },
-      { time: "18:00", title: "Le Marais District", type: "Trending | Shopping", description: "Discover fashion boutiques, art galleries and trendy bars in this historic district." }
-    ]
-  },
-  {
-    day: 3,
-    location: "Paris",
-    title: "Royal Experience & Parisian Luxury",
-    image: "https://images.unsplash.com/photo-1568700942090-19dc36fab0c4?q=80&w=1974&auto=format&fit=crop",
-    description: "Experience the grandeur of French royalty and luxury.",
-    activities: [
-      { time: "09:00", title: "Palace of Versailles", type: "Historical | Majestic", description: "Explore the opulent royal palace and its magnificent gardens, a UNESCO World Heritage site." },
-      { time: "14:00", title: "Angelina Paris", type: "Luxury | Cuisine", description: "Indulge in Paris' most famous hot chocolate and pastries at this historic tearoom." },
-      { time: "16:00", title: "Galeries Lafayette", type: "Shopping | Architectural", description: "Visit the iconic department store with its stunning stained-glass dome and rooftop views." },
-      { time: "19:30", title: "Dinner at Le Jules Verne", type: "Fine Dining | Experience", description: "Enjoy Michelin-starred cuisine inside the Eiffel Tower with panoramic views of Paris." }
-    ]
-  }
-];
-
-// Mock data for popular destinations
-const popularDestinations = [
-  { id: 1, name: "Paris", country: "France", image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=2073&auto=format&fit=crop" },
-  { id: 2, name: "Tokyo", country: "Japan", image: "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?q=80&w=1974&auto=format&fit=crop" },
-  { id: 3, name: "New York", country: "USA", image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=2070&auto=format&fit=crop" },
-  { id: 4, name: "Rome", country: "Italy", image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?q=80&w=1996&auto=format&fit=crop" },
-  { id: 5, name: "Kyoto", country: "Japan", image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2070&auto=format&fit=crop" },
-  { id: 6, name: "Barcelona", country: "Spain", image: "https://images.unsplash.com/photo-1583422409516-2895a77efded?q=80&w=2070&auto=format&fit=crop" },
-  { id: 7, name: "Santorini", country: "Greece", image: "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?q=80&w=2002&auto=format&fit=crop" },
-  { id: 8, name: "Bali", country: "Indonesia", image: "https://images.unsplash.com/photo-1551621053-40c35aab4fff?q=80&w=2070&auto=format&fit=crop" },
-  { id: 1, name: "Paris", country: "France", image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=2073&auto=format&fit=crop" },
-  { id: 2, name: "Tokyo", country: "Japan", image: "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?q=80&w=1974&auto=format&fit=crop" },
-  { id: 3, name: "New York", country: "USA", image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=2070&auto=format&fit=crop" },
-  { id: 4, name: "Rome", country: "Italy", image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?q=80&w=1996&auto=format&fit=crop" },
-  { id: 5, name: "Kyoto", country: "Japan", image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2070&auto=format&fit=crop" },
-  { id: 6, name: "Barcelona", country: "Spain", image: "https://images.unsplash.com/photo-1583422409516-2895a77efded?q=80&w=2070&auto=format&fit=crop" },
-  { id: 7, name: "Santorini", country: "Greece", image: "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?q=80&w=2002&auto=format&fit=crop" },
-  { id: 8, name: "Bali", country: "Indonesia", image: "https://images.unsplash.com/photo-1551621053-40c35aab4fff?q=80&w=2070&auto=format&fit=crop" },
-  { id: 1, name: "Paris", country: "France", image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=2073&auto=format&fit=crop" },
-  { id: 2, name: "Tokyo", country: "Japan", image: "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?q=80&w=1974&auto=format&fit=crop" },
-  { id: 3, name: "New York", country: "USA", image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=2070&auto=format&fit=crop" },
-  { id: 4, name: "Rome", country: "Italy", image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?q=80&w=1996&auto=format&fit=crop" },
-  { id: 5, name: "Kyoto", country: "Japan", image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2070&auto=format&fit=crop" },
-  { id: 6, name: "Barcelona", country: "Spain", image: "https://images.unsplash.com/photo-1583422409516-2895a77efded?q=80&w=2070&auto=format&fit=crop" },
-  { id: 7, name: "Santorini", country: "Greece", image: "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?q=80&w=2002&auto=format&fit=crop" },
-  { id: 8, name: "Bali", country: "Indonesia", image: "https://images.unsplash.com/photo-1551621053-40c35aab4fff?q=80&w=2070&auto=format&fit=crop" },
-  { id: 1, name: "Paris", country: "France", image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=2073&auto=format&fit=crop" },
-  { id: 2, name: "Tokyo", country: "Japan", image: "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?q=80&w=1974&auto=format&fit=crop" },
-  { id: 3, name: "New York", country: "USA", image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=2070&auto=format&fit=crop" },
-  { id: 4, name: "Rome", country: "Italy", image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?q=80&w=1996&auto=format&fit=crop" },
-  { id: 5, name: "Kyoto", country: "Japan", image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2070&auto=format&fit=crop" },
-  { id: 6, name: "Barcelona", country: "Spain", image: "https://images.unsplash.com/photo-1583422409516-2895a77efded?q=80&w=2070&auto=format&fit=crop" },
-  { id: 7, name: "Santorini", country: "Greece", image: "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?q=80&w=2002&auto=format&fit=crop" },
-  { id: 8, name: "Bali", country: "Indonesia", image: "https://images.unsplash.com/photo-1551621053-40c35aab4fff?q=80&w=2070&auto=format&fit=crop" },
-];
-
-const images = [
-  "https://assets.aceternity.com/cloudinary_bkp/3d-card.png",
-  "https://assets.aceternity.com/animated-modal.png",
-  "https://assets.aceternity.com/animated-testimonials.webp",
-  "https://assets.aceternity.com/cloudinary_bkp/Tooltip_luwy44.png",
-  "https://assets.aceternity.com/github-globe.png",
-  "https://assets.aceternity.com/glare-card.png",
-  "https://assets.aceternity.com/layout-grid.png",
-  "https://assets.aceternity.com/flip-text.png",
-  "https://assets.aceternity.com/hero-highlight.png",
-  "https://assets.aceternity.com/carousel.webp",
-  "https://assets.aceternity.com/placeholders-and-vanish-input.png",
-  "https://assets.aceternity.com/shooting-stars-and-stars-background.png",
-  "https://assets.aceternity.com/signup-form.png",
-  "https://assets.aceternity.com/cloudinary_bkp/stars_sxle3d.png",
-  "https://assets.aceternity.com/spotlight-new.webp",
-  "https://assets.aceternity.com/cloudinary_bkp/Spotlight_ar5jpr.png",
-  "https://assets.aceternity.com/cloudinary_bkp/Parallax_Scroll_pzlatw_anfkh7.png",
-  "https://assets.aceternity.com/tabs.png",
-  "https://assets.aceternity.com/cloudinary_bkp/Tracing_Beam_npujte.png",
-  "https://assets.aceternity.com/cloudinary_bkp/typewriter-effect.png",
-  "https://assets.aceternity.com/glowing-effect.webp",
-  "https://assets.aceternity.com/hover-border-gradient.png",
-  "https://assets.aceternity.com/cloudinary_bkp/Infinite_Moving_Cards_evhzur.png",
-  "https://assets.aceternity.com/cloudinary_bkp/Lamp_hlq3ln.png",
-  "https://assets.aceternity.com/macbook-scroll.png",
-  "https://assets.aceternity.com/cloudinary_bkp/Meteors_fye3ys.png",
-  "https://assets.aceternity.com/cloudinary_bkp/Moving_Border_yn78lv.png",
-  "https://assets.aceternity.com/multi-step-loader.png",
-  "https://assets.aceternity.com/vortex.png",
-  "https://assets.aceternity.com/wobble-card.png",
-  "https://assets.aceternity.com/world-map.webp",
-];
-
-// Mock data for map locations
-const mapLocations = [
-  { id: 1, name: "Eiffel Tower", lat: 48.8584, lng: 2.2945, type: "Landmark | Must-Visit", rating: 4.8 },
-  { id: 2, name: "Louvre Museum", lat: 48.8606, lng: 2.3376, type: "Cultural | Historical", rating: 4.7 },
-  { id: 3, name: "Notre-Dame", lat: 48.8530, lng: 2.3499, type: "Historical | Architectural", rating: 4.7 },
-  { id: 4, name: "Montmartre", lat: 48.8867, lng: 2.3431, type: "Local | Artistic", rating: 4.5 },
-  { id: 5, name: "Palace of Versailles", lat: 48.8048, lng: 2.1203, type: "Historical | Majestic", rating: 4.6 }
-];
-
-// Mock data for reviews
-const reviewsData = [
-  {
-    id: 1,
-    name: "Jessica T.",
-    avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-    location: "Berlin, Germany",
-    rating: 5,
-    text: "The AI itinerary was perfect! It saved us so much time planning our Paris trip and found hidden gems we would have never discovered on our own."
-  },
-  {
-    id: 2,
-    name: "Marco L.",
-    avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-    location: "Toronto, Canada",
-    rating: 4,
-    text: "Great recommendations for restaurants that weren't too touristy. The day-by-day planning helped us maximize our time without feeling rushed."
-  },
-  {
-    id: 3,
-    name: "Aisha K.",
-    avatar: "https://randomuser.me/api/portraits/women/63.jpg",
-    location: "Dubai, UAE",
-    rating: 5,
-    text: "The AI adapted our itinerary when it unexpectedly rained on day 3. Brilliant service! It suggested indoor activities that ended up being highlights."
-  }
-];
 
 interface InterestTagProps {
   children: React.ReactNode;
@@ -229,13 +69,16 @@ const Features: React.FC = () => {
 
   // Track if sections are in view
   const smartFormRef = React.useRef<HTMLDivElement>(null);
-  const smartFormInView = useInView(smartFormRef, { amount: 0.2, once: true });
+  const smartFormInView = useInView(smartFormRef, { amount: 0.2, once: false });
   
   const itineraryRef = React.useRef<HTMLDivElement>(null);
   const itineraryInView = useInView(itineraryRef, { amount: 0.2, once: true });
   
   const mapRef = React.useRef<HTMLDivElement>(null);
   const mapInView = useInView(mapRef, { amount: 0.2, once: true });
+
+  const chatbotRef = React.useRef<HTMLDivElement>(null);
+  const chatbotInView = useInView(chatbotRef, { amount: 0.2, once: false });
   
   const reviewsRef = React.useRef<HTMLDivElement>(null);
   const reviewsInView = useInView(reviewsRef, { amount: 0.2, once: true });
@@ -253,6 +96,49 @@ const Features: React.FC = () => {
     );
   };
 
+  // Peerlist logo for macbook
+const Badge = ({ className }: { className?: string }) => {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 56 56"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      <path
+        d="M56 28C56 43.464 43.464 56 28 56C12.536 56 0 43.464 0 28C0 12.536 12.536 0 28 0C43.464 0 56 12.536 56 28Z"
+        fill="#00AA45"
+      ></path>
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M28 54C42.3594 54 54 42.3594 54 28C54 13.6406 42.3594 2 28 2C13.6406 2 2 13.6406 2 28C2 42.3594 13.6406 54 28 54ZM28 56C43.464 56 56 43.464 56 28C56 12.536 43.464 0 28 0C12.536 0 0 12.536 0 28C0 43.464 12.536 56 28 56Z"
+        fill="#219653"
+      ></path>
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M27.0769 12H15V46H24.3846V38.8889H27.0769C34.7305 38.8889 41 32.9048 41 25.4444C41 17.984 34.7305 12 27.0769 12ZM24.3846 29.7778V21.1111H27.0769C29.6194 21.1111 31.6154 23.0864 31.6154 25.4444C31.6154 27.8024 29.6194 29.7778 27.0769 29.7778H24.3846Z"
+        fill="#24292E"
+      ></path>
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M18 11H29.0769C36.2141 11 42 16.5716 42 23.4444C42 30.3173 36.2141 35.8889 29.0769 35.8889H25.3846V43H18V11ZM25.3846 28.7778H29.0769C32.1357 28.7778 34.6154 26.39 34.6154 23.4444C34.6154 20.4989 32.1357 18.1111 29.0769 18.1111H25.3846V28.7778Z"
+        fill="white"
+      ></path>
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M17 10H29.0769C36.7305 10 43 15.984 43 23.4444C43 30.9048 36.7305 36.8889 29.0769 36.8889H26.3846V44H17V10ZM19 12V42H24.3846V34.8889H29.0769C35.6978 34.8889 41 29.7298 41 23.4444C41 17.1591 35.6978 12 29.0769 12H19ZM24.3846 17.1111H29.0769C32.6521 17.1111 35.6154 19.9114 35.6154 23.4444C35.6154 26.9775 32.6521 29.7778 29.0769 29.7778H24.3846V17.1111ZM26.3846 19.1111V27.7778H29.0769C31.6194 27.7778 33.6154 25.8024 33.6154 23.4444C33.6154 21.0864 31.6194 19.1111 29.0769 19.1111H26.3846Z"
+        fill="#24292E"
+      ></path>
+    </svg>
+  );
+};
+
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -269,97 +155,93 @@ const Features: React.FC = () => {
 
   return (
     <div className="bg-black min-h-screen text-white overflow-hidden">
-      {/* Floating navigation */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
-        <FloatingNav
-          navItems={[
-            {
-              name: "Smart Form",
-              link: "#smart-form",
-              icon: <Users className="h-4 w-4" />
-            },
-            {
-              name: "Itinerary",
-              link: "#itinerary",
-              icon: <Calendar className="h-4 w-4" />
-            },
-            {
-              name: "Map",
-              link: "#map",
-              icon: <MapPin className="h-4 w-4" />
-            },
-            {
-              name: "Reviews",
-              link: "#reviews",
-              icon: <Star className="h-4 w-4" />
-            }
-          ]}
-        />
-      </div>
 
-      {/* Interactive particles background */}
-      {/* <div className="absolute inset-0 z-0">
-        <SparklesCore
-          id="tsparticlesfullscreen"
-          background="transparent"
-          minSize={0.6}
-          maxSize={1.4}
-          particleDensity={40}
-          className="w-full h-full"
-          particleColor="#8a2be2"
-        />
-      </div> */}
-
-      <div className="relative z-10">
-        {/* Hero section with spotlight */}
-        <section className="relative pt-20 pb-16 overflow-hidden">
-          <Spotlight
+      <div className="relative">
+        
+      {/* Combined hero and 3D marquee with z-index layering */}
+        <section className="relative min-h-screen flex flex-col justify-center items-center  overflow-hidden">
+          {/* Add spotlight for better visual effect */}
+          {/* <Spotlight
             className="-top-40 left-0 md:left-60"
-            fill="blue"
-          />
+            fill="white"
+          /> */}
           
-          <div className="container mx-auto px-4 text-center">
+          {/* Background 3D marquee with reduced opacity */}
+          <div className="absolute my-auto inset-0 z-0 h-[90vh]">
+            <div className="opacity-45 h-full">
+              <ThreeDMarquee
+                images={popularDestinations.map(dest => dest.image)}
+                className="w-full h-full"
+              />
+            </div>
+          </div>
+
+          {/* Hero content - positioned on top */}
+          <div className="container mx-auto px-4 text-center relative z-20 pointer-events-none">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
+              className="max-w-4xl mx-auto"
             >
-              <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-blue-500">
-                Your Dream Journey Awaits
-              </h1>
-              <p className="text-xl text-blue-100 max-w-3xl mx-auto mb-10">
-                Let our AI craft the perfect itinerary based on your preferences, 
-                local insights, and real-time data.
-              </p>
-              
-              <Button
-                className="bg-black text-white border-none px-8 py-4 rounded-[1.75rem]"
-                onClick={() => document.getElementById('smart-form')?.scrollIntoView({ behavior: 'smooth' })}
-              >
-                <span className="flex items-center">
-                  Start Planning <ArrowRight className="ml-2 h-4 w-4" />
+              <h1 className="text-5xl md:text-7xl font-bold mb-8 text-white ">
+                <span className="relative">
+                  Your <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500 animate-pulse-slow">Dream Journey</span> Awaits
+                  <span className="absolute inset-0 bg-white/5 blur-sm -z-10 rounded-lg"></span>
                 </span>
-              </Button>
+            </h1>
+              <div className="relative">
+                <p className="text-xl text-blue-100 max-w-3xl mx-auto mb-10 leading-relaxed">
+                    Discover extraordinary destinations with our AI-powered travel planner that adapts to your
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-medium"> preferences</span>,
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-medium"> timeframe</span>, and
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-medium"> budget</span>.
+                  </p>
+                {/* Add a subtle glow effect behind the text */}
+                <div className="absolute -inset-10 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-blue-500/10 rounded-full blur-3xl -z-10"></div>
+              </div>
             </motion.div>
           </div>
-        </section> 
-        
-        {/* Popular destinations 3D marquee */}
-        <div className="mb-20">
-          <ThreeDMarquee
-            images={popularDestinations.map(dest => dest.image) as Array}
-            // images={images}
-            className="w-full"
-          />
-        </div>
+          <div className="flex justify-center">
+            <button
+              className="border border-blue-800/20 text-white backdrop-blur-md bg-white/5 hover:bg-white/10 px-10 py-3 rounded-full transition-all duration-300 shadow-lg cursor-pointer"
+              onClick={() => document.getElementById('smart-form')?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              <span className="flex items-center justify-center text-lg font-medium">
+                Generate Itinerary <ArrowRight className="ml-2 h-5 w-5" />
+              </span>
+            </button>
+          </div>
+        </section>
 
         {/* Smart Form Section */}
-         <section id="smart-form" className="py-20" ref={smartFormRef}>
+        <section id="smart-form" className="py-6 sm:py-10 lg:py-14" ref={smartFormRef}>
           <div className="container mx-auto px-4">
-            <TextGenerateEffect
-              words="Let AI Personalize Your Journey"
-              className="text-4xl font-bold text-center mb-12 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400"
-            />
+            {/* Replace TextGenerateEffect with TypewriterEffect */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={smartFormInView ? { opacity: 1 } : { opacity: 0 }}
+              className="text-center"
+            >
+              <TypewriterEffect
+                key={smartFormInView ? "visible" : "hidden"} 
+                words={[
+                  { text: "Let", className: "text-2xl sm:text-3xl lg:text-4xl font-bold" },
+                  { text: "AI", className: "text-2xl sm:text-3xl lg:text-4xl font-bold " },
+                  { text: "Personalize", className: "text-2xl sm:text-3xl lg:text-4xl font-bold" },
+                  { text: "Your", className: "text-2xl sm:text-3xl lg:text-4xl font-bold " },
+                  { text: "Journey", className: "text-2xl sm:text-3xl lg:text-4xl font-bold " }
+                ]}
+                className="text-center"
+                cursorClassName="bg-blue-400"
+              />
+
+              {/* Added description with gradient text */}
+              <p className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 max-w-2xl mx-auto text-sm sm:text-base mt-3 sm:mt-4 mb-8 sm:mb-10">
+                Tell us where you want to go, and we'll create a detailed itinerary tailored perfectly to your preferences and style.
+              </p>
+
+            </motion.div>
 
             <AnimatePresence>
               {formVisible && (
@@ -367,146 +249,149 @@ const Features: React.FC = () => {
                   initial={{ opacity: 0, y: 40 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.7, delay: 0.3 }}
-                  className="max-w-4xl mx-auto"
+                  className="max-w-xs sm:max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto"
                 >
-                  <TextRevealCard
-                    text="Create Your Dream Itinerary"
-                    revealText="Tell Us About Your Trip"
-                    className="w-full"
-                  >
-                   
-                      <CardContainer className="w-full">
-                        <BackgroundGradient className="rounded-[22px] p-0.5">
-                          <div className="bg-black/95 rounded-[21px] p-8">
-                            <form className="space-y-6">
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                  <Label className="text-blue-100">Destination</Label>
-                                  <Input
-                                    name="destination"
-                                    value={formData.destination}
-                                    onChange={handleFormChange}
-                                    placeholder="Where would you like to go?"
-                                    className="bg-black/50 border border-blue-500/20 focus:border-purple-500/50 text-white"
-                                  />
-                                </div>
-                                
-                                <div className="space-y-2">
-                                  <Label className="text-blue-100">Number of Days</Label>
-                                  <Select 
-                                    name="days"
-                                    value={formData.days} 
-                                    onValueChange={(value) => setFormData(prev => ({ ...prev, days: value }))}
-                                  >
-                                    <SelectTrigger className="bg-black/50 border border-blue-500/20 focus:border-purple-500/50 text-white">
-                                      <SelectValue placeholder="Select days" />
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-black/90 border border-blue-500/30 text-white">
-                                      {[1, 2, 3, 4, 5, 6, 7, 10, 14].map(day => (
-                                        <SelectItem key={day} value={day.toString()}>
-                                          {day} {day === 1 ? 'day' : 'days'}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                                
-                                <div className="space-y-2">
-                                  <Label className="text-blue-100">Budget</Label>
-                                  <Select 
-                                    name="budget"
-                                    value={formData.budget} 
-                                    onValueChange={(value) => setFormData(prev => ({ ...prev, budget: value }))}
-                                  >
-                                    <SelectTrigger className="bg-black/50 border border-blue-500/20 focus:border-purple-500/50 text-white">
-                                      <SelectValue placeholder="Select budget" />
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-black/90 border border-blue-500/30 text-white">
-                                      <SelectItem value="budget">Budget</SelectItem>
-                                      <SelectItem value="medium">Medium</SelectItem>
-                                      <SelectItem value="luxury">Luxury</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                                
-                                <div className="space-y-2">
-                                  <Label className="text-blue-100">Number of Travelers</Label>
-                                  <Select 
-                                    name="persons"
-                                    value={formData.persons}
-                                    onValueChange={(value) => setFormData(prev => ({ ...prev, persons: value }))}
-                                  >
-                                    <SelectTrigger className="bg-black/50 border border-blue-500/20 focus:border-purple-500/50 text-white">
-                                      <SelectValue placeholder="Select number" />
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-black/90 border border-blue-500/30 text-white">
-                                      {[1, 2, 3, 4, 5, 6, 8, 10].map(num => (
-                                        <SelectItem key={num} value={num.toString()}>
-                                          {num} {num === 1 ? 'person' : 'people'}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                              </div>
-                              
-                              <div className="space-y-3">
-                                <Label className="text-blue-100">Travel Interests</Label>
-                                <div className="flex flex-wrap gap-2">
-                                  {interestOptions.map(interest => (
-                                    <InterestTag
-                                      key={interest}
-                                      selected={interests.includes(interest)}
-                                      onClick={() => handleInterestToggle(interest)}
-                                    >
-                                      {interest}
-                                    </InterestTag>
+                  
+                  <CardContainer className="w-full pointer-events-auto">
+                    <BackgroundGradient className="rounded-xl sm:rounded-2xl p-0.5">
+                      <div className="bg-black/95 rounded-lg sm:rounded-xl lg:rounded-2xl p-4 sm:p-6 lg:p-8">
+                        <form className="space-y-4 sm:space-y-5 lg:space-y-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 lg:gap-6">
+                            <div className="space-y-1 sm:space-y-2">
+                              <Label className="text-blue-100 text-xs sm:text-sm lg:text-base">Destination</Label>
+                              <Input
+                                name="destination"
+                                value={formData.destination}
+                                onChange={handleFormChange}
+                                placeholder="Where would you like to go?"
+                                className="bg-black/50 border border-blue-500/20 focus:border-purple-500/50 text-white text-xs sm:text-sm lg:text-base h-8 sm:h-9 lg:h-10"
+                              />
+                            </div>
+                            
+                            <div className="space-y-1 sm:space-y-2">
+                              <Label className="text-blue-100 text-xs sm:text-sm lg:text-base">Number of Days</Label>
+                              <Select 
+                                name="days"
+                                value={formData.days} 
+                                onValueChange={(value) => setFormData(prev => ({ ...prev, days: value }))}
+                              >
+                                <SelectTrigger className="bg-black/50 border border-blue-500/20 focus:border-purple-500/50 text-white text-xs sm:text-sm lg:text-base h-8 sm:h-9 lg:h-10">
+                                  <SelectValue placeholder="Select days" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-black/90 border border-blue-500/30 text-white text-xs sm:text-sm lg:text-base">
+                                  {[1, 2, 3, 4, 5, 6, 7, 10, 14].map(day => (
+                                    <SelectItem key={day} value={day.toString()}>
+                                      {day} {day === 1 ? 'day' : 'days'}
+                                    </SelectItem>
                                   ))}
-                                </div>
-                              </div>
-                              
-                              <div className="space-y-2">
-                                <Label className="text-blue-100">Any Special Requests?</Label>
-                                <Textarea
-                                  name="customRequests"
-                                  value={formData.customRequests}
-                                  onChange={handleFormChange}
-                                  placeholder="Tell us any special requirements or places you'd like to visit..."
-                                  className="bg-black/50 border border-blue-500/20 focus:border-purple-500/50 text-white resize-none min-h-24"
-                                />
-                              </div>
-                              
-                              <div className="flex justify-center pt-4">
-                                <HoverBorderGradient
-                                  as="button"
-                                  className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium text-lg shadow-lg shadow-purple-900/20"
-                                >
-                                  <span className="flex items-center">
-                                    Generate My Itinerary <ArrowRight className="ml-2 h-4 w-4" />
-                                  </span>
-                                </HoverBorderGradient>
-                              </div>
-                            </form>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
+                            <div className="space-y-1 sm:space-y-2">
+                              <Label className="text-blue-100 text-xs sm:text-sm lg:text-base">Budget</Label>
+                              <Select 
+                                name="budget"
+                                value={formData.budget} 
+                                onValueChange={(value) => setFormData(prev => ({ ...prev, budget: value }))}
+                              >
+                                <SelectTrigger className="bg-black/50 border border-blue-500/20 focus:border-purple-500/50 text-white text-xs sm:text-sm lg:text-base h-8 sm:h-9 lg:h-10">
+                                  <SelectValue placeholder="Select budget" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-black/90 border border-blue-500/30 text-white">
+                                  <SelectItem value="budget">Budget</SelectItem>
+                                  <SelectItem value="medium">Medium</SelectItem>
+                                  <SelectItem value="luxury">Luxury</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
+                            <div className="space-y-1 sm:space-y-2">
+                              <Label className="text-blue-100 text-xs sm:text-sm lg:text-base">Number of Travelers</Label>
+                              <Select 
+                                name="persons"
+                                value={formData.persons}
+                                onValueChange={(value) => setFormData(prev => ({ ...prev, persons: value }))}
+                              >
+                                <SelectTrigger className="bg-black/50 border border-blue-500/20 focus:border-purple-500/50 text-white text-xs sm:text-sm lg:text-base h-8 sm:h-9 lg:h-10">
+                                  <SelectValue placeholder="Select number" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-black/90 border border-blue-500/30 text-white">
+                                  {[1, 2, 3, 4, 5, 6, 8, 10].map(num => (
+                                    <SelectItem key={num} value={num.toString()}>
+                                      {num} {num === 1 ? 'person' : 'people'}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
                           </div>
-                        </BackgroundGradient>
-                      </CardContainer>
-                  </TextRevealCard>
+                          
+                          <div className="space-y-1 sm:space-y-2">
+                            <Label className="text-blue-100 text-xs sm:text-sm lg:text-base">Travel Interests</Label>
+                            <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                              {interestOptions.map(interest => (
+                                <InterestTag
+                                  key={interest}
+                                  selected={interests.includes(interest)}
+                                  onClick={() => handleInterestToggle(interest)}
+                                >
+                                  <span className="text-xs sm:text-sm">{interest}</span>
+                                </InterestTag>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-1 sm:space-y-2">
+                            <Label className="text-blue-100 text-xs sm:text-sm lg:text-base">Your Interests</Label>
+                            <Textarea
+                              name="customRequests"
+                              value={formData.customRequests}
+                              onChange={handleFormChange}
+                              placeholder="Tell us your interests or places you'd like to visit..."
+                              className="bg-black/50 border border-blue-500/20 focus:border-purple-500/50 text-white text-xs sm:text-sm lg:text-base resize-none min-h-16 sm:min-h-20 lg:min-h-24"
+                            />
+                          </div>
+                          
+                          <div className="flex justify-center pt-2 sm:pt-3 lg:pt-4">
+                            <HoverBorderGradient
+                              as="button"
+                              className="px-5 sm:px-6 lg:px-8 py-2 sm:py-2.5 lg:py-3 bg-gradient-to-r from-blue-600 to-purple-600 font-medium text-sm sm:text-base lg:text-lg shadow-lg shadow-purple-900/20"
+                            >
+                              <span className="flex items-center whitespace-nowrap">
+                                Generate My Itinerary <ArrowRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
+                              </span>
+                            </HoverBorderGradient>
+                          </div>
+                        </form>
+                      </div>
+                    </BackgroundGradient>
+                  </CardContainer>
+                  
+                  {/* text reveal */}
+                  <div className="mt-6 sm:mt-8 lg:mt-10 mb-0">
+                    <TextRevealCard
+                      text="You pick the destination"
+                      revealText="Stellar itinerary is our creation."
+                      className="w-full text-xs sm:text-sm md:text-base lg:text-lg"
+                    />
+                  </div>
+
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
-        </section> 
+        </section>
         
         {/* AI-Generated Itinerary Timeline */}
         <section id="itinerary" className="py-20 relative" ref={itineraryRef}>
           <BackgroundBeams className="absolute inset-0 opacity-20" />
           <div className="container mx-auto px-4 relative z-10">
-            <TextGenerateEffect
-              words="Your AI-Generated Paris Itinerary"
-              className="text-4xl font-bold text-center mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400"
-            />
+          <h2 className="text-4xl font-bold text-white mb-4 text-center">
+                 Your <span className="text-transparent  bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">AI-Generated </span>Paris Itinerary
+          </h2>
             
-            <p className="text-center text-blue-200 max-w-3xl mx-auto mb-16">
+            <p className="text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 max-w-3xl mx-auto mb-16">
               This personalized 3-day journey showcases the best of Paris, 
               balancing iconic landmarks, cultural immersion, and authentic local experiences.
             </p>
@@ -519,7 +404,7 @@ const Features: React.FC = () => {
                       key={day.day} 
                       onClick={() => setSelectedDay(day.day)}
                       className={cn(
-                        "py-2 px-4 rounded-md transition-all",
+                        "py-2 px-4 rounded-md transition-all cursor-pointer",
                         selectedDay === day.day
                           ? "bg-gradient-to-r from-blue-600/80 to-purple-600/80 text-white"
                           : "text-gray-300 hover:text-white"
@@ -579,16 +464,19 @@ const Features: React.FC = () => {
                       </BackgroundGradient>
                       
                       {/* Timeline for the day */}
-                      <div className="pl-4 space-y-12 relative before:absolute before:inset-0 before:w-[2px] before:bg-gradient-to-b before:from-blue-500 before:via-purple-500 before:to-blue-500 before:left-0 before:ml-[19px]">
-                        <Timeline 
-                          data={day.activities.map((activity, idx) => ({
-                            title: activity.title,
-                            content: <p className="text-sm text-gray-400">{activity.description}</p>,
-                            time: activity.time,
-                            icon: <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white">{idx + 1}</div>
-                          }))}
-                        />
-                      </div>
+                    <div className="pl-4 mt-16 space-y-12 relative">
+                      {/* Gradient line with proper spacing and constraints */}
+                      <div className="absolute top-0 bottom-0 left-0 ml-[19px] w-[2px] bg-gradient-to-b from-blue-500 via-purple-500 to-blue-500 max-h-[95%] mt-5"></div>
+                      
+                      <Timeline 
+                        data={day.activities.map((activity, idx) => ({
+                          title: activity.title,
+                          content: <p className="text-sm text-gray-400">{activity.description}</p>,
+                          time: activity.time,
+                          icon: <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white relative z-10">{idx + 1}</div>
+                        }))}
+                      />
+                    </div>
                     </motion.div>
                   )
                 ))}
@@ -598,294 +486,222 @@ const Features: React.FC = () => {
         </section>
         
         {/* Interactive Map Section */}
-        <section id="map" className="py-20 relative" ref={mapRef}>
+        {/* Map Showcase Section */}
+        <section className="py-16 sm:py-20 bg-black relative">
           <div className="container mx-auto px-4">
-            <TextGenerateEffect
-              words="Visualize Your Travel Route"
-              className="text-4xl font-bold text-center mb-12 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400"
-            />
+            <div className="text-center mb-10">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+                viewport={{ once: true }}
+              >
+                <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3">
+                  Visualize Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Travel Route</span>
+                </h2>
+                <p className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 max-w-2xl mx-auto text-sm sm:text-base">
+                  See your entire itinerary mapped out for easy navigation
+                </p>
+              </motion.div>
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              whileInView={{ opacity: 1, scale: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.3 }}
+              transition={{ 
+                type: "spring",
+                stiffness: 50,
+                damping: 15,
+                duration: 0.8
+              }}
+              className="max-w-4xl mx-auto"
+            >
+              <div className="bg-black/80 rounded-lg overflow-hidden shadow-2xl shadow-blue-900/10">
+                {/* Map Image with dimmed overlay */}
+                <div className="relative aspect-[16/9] w-full overflow-hidden rounded-md">
+                  <div className="absolute inset-0 bg-black/30 z-10"></div>
+                  <img 
+                    src="/mapimg.png" 
+                    alt="Interactive Travel Map" 
+                    className="w-full h-full object-cover relative z-0"
+                  />
+                </div>
+              </div>
+          </motion.div>
+          </div>
+        </section>
+
+  
+        {/* AI Travel Chatbot Section */}
+        <section className="py-20 mb-14 bg-black relative" ref={chatbotRef}>
+          <div className="container mx-auto px-4">
+            {/* Adding TypewriterEffect heading with key to reset when view changes */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={chatbotInView ? { opacity: 1 } : { opacity: 0 }}
+              className="text-center mb-12"
+              key={chatbotInView ? "chatbot-visible" : "chatbot-hidden"} // Add key to force re-render
+            >
+              <TypewriterEffect
+                words={[
+                  { text: "Your", className: "text-3xl sm:text-4xl font-bold text-blue-200" },
+                  { text: "Personal", className: "text-3xl sm:text-4xl font-bold text-blue-400" },
+                  { text: "AI", className: "text-3xl sm:text-4xl font-bold text-purple-400" },
+                  { text: "Travel", className: "text-3xl sm:text-4xl font-bold text-blue-400" },
+                  { text: "Companion", className: "text-3xl sm:text-4xl font-bold text-blue-200" }
+                ]}
+                className="mb-4"
+                cursorClassName="bg-blue-400"
+              />
+              <p className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 max-w-2xl mx-auto text-sm sm:text-base">
+                Curious about any destination in your itinerary? Get instant, detailed insights and local knowledge at your fingertips.
+              </p>
+            </motion.div>
             
-            <div className="max-w-5xl mx-auto">
-              <CardContainer className="w-full">
-                <BackgroundGradient className="rounded-2xl p-0.5 mb-12">
-                  <div className="bg-black/80 rounded-2xl p-6 md:p-8 min-h-[500px] relative">
-                    
-                    <div className="relative h-[500px] bg-[url('https://images.unsplash.com/photo-1541791003877-802fa7418720?q=80&w=1974&auto=format&fit=crop')] bg-cover bg-center rounded-lg overflow-hidden">
-                      <div className="absolute inset-0 bg-black/40"></div>
-                      
-                      <svg className="absolute inset-0 w-full h-full" style={{ pointerEvents: 'none' }}>
-                        <defs>
-                          <linearGradient id="routeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#4f46e5" />
-                            <stop offset="100%" stopColor="#a855f7" />
-                          </linearGradient>
-                        </defs>
-                        <path 
-                          d="M150,220 C200,100 280,300 350,150 C420,30 480,200 550,250" 
-                          stroke="url(#routeGradient)" 
-                          strokeWidth="4" 
-                          strokeLinecap="round" 
-                          strokeDasharray="10,5"
-                          fill="none" 
-                          className="animate-pulse-slow"
-                        />
-                      </svg>
-                      
-                     
-                      {mapLocations.map((location) => (
-                        <button
-                          key={location.id}
-                          onClick={() => setSelectedLocation(location.id)}
-                          className={`absolute w-6 h-6 rounded-full bg-gradient-to-r transition-all duration-300 ${
-                            selectedLocation === location.id
-                              ? "from-blue-500 to-purple-600 scale-125 z-20 shadow-lg shadow-purple-500/30"
-                              : "from-blue-400/80 to-purple-500/50"
-                          } flex items-center justify-center`}
-                          style={{
-                            
-                            left: `${((location.id * 125) % 500) + 50}px`,
-                            top: `${((location.id * 83) % 400) + 50}px`,
-                          }}
-                        >
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-50"></span>
-                          <MapPin className="w-3 h-3 text-white" />
-                          
-                          {selectedLocation === location.id && (
-                            <motion.div
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              className="absolute top-full mt-3 left-1/2 -translate-x-1/2 w-52 bg-black/90 backdrop-blur-md p-3 rounded-lg border border-purple-500/30 shadow-lg z-30"
-                            >
-                              <h4 className="font-medium text-white text-sm">{location.name}</h4>
-                              <div className="my-1.5">
-                                <FlipWords words={[location.type]} className="text-xs" />
-                              </div>
-                              <div className="flex items-center mt-1">
-                                <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-                                <span className="ml-1 text-xs text-gray-300">{location.rating}/5.0</span>
-                                <span className="text-xs text-blue-400 ml-auto">View Details</span>
-                              </div>
-                            </motion.div>
-                          )}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={chatbotInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+              className="max-w-5xl mx-auto"
+            >
+              <BackgroundGradient className="rounded-[22px] overflow-hidden">
+                <div className="p-6 sm:p-8 md:p-10 bg-black rounded-[18px] h-full flex flex-col md:flex-row items-center gap-4 sm:gap-6 md:gap-8">
+                  <div className="md:w-1/2">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4">
+                      Curious About <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Destinations</span>?
+                    </h2>
+                    <p className="text-gray-400 mb-4 sm:mb-6">
+                      Ask our AI Travel Assistant anything specific about locations in your itinerary - from hidden local spots to practical travel tips.
+                    </p>
+                    <div className="space-y-4">
+                      <div className="bg-gray-900 rounded-lg p-3 sm:p-4 border border-gray-800">
+                        <p className="text-gray-300 text-xs sm:text-sm mb-2">Ask about places in your itinerary:</p>
+                        <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                          <span className="text-xs bg-blue-900 bg-opacity-40 text-blue-300 px-2 py-1 rounded-full">Eiffel Tower history</span>
+                          <span className="text-xs bg-purple-900 bg-opacity-40 text-purple-300 px-2 py-1 rounded-full">Montmartre restaurants</span>
+                          <span className="text-xs bg-indigo-900 bg-opacity-40 text-indigo-300 px-2 py-1 rounded-full">Louvre Museum tips</span>
+                          <span className="text-xs bg-pink-900 bg-opacity-40 text-pink-300 px-2 py-1 rounded-full">Versailles secrets</span>
+                        </div>
+                      </div>
+                      <HoverBorderGradient className="w-full">
+                        <button type="submit" className="w-full px-4 sm:px-6 py-3 sm:py-4 text-white font-medium relative z-10 flex items-center justify-center gap-2">
+                          <FaCommentDots className="text-blue-400" />
+                          <span className="text-sm sm:text-base">Chat with AI Assistant</span>
                         </button>
-                      ))}
+                      </HoverBorderGradient>
                     </div>
-                    
-                    <div className="mt-6">
-                      <h3 className="text-xl font-bold text-white mb-2">Paris Exploration Route</h3>
-                      <p className="text-blue-200 mb-4">
-                        This AI-optimized route minimizes travel time while maximizing experiences. 
-                        It considers opening hours, crowd levels, and proximity between attractions.
-                      </p>
-                      
-                      <div className="flex flex-wrap gap-3">
-                        <HoverBorderGradient className="px-4 py-2 bg-black text-white rounded-md">
-                          <div className="flex items-center">
-                            <Clock className="h-4 w-4 mr-2" />
-                            <span>Optimized for Time</span>
+                  </div>
+                  <div className="md:w-1/2 w-full">
+                    <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
+                      <div className="bg-gray-800 px-5 py-4 flex items-center justify-between">
+                        <p className="text-white font-medium text-sm sm:text-base">AI Travel Assistant</p>
+                        <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                      </div>
+                      <div 
+                        className="h-72 sm:h-80 md:h-96 p-4 sm:p-5 overflow-y-auto"
+                        style={{ 
+                          scrollbarWidth: 'none', 
+                          msOverflowStyle: 'none' 
+                        }}
+                      >
+                        <style>
+                          {`
+                            .chat-scroll::-webkit-scrollbar {
+                              display: none;
+                            }
+                          `}
+                        </style>
+                        <div className="chat-scroll flex flex-col gap-5">
+                          <div className="flex gap-3 mb-4">
+                            <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs">
+                              AI
+                            </div>
+                            <div className="bg-gray-800 rounded-lg p-3 max-w-[80%]">
+                              <p className="text-gray-200 text-xs sm:text-sm">Hello! I can provide detailed information about any place in your Paris itinerary. Which location would you like to know more about?</p>
+                            </div>
                           </div>
-                        </HoverBorderGradient>
-                        
-                        <HoverBorderGradient className="px-4 py-2 bg-black text-white rounded-md">
-                          <div className="flex items-center">
-                            <Users className="h-4 w-4 mr-2" />
-                            <span>Avoids Crowds</span>
+                          <div className="flex gap-3 mb-4 justify-end">
+                            <div className="bg-blue-900 bg-opacity-40 rounded-lg p-3 max-w-[80%]">
+                              <p className="text-gray-200 text-xs sm:text-sm">Tell me about Montmartre from Day 2. What's special about it and what shouldn't I miss?</p>
+                            </div>
+                            <div className="h-8 w-8 rounded-full bg-gray-700 flex items-center justify-center text-white text-xs">
+                              You
+                            </div>
                           </div>
-                        </HoverBorderGradient>
-                        
-                        <HoverBorderGradient className="px-4 py-2 bg-black text-white rounded-md">
-                          <div className="flex items-center">
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            <span>Interactive Map</span>
+                          <div className="flex gap-3">
+                            <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs">
+                              AI
+                            </div>
+                            <div className="bg-gray-800 rounded-lg p-3 max-w-[80%]">
+                              <p className="text-gray-200 text-xs sm:text-sm">
+                                <strong className="text-blue-400">Montmartre</strong> is a charming artistic neighborhood with cobblestone streets and village-like atmosphere. Here's what makes it special:
+                                <br /><br />
+                                <strong className="text-blue-400">Must-see:</strong> The stunning Sacré-Cœur Basilica with panoramic city views
+                                <br />
+                                <strong className="text-blue-400">Don't miss:</strong> Place du Tertre with street artists, the Moulin Rouge, and Café des Deux Moulins from the film Amélie
+                                <br />
+                                <strong className="text-blue-400">Local tip:</strong> Visit early morning to avoid crowds and get the best photos of Paris from the hilltop
+                              </p>
+                            </div>
                           </div>
-                        </HoverBorderGradient>
+                        </div>
+                      </div>
+                      <div className="px-4 sm:px-5 py-3 sm:py-4 border-t border-gray-800">
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="Ask about any place in your itinerary..."
+                            className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 sm:px-4 sm:py-2.5 text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                          <button className="p-2 sm:p-2.5 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </BackgroundGradient>
-              </CardContainer>
-            </div>
+                </div>
+              </BackgroundGradient>
+            </motion.div>
           </div>
         </section>
+  
         
         {/* Reviews Section */}
-         <section id="reviews" className="py-20 relative" ref={reviewsRef}>
-          <div className="container mx-auto px-4">
-            <TextGenerateEffect
-              words="What Travelers Are Saying"
-              className="text-4xl font-bold text-center mb-12 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400"
-            />
-            
-            <div className="max-w-5xl mx-auto">
-              <AnimatePresence mode="wait">
-                {!showReviewSummary ? (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="grid grid-cols-1 md:grid-cols-3 gap-6"
-                  >
-                    {reviewsData.map((review) => (
-                      <motion.div
-                        key={review.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: review.id * 0.1 }}
-                        className="bg-black/60 border border-blue-500/20 rounded-xl p-6"
-                      >
-                        <div className="flex items-center mb-4">
-                          <img 
-                            src={review.avatar} 
-                            alt={review.name}
-                            className="w-12 h-12 rounded-full object-cover border-2 border-purple-500/50" 
-                          />
-                          <div className="ml-3">
-                            <p className="font-medium text-white">{review.name}</p>
-                            <p className="text-xs text-gray-400">{review.location}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex mb-3">
-                          {[...Array(5)].map((_, i) => (
-                            <Star 
-                              key={i}
-                              className={`w-4 h-4 ${i < review.rating ? 'text-yellow-500 fill-yellow-500' : 'text-gray-600'}`} 
-                            />
-                          ))}
-                        </div>
-                        
-                        <p className="text-gray-300 text-sm leading-relaxed">{review.text}</p>
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="max-w-3xl mx-auto"
-                  >
-                    <Spotlight
-                      className="-top-10 -right-10 md:top-10 md:right-40"
-                      fill="purple"
-                    />
-                    
-                    <BackgroundGradient className="rounded-2xl p-0.5">
-                      <CardContainer className="w-full">
-                        <div className="bg-black/80 rounded-2xl p-8">
-                          <div className="flex items-center mb-6">
-                            <div className="bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg p-3 mr-4">
-                              <Star className="h-6 w-6 text-white" />
-                            </div>
-                            <div>
-                              <h3 className="text-xl font-bold text-white">AI-Generated Review Summary</h3>
-                              <p className="text-gray-400 text-sm">Based on 1,248 verified traveler reviews</p>
-                            </div>
-                            <div className="ml-auto">
-                              <div className="bg-blue-500/20 rounded-full px-3 py-1.5">
-                                <span className="text-blue-300 font-medium">4.8/5</span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <CardBody className="text-gray-200">
-                            <CardItem translateZ="50" className="mb-8">
-                              <p className="text-lg leading-relaxed">
-                                "Travelers consistently praise the AI itinerary planner for its ability to 
-                                <span className="text-blue-400 font-medium"> save valuable planning time </span> 
-                                while creating perfectly balanced days. Many highlighted how the AI discovered 
-                                <span className="text-purple-400 font-medium"> hidden local gems </span> 
-                                that became unexpected trip highlights. The dynamic weather adaptation feature 
-                                received special mention from travelers who experienced changing conditions."
-                              </p>
-                            </CardItem>
-                            
-                            <CardItem translateZ="80" className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
-                              <div className="bg-black/50 rounded-lg p-4 border border-blue-500/20">
-                                <h4 className="text-blue-300 font-medium mb-3">Top Highlights</h4>
-                                <ul className="space-y-2">
-                                  <li className="flex items-center text-sm">
-                                    <div className="bg-green-500/20 p-1 rounded-md mr-2">
-                                      <TrendingUp className="h-4 w-4 text-green-400" />
-                                    </div>
-                                    <span>Time-saving itineraries</span>
-                                  </li>
-                                  <li className="flex items-center text-sm">
-                                    <div className="bg-red-500/20 p-1 rounded-md mr-2">
-                                      <Heart className="h-4 w-4 text-red-400" />
-                                    </div>
-                                    <span>Unexpected discovery moments</span>
-                                  </li>
-                                  <li className="flex items-center text-sm">
-                                    <div className="bg-blue-500/20 p-1 rounded-md mr-2">
-                                      <Users className="h-4 w-4 text-blue-400" />
-                                    </div>
-                                    <span>Personalized recommendations</span>
-                                  </li>
-                                </ul>
-                              </div>
-                              
-                              <div className="bg-black/50 rounded-lg p-4 border border-purple-500/20">
-                                <h4 className="text-purple-300 font-medium mb-3">Rating Breakdown</h4>
-                                <div className="space-y-2">
-                                  <div className="flex items-center justify-between text-sm">
-                                    <span className="text-gray-400">Accuracy:</span>
-                                    <div className="flex items-center gap-1.5">
-                                      <div className="h-2 w-24 bg-gray-700 rounded-full overflow-hidden">
-                                        <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" style={{width: '94%'}}></div>
-                                      </div>
-                                      <span className="text-white">4.7</span>
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center justify-between text-sm">
-                                    <span className="text-gray-400">Personalization:</span>
-                                    <div className="flex items-center gap-1.5">
-                                      <div className="h-2 w-24 bg-gray-700 rounded-full overflow-hidden">
-                                        <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" style={{width: '98%'}}></div>
-                                      </div>
-                                      <span className="text-white">4.9</span>
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center justify-between text-sm">
-                                    <span className="text-gray-400">Value:</span>
-                                    <div className="flex items-center gap-1.5">
-                                      <div className="h-2 w-24 bg-gray-700 rounded-full overflow-hidden">
-                                        <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" style={{width: '96%'}}></div>
-                                      </div>
-                                      <span className="text-white">4.8</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </CardItem>
-                          </CardBody>
-                        </div>
-                      </CardContainer>
-                    </BackgroundGradient>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              
-              <div className="flex justify-center mt-10">
-                <HoverBorderGradient
-                  as="button"
-                  onClick={() => setShowReviewSummary(!showReviewSummary)}
-                  className="px-6 py-3 bg-black text-white rounded-md"
+        <div className="w-full mx-auto">
+              <div className="text-center">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8 }}
+                  viewport={{ once: true }}
                 >
-                  <span>{showReviewSummary ? "View Individual Reviews" : "See AI-Powered Summary"}</span>
-                </HoverBorderGradient>
+                  <h2 className="text-4xl font-bold text-white mb-4">
+                    Trusted <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Review Insights</span>
+                  </h2>
+                  <p className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500  max-w-2xl mx-auto">
+                  We analyze thousands of authentic reviews, distilled for your journey,
+                  </p>
+                  <p className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500  text-sm sm:text-base max-w-3xl mx-auto">
+                  Skip hours of research—get honest, actionable summaries that highlight what truly matters at each stop in your itinerary.
+                  </p>
+                </motion.div>
               </div>
-            </div>
-          </div>
-        </section> 
+          <Reviews/>
+        </div>
+
         
-        {/* Final CTA Section */}
-         <section className="py-20 relative overflow-hidden">
+        
+        {/* Final CTA Section*/}
+        <section className="py-12 sm:py-16 lg:py-20 relative overflow-hidden">
           <div className="absolute inset-0 z-0">
             <BackgroundBeams />
           </div>
           
-          <div className="container mx-auto px-4 relative z-10">
+          <div className="container mx-auto px-4 sm:px-6 relative z-10">
             <div className="max-w-3xl mx-auto text-center">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -893,30 +709,36 @@ const Features: React.FC = () => {
                 transition={{ duration: 0.6 }}
                 viewport={{ once: true }}
               >
-                <h2 className="text-4xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-blue-500">
-                  Ready to Experience Travel Planning Reimagined?
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6">
+                  <span className="inline-block bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-blue-500">
+                    Ready to Experience Travel Planning Reimagined?
+                  </span>
                 </h2>
-                <p className="text-xl text-blue-100 mb-10">
+                <p className="text-base sm:text-lg lg:text-xl text-blue-100 mb-8 sm:mb-10 lg:mb-12 max-w-xl mx-auto">
                   Let our AI craft your perfect itinerary in seconds. No more hours of research or uncertainty.
                 </p>
                 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button
-                    borderRadius={0.75}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-none px-8 py-4"
+                <div className="flex flex-col sm:flex-row gap-5 justify-center items-center">
+                  <button 
                     onClick={() => document.getElementById('smart-form')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium px-8 py-3.5 rounded-lg shadow-md transition-all duration-200 text-base cursor-pointer"
                   >
-                    <span>Plan Your Journey Now</span>
-                  </Button>
+                    <span className="flex items-center justify-center gap-2">
+                      Plan Your Journey Now
+                      <ArrowRight className="h-5 w-5" />
+                    </span>
+                  </button>
                   
-                  <Button variant="outline" className="border border-blue-500/30 text-white hover:bg-blue-900/20 px-8">
+                  <button 
+                    className="w-full sm:w-auto border-2 border-blue-500/30 text-white hover:bg-blue-900/20 hover:border-blue-400/50 px-8 py-3.5 rounded-lg transition-all duration-200 text-base font-medium cursor-pointer"
+                  >
                     View Example Itineraries
-                  </Button>
+                  </button>
                 </div>
               </motion.div>
             </div>
           </div>
-        </section> 
+        </section>
       </div>
     </div>
   );
