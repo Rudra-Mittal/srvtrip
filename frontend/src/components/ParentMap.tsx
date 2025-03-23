@@ -5,18 +5,16 @@ import MapComponent from "./Map";
 function ParentMap() {
   // Predefined markers with names
   const predefinedMarkers = [
-    { lat: 31.0857947, lng: 77.0661085, name: "Shimla" },
-    { lat: 31.1008914, lng: 77.1763562, name: "The Ridge" },
-    { lat: 31.1040341, lng: 77.1755249, name: "Mall Road" },
-    { lat: 31.1009306, lng: 77.1763075, name: "Christ Church" },
-    { lat: 31.1013414, lng: 77.1835041, name: "Jakhu Temple" },
-    { lat: 31.1034073, lng: 77.1508082, name: "Viceregal Lodge" },
+    { lat: 48.858093, lng: 2.294694, name: "Eiffel Tower" },
+    { lat: 48.854179, lng: 2.332503, name: "Café de Flore" },
+    { lat: 48.8606,   lng: 2.3376, name: "Louvre Museum" },
+    { lat: 48.8566, lng:  2.3522, name: "Seine River" },
   ];
   
   const [hoveredMarker, setHoveredMarker] = useState<Marker | null>(null);
   const [selectedMarker, setSelectedMarker] = useState<Marker | null>(null);
   const [infoOpen, setInfoOpen] = useState<boolean  | null>(null);
-  const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+  const apiKey = "AIzaSyBZbm53yrsueed4OWNR4hv_ZCg6aUrzoP0";
  
   
   if (!apiKey) {
