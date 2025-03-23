@@ -7,7 +7,7 @@ import {
   useMapsLibrary,
   useMap,
 } from "@vis.gl/react-google-maps";
-import "./index.css";
+import "../index.css";
 
 // Interface for animation parameters
 interface AnimateZoomParams {
@@ -152,9 +152,7 @@ const MarkerManager = ({
   
   // Images for carousel
   const carouselImages = [
-    "./pexels-pixabay-533769.jpg",
-    "./download.jpeg", // Replace with your actual second image
-    "./download (1).jpeg"
+  "michael-fousert-3G1e6AxFcMA-unsplash.jpg"
     // Add more images as needed
   ];
   
@@ -423,99 +421,148 @@ const MarkerManager = ({
       })}
 
       {/* Info Window - positioned directly above marker */}
-      {infoOpen && (
-        <InfoWindow 
-          position={getInfoWindowPosition(infoOpen)}
-          pixelOffset={[0, 100]} // Increase vertical offset to position higher above marker
-          onCloseClick={handleZoomOut}
-          disableAutoPan={true} // Prevent automatic panning
-          className=""
+     {/* Info Window - positioned directly above marker */}
+{infoOpen && (
+  <InfoWindow 
+    position={getInfoWindowPosition(infoOpen)}
+    pixelOffset={[0, 100]} // Increase vertical offset to position higher above marker
+    onCloseClick={handleZoomOut}
+    disableAutoPan={true} // Prevent automatic panning
+    className=""
+  >
+    <div 
+      className="custom-infowindow"
+      onMouseEnter={handlePopupMouseEnter}
+      onMouseLeave={handlePopupMouseLeave}
+    >
+      <div style={{ position: "relative" ,  overflow: "hidden" , height: "100px"}}>
+        {/* Carousel container */}
+        {carouselImages.map((image, index) => (
+          <img
+            key={index}
+            src={image}
+            alt={`Location ${index + 1}`}
+            style={{
+              width: "100%",
+              height: "150px",
+              objectFit: "cover",
+              borderRadius: "5px 5px 0 0",
+              marginBottom: "0",
+              position: 'absolute', // Make images absolute positioned
+              top: 0,
+              left: 0,
+              opacity: currentImageIndex === index ? 1 : 0,
+              transition: "opacity 0.5s ease-in-out",
+            }}
+          />
+        ))}
+        
+        {/* Left arrow */}
+        <div
+          onClick={handlePrevImage}
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "10px",
+            transform: "translateY(-50%)",
+            backgroundColor: "rgba(255, 255, 255, 0.7)",
+            borderRadius: "50%",
+            width: "30px",
+            height: "30px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            opacity: isInfoWindowHovered ? 1 : 0,
+            transition: "opacity 0.3s ease",
+            zIndex: 10
+          }}
         >
-          <div 
-            className="custom-infowindow"
-            onMouseEnter={handlePopupMouseEnter}
-            onMouseLeave={handlePopupMouseLeave}
+          <span style={{ fontSize: "18px", fontWeight: "bold" }}>←</span>
+        </div>
+        
+        {/* Right arrow */}
+        <div
+          onClick={handleNextImage}
+          style={{
+            position: "absolute",
+            top: "50%",
+            right: "10px",
+            transform: "translateY(-50%)",
+            backgroundColor: "rgba(255, 255, 255, 0.7)",
+            borderRadius: "50%",
+            width: "30px",
+            height: "30px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            opacity: isInfoWindowHovered ? 1 : 0,
+            transition: "opacity 0.3s ease",
+            zIndex: 10
+          }}
+        >
+          <span style={{ fontSize: "18px", fontWeight: "bold" }}>→</span>
+        </div>
+      </div>
+      
+      <div style={{ padding: "8px", marginTop: "0" }}>
+        <h3 style={{ fontSize: "16px", fontWeight: "bold", margin: "3px 0" }}>
+          {infoOpen.name || "Location"}
+        </h3>
+        
+        {/* Star Rating Component */}
+       {/* Star Rating Component */}
+<div className="flex items-center mt-1 mb-2">
+  <div className="flex mr-1">
+    {[1, 2, 3, 4, 5].map((star) => {
+      const rating = infoOpen.rating || 4.5;
+      const isFullStar = star <= Math.floor(rating);
+      const isHalfStar = !isFullStar && star === Math.ceil(rating) && rating % 1 !== 0;
+      
+      return (
+        <div key={star} className="relative">
+          {/* Background star (always gray) */}
+          <svg 
+            className="w-4 h-4 text-gray-300"
+            fill="currentColor" 
+            viewBox="0 0 20 20" 
+            xmlns="http://www.w3.org/2000/svg"
           >
-            <div style={{ position: "relative" ,  overflow: "hidden" , height: "100px"}}>
-              {/* Carousel container */}
-              {carouselImages.map((image, index) => (
-                <img
-                  key={index}
-                  src={image}
-                  alt={`Location ${index + 1}`}
-                  style={{
-                    width: "100%",
-                    height: "150px",
-                    objectFit: "cover",
-                    borderRadius: "5px 5px 0 0",
-                    marginBottom: "0",
-                    position: 'absolute', // Make images absolute positioned
-                    top: 0,
-                    left: 0,
-                    opacity: currentImageIndex === index ? 1 : 0,
-                    transition: "opacity 0.5s ease-in-out",
-                  }}
-                />
-              ))}
-              
-              {/* Left arrow */}
-              <div
-                onClick={handlePrevImage}
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "10px",
-                  transform: "translateY(-50%)",
-                  backgroundColor: "rgba(255, 255, 255, 0.7)",
-                  borderRadius: "50%",
-                  width: "30px",
-                  height: "30px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  opacity: isInfoWindowHovered ? 1 : 0,
-                  transition: "opacity 0.3s ease",
-                  zIndex: 10
-                }}
-              >
-                <span style={{ fontSize: "18px", fontWeight: "bold" }}>←</span>
-              </div>
-              
-              {/* Right arrow */}
-              <div
-                onClick={handleNextImage}
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  right: "10px",
-                  transform: "translateY(-50%)",
-                  backgroundColor: "rgba(255, 255, 255, 0.7)",
-                  borderRadius: "50%",
-                  width: "30px",
-                  height: "30px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  opacity: isInfoWindowHovered ? 1 : 0,
-                  transition: "opacity 0.3s ease",
-                  zIndex: 10
-                }}
-              >
-                <span style={{ fontSize: "18px", fontWeight: "bold" }}>→</span>
-              </div>
-            </div>
-            
-            <div style={{ padding: "8px", marginTop: "0" }}>
-              <h3 style={{ fontSize: "16px", fontWeight: "bold", margin: "3px 0" }}>
-                {infoOpen.name || "Location"}
-              </h3>
-              
-            </div>
-          </div>
-        </InfoWindow>
-      )}
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+          </svg>
+          
+          {/* Full or half star overlay */}
+          {(isFullStar || isHalfStar) && (
+            <svg 
+              className="w-4 h-4 text-yellow-400 absolute top-0 left-0"
+              fill="currentColor" 
+              viewBox="0 0 20 20" 
+              xmlns="http://www.w3.org/2000/svg"
+              style={{
+                clipPath: isHalfStar ? 'polygon(0 0, 50% 0, 50% 100%, 0 100%)' : 'none'
+              }}
+            >
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+            </svg>
+          )}
+        </div>
+      );
+    })}
+  </div>
+  <span className="text-xs text-gray-600 ml-1">
+    {(infoOpen.rating || 4.5).toFixed(1)} 
+  </span>
+</div>
+        
+        {/* Location Type/Category */}
+        <div className="text-xs text-gray-500 mb-1">
+          {infoOpen.category || "Tourist Attraction"}
+        </div>
+      </div>
+    </div>
+  </InfoWindow>
+)}
     </div>
   );
 };
