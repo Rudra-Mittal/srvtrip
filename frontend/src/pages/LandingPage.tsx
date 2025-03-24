@@ -4,6 +4,9 @@ import { Spotlight } from "../components/ui/spotlight";
 import { SparklesCore } from "../components/ui/sparkles";
 import { HeroParallaxDemo, products } from "@/components/heroparallax";
 import ParentMap from "@/components/ParentMap";
+import AdTaskLanding from "./adtask";
+import { GlobeDemo } from "@/components/globeDemo";
+import LampDemo from "@/components/ui/lamp";
 // import { sample_destination_images } from "../sample_Images_itinerary";
 
 export default function LandingPage() {
@@ -20,7 +23,10 @@ export default function LandingPage() {
 
       {/* Parallax background with travel destinations */}
       <div >
-        <HeroParallaxDemo />
+         <HeroParallaxDemo />
+         {/* <GlobeDemo/> */}
+         {/* <LampDemo/> */}
+        {/* <AdTaskLanding /> */}
       </div>
       {/* <ParentMap/> */}
       {/* Scroll indicator */}
