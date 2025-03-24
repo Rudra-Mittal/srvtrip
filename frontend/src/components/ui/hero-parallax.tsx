@@ -200,11 +200,11 @@ export const Header = ({ spotlightActive = false, textVisible = false }) => {
     {/* Center spotlight with vertical animation */}
     {spotlightActive && (
       <>
-        <Spotlight
-          className="animate-[spotlight-vertical_4s_ease_0.0s_forwards] absolute top-[-15%] inset-x-0 mx-auto 
-                    sm:top-[-25%] md:top-[-30%] w-[600px] h-[600px] sm:w-[800px] sm:h-[800px]"
+       <Spotlight
+          className=""
           fill="rgb(255, 255, 255)"
         />
+
       </>
     )}
   

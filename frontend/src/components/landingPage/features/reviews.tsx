@@ -273,6 +273,25 @@ const handleAggregate = async () => {
     </motion.div>
   )
    return (
+    <div className="w-full mx-auto">
+              <div className="text-center">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8 }}
+                  viewport={{ once: true }}
+                >
+                  <h2 className="text-4xl font-bold text-white mb-4">
+                    Trusted <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Review Insights</span>
+                  </h2>
+                  <p className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500  max-w-2xl mx-auto">
+                  We analyze thousands of authentic reviews, distilled for your journey,
+                  </p>
+                  <p className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500  text-sm sm:text-base max-w-3xl mx-auto">
+                  Skip hours of research—get honest, actionable summaries that highlight what truly matters at each stop in your itinerary.
+                  </p>
+                </motion.div>
+              </div>
     <div className="flex items-center justify-center h-screen bg-black w-full max-w-4xl mx-auto my-auto">
   
       <div ref={containerRef} className="relative h-[600px] w-full flex items-center justify-center overflow-hidden">
@@ -299,5 +318,7 @@ const handleAggregate = async () => {
           
         </div>
        </div>
+       </div>
   )
 }
+        

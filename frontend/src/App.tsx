@@ -4,10 +4,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import SignupPage from './pages/SignupPage'
 import SigninPage from './pages/SigninPage'
 import { DayNumPage } from './pages/DayNumPage'
-import Middle from './components/middlepage'
-import Loader from './pages/loader'
 import Features from './components/Features'
-import LandingPage from './pages/LandingPage'
 
 
 function App() {
@@ -16,12 +13,10 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<LandingPage />} /> 
+          <Route path="/" element={<Features />} /> 
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/signin" element={<SigninPage/>} />
           <Route path="/day/:daynumber" element={<DayNumPage/>} />
-          <Route path="/middle" element= {<Middle/>}/>
-          <Route path="/loader" element={<Loader/>} />
           <Route path="/features" element={<Features/>} />
         </Routes>
       
