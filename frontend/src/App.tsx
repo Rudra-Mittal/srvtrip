@@ -5,6 +5,8 @@ import SignupPage from './pages/SignupPage'
 import SigninPage from './pages/SigninPage'
 import { DayNumPage } from './pages/DayNumPage'
 import Features from './components/Features'
+import Form from './pages/FormPage'
+import LandingPage from './pages/LandingPage'
 
 
 function App() {
@@ -13,11 +15,12 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Features />} /> 
+          <Route path="/" element={<LandingPage />} /> 
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/signin" element={<SigninPage/>} />
           <Route path="/day/:daynumber" element={<DayNumPage/>} />
           <Route path="/features" element={<Features/>} />
+          <Route path="/form" element={<Form/>} />
         </Routes>
       
       </BrowserRouter>

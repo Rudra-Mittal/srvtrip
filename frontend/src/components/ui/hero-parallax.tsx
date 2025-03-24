@@ -9,7 +9,6 @@ import {
   MotionValue,
 } from "motion/react";
 import { Spotlight } from "./spotlight";
-import { Spotlightb } from "./spotlightb";
 const words=["Extraordinary", "Stunning", "Unforgettable", "Next-Gen"];
 
 export const HeroParallax = ({
