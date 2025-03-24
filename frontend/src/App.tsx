@@ -8,6 +8,7 @@ import Middle from './components/middlepage'
 import Loader from './pages/loader'
 import Features from './components/Features'
 import LandingPage from './pages/LandingPage'
+import { ItineraryPage } from './pages/ItineraryPage'
 
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
           <Route path="/middle" element= {<Middle/>}/>
           <Route path="/loader" element={<Loader/>} />
           <Route path="/features" element={<Features/>} />
+          <Route path="/itinerary" element={<ItineraryPage/>} />
         </Routes>
       
       </BrowserRouter>

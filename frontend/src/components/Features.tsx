@@ -15,7 +15,7 @@ import { HeroParallax } from "@/components/ui/hero-parallax";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MacbookScroll } from "@/components/ui/macbook-scroll";
+// import { MacbookScroll } from "@/components/ui/macbook-scroll";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TextRevealCard } from "@/components/ui/text-reveal-card";
 import { ThreeDMarquee } from "@/components/ui/3d-marquee";
