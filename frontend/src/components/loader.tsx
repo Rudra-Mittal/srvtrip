@@ -1,15 +1,12 @@
 import { Canvas } from '@react-three/fiber'
 
 import * as THREE from 'three'  
-// Main component
 const Loader = () => {
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 0.1, 1000);
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  const camera = new THREE.PerspectiveCamera(100, window.innerWidth/window.innerHeight, 0.1, 1000);
+  const renderer = new THREE.WebGLRenderer({ antialias: false });
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
-
-  // Bouncing sphere wireframe
   const sphere = (() => {
       const geometry = new THREE.SphereGeometry(1.3, 25, 20);
       const edges = new THREE.EdgesGeometry(geometry);
@@ -148,8 +145,7 @@ const peakHeight = 5;
 let currentHeight = floorLevel;
 let bounceCount = 0;
 let velocity = Math.sqrt(2 * gravity * (peakHeight - floorLevel));
-let isAscending = true;
-  camera.position.set(8, 5, 10);
+camera.position.set(8, 5, 10);
   camera.lookAt(0, 2, 0);
 
   let lastTime = 0;
@@ -207,9 +203,8 @@ let isAscending = true;
 
   animate(0);
   return (
-     <div className='w-100 p-0'>
-       <Canvas/>
-     </div>
+    <>
+    </>
   )
 }
 
