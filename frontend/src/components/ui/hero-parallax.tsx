@@ -9,7 +9,6 @@ import {
   MotionValue,
 } from "motion/react";
 import { Spotlight } from "./spotlight";
-import { Spotlightb } from "./spotlightb";
 const words=["Extraordinary", "Stunning", "Unforgettable", "Next-Gen"];
 
 export const HeroParallax = ({
@@ -200,11 +199,11 @@ export const Header = ({ spotlightActive = false, textVisible = false }) => {
     {/* Center spotlight with vertical animation */}
     {spotlightActive && (
       <>
-        <Spotlight
-          className="animate-[spotlight-vertical_4s_ease_0.0s_forwards] absolute top-[-15%] inset-x-0 mx-auto 
-                    sm:top-[-25%] md:top-[-30%] w-[600px] h-[600px] sm:w-[800px] sm:h-[800px]"
+       <Spotlight
+          className=""
           fill="rgb(255, 255, 255)"
         />
+
       </>
     )}
   
@@ -305,7 +304,7 @@ export const ProductCard = ({
     } else if (isLoaded && !hasScrolled) {
       // Initial state or after refresh
       if (!hasEverScrolled) {
-        setImageOpacity(spotlightActive ? 0.5 : 0.9);
+        setImageOpacity(spotlightActive ? 1: 0.9);
       }
     }
     
@@ -344,9 +343,6 @@ export const ProductCard = ({
         />
       
       <div className="absolute inset-0 h-full w-full opacity-0 group-hover/product:opacity-100 group-hover/product:transition-all duration-300 ease-out pointer-events-none"></div>
-      <h2 className="absolute bottom-4 left-4 opacity-0 group-hover/product:opacity-100 text-white">
-        {product.title}
-      </h2>
-    </motion.div>
+        </motion.div>
   );
 };

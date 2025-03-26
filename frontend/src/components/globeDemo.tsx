@@ -28,6 +28,11 @@ export function GlobeDemo() {
     initialPosition: { lat: 22.3193, lng: 114.1694 },
     autoRotate: false,
     autoRotateSpeed: 1.0,
+    globeTransparency: 0.7,  // Make globe transparent
+    globeScale: 1.2,         // Scale up the globe
+    positionOffset: 0.5,     // Position to the right (0-1 range)
+    oceanOpacity: 0.6,       // Ocean layer opacity
+    starsCount: 5000, 
   };
   const colors = ["#06b6d4", "#3b82f6", "#6366f1"];
   const sampleArcs = [
