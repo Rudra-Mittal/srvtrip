@@ -1,13 +1,4 @@
 const colors = ["#06b6d4", "#3b82f6", "#6366f1"];
-export const sampleArcs = [
-"use client";
-import { motion } from "framer-motion";
-import dynamic from "next/dynamic";
-
-const World = dynamic(() => import("./ui/globe").then((m) => m.World), {
-  ssr: false,
-});
-
 export function GlobeDemo() {
   const globeConfig = {
     pointSize: 4,
@@ -37,7 +28,8 @@ export function GlobeDemo() {
     starsCount: 5000, 
   };
   const colors = ["#06b6d4", "#3b82f6", "#6366f1"];
-  const sampleArcs = [
+  };
+  export const sampleArcs = [
     {
       order: 1,
       startLat: -19.885592,
@@ -398,4 +390,4 @@ export function GlobeDemo() {
       arcAlt: 0.3,
       color: colors[Math.floor(Math.random() * (colors.length - 1))],
     },
-  ];
+  ]

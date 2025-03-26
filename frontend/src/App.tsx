@@ -9,6 +9,7 @@ import Form from './pages/FormPage'
 import LandingPage from './pages/LandingPage'
 import FormPage from './pages/FormPage'
 import Loader from './components/loader'
+import { ItineraryPage } from './pages/ItineraryPage'
 
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
           <Route path="/day/:daynumber" element={<DayNumPage/>} />
           <Route path="/features" element={<Features/>} />
           <Route path="/form" element={<FormPage/>} />
+          <Route path="/itinerary" element={<ItineraryPage/>}/>
         </Routes>
       
       </BrowserRouter>

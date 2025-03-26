@@ -14,19 +14,18 @@ export default function LandingPage() {
   const smartFormRef = React.useRef<HTMLDivElement>(null);  
   const itineraryRef = React.useRef<HTMLDivElement>(null);
   const chatbotRef = React.useRef<HTMLDivElement>(null);
-  // Reformat the sample images for HeroParallax
-//   const heroImages = sample_destination_images.map((item, index) => ({
-//     title: item.title,
-//     link: "#",
-//     thumbnail: item.url,
-//   }));
+  useEffect(()=>{
+    setTimeout(()=>{
+      setFormVisible(true)
+    },200)
+  },[])
 
   return (
     <div className="bg-black min-h-screen text-white overflow-hidden">
       <HeroParallaxDemo/>
       <div className="relative">
         {/* Smart Form Section */}
-        <section id="smart-form" className="py-6 sm:py-10 lg:py-14" ref={smartFormRef}>
+        <section id="smart-form" className="" ref={smartFormRef}>
           <SmartForm smartFormRef={smartFormRef} formVisible={formVisible}/>
         </section>
         {/* AI-Generated Itinerary Timeline */}
