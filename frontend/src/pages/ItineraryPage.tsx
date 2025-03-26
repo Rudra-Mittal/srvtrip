@@ -1,7 +1,6 @@
 import { Boxes } from "@/components/ui/background-boxes";
-import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect, useRef } from "react";
-import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import { useState, useRef } from "react";
 import {DayCard} from "@/components/ItineraryDayCard";
 
 export const ItineraryPage = () => {
