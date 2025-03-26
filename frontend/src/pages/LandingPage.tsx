@@ -8,18 +8,18 @@ import MapLanding from "@/components/landingPage/features/mapLanding";
 import Chatbot from "@/components/landingPage/features/chatbot";
 import CtaSection from "@/components/landingPage/footer/ctaSection";
 import ThreeDMarque from "@/components/landingPage/footer/threedmarquee";
-
-const LandingPage: React.FC = () => {
+  
+export default function LandingPage() {
   const [formVisible, setFormVisible] = useState(false);
   const smartFormRef = React.useRef<HTMLDivElement>(null);  
   const itineraryRef = React.useRef<HTMLDivElement>(null);
   const chatbotRef = React.useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFormVisible(true);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, []);
+  // Reformat the sample images for HeroParallax
+//   const heroImages = sample_destination_images.map((item, index) => ({
+//     title: item.title,
+//     link: "#",
+//     thumbnail: item.url,
+//   }));
 
   return (
     <div className="bg-black min-h-screen text-white overflow-hidden">
@@ -57,4 +57,3 @@ const LandingPage: React.FC = () => {
   );
 };
 
-export default LandingPage;

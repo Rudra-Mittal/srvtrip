@@ -1,5 +1,43 @@
 const colors = ["#06b6d4", "#3b82f6", "#6366f1"];
 export const sampleArcs = [
+"use client";
+import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
+
+const World = dynamic(() => import("./ui/globe").then((m) => m.World), {
+  ssr: false,
+});
+
+export function GlobeDemo() {
+  const globeConfig = {
+    pointSize: 4,
+    globeColor: "rgba(29, 7, 46, 1)",
+    showAtmosphere: true,
+    atmosphereColor: "FF0000",
+    atmosphereAltitude: 0.1,
+    emissive: "#062056",
+    emissiveIntensity: 0.1,
+    shininess: 0.9,
+    polygonColor: "rgba(255,255,255,0.7)",
+    ambientLight: "#38bdf8",
+    directionalLeftLight: "#ffffff",
+    directionalTopLight: "#ffffff",
+    pointLight: "#ffffff",
+    arcTime: 1000,
+    arcLength: 0.9,
+    rings: 1,
+    maxRings: 3,
+    initialPosition: { lat: 22.3193, lng: 114.1694 },
+    autoRotate: false,
+    autoRotateSpeed: 1.0,
+    globeTransparency: 0.7,  // Make globe transparent
+    globeScale: 1.2,         // Scale up the globe
+    positionOffset: 0.5,     // Position to the right (0-1 range)
+    oceanOpacity: 0.6,       // Ocean layer opacity
+    starsCount: 5000, 
+  };
+  const colors = ["#06b6d4", "#3b82f6", "#6366f1"];
+  const sampleArcs = [
     {
       order: 1,
       startLat: -19.885592,

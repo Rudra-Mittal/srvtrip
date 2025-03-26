@@ -39,7 +39,7 @@ export const products = [
   {
     title: "Machu Picchu, Peru",
     link: "https://en.wikipedia.org/wiki/Machu_Picchu",
-    thumbnail: "https://images.unsplash.com/photo-1526392060635-9d6019884377?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
+    thumbnail: "https://images.unsplash.com/photo-1500581276021-a4bbcd0050c5?q=80&w=2070&auto=format&fit=crop",
   },
   {
     title: "Sahara Desert, Morocco",

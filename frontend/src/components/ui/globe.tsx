@@ -1,16 +1,33 @@
-"use client";
 import { useEffect, useRef, useState } from "react";
+import * as THREE from "three";
 import { Color, Scene, Fog, PerspectiveCamera, Vector3 } from "three";
 import ThreeGlobe from "three-globe";
 import { useThree, Canvas, extend } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import {countries} from "@/data/globe";
+import {countries} from "@/data/globe.ts";
 declare module "@react-three/fiber" {
   interface ThreeElements {
     threeGlobe: ThreeElements["mesh"] & {
       new (): ThreeGlobe;
+      // Right-side positioning offset (0 is center, 1 is far right)
     };
   }
+}
+
+function hexToRgb(hex: string) {
+  // Remove the # if present
+  hex = hex.replace(/^#/, '');
+  
+  // Parse the hex values
+  const bigint = parseInt(hex, 16);
+  
+  // Extract the RGB components
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  
+  // Return as an object
+  return { r, g, b };
 }
 
 extend({ ThreeGlobe: ThreeGlobe });
@@ -53,6 +70,8 @@ export type GlobeConfig = {
   };
   autoRotate?: boolean;
   autoRotateSpeed?: number;
+  globeScale?: number; // Scale factor for the globe
+  positionOffset?: number;
 };
 
 interface WorldProps {
@@ -64,8 +83,13 @@ let numbersOfRings = [0];
 
 export function Globe({ globeConfig, data }: WorldProps) {
   const globeRef = useRef<ThreeGlobe | null>(null);
-  const groupRef = useRef();
+  const groupRef = useRef<THREE.Group | null>(null);
+  const layersGroupRef = useRef<THREE.Group | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  
+  // Add refs for custom layers
+  const oceanSphereRef = useRef<THREE.Mesh | null>(null);
+  const starsLayerRef = useRef<THREE.Points | null>(null);
 
   const defaultProps = {
     pointSize: 1,
@@ -81,17 +105,151 @@ export function Globe({ globeConfig, data }: WorldProps) {
     arcLength: 0.9,
     rings: 1,
     maxRings: 3,
+    globeScale: 1.2,             // Scale factor for the globe
+    globeTransparency: 0.7,      // Transparency for the globe
+    oceanOpacity: 0.6,           // Opacity for ocean layer
+    starsCount: 5000,            // Number of star particles
+    starsSize: 0.05,             // Size of star particles
+    positionOffset: 0.5,         // Right-side positioning offset (0 is center, 1 is far right)
     ...globeConfig,
   };
 
-  // Initialize globe only once
+  // Initialize globe and custom layers
   useEffect(() => {
     if (!globeRef.current && groupRef.current) {
+      // Create a group for all layers to maintain synchronization
+      layersGroupRef.current = new THREE.Group();
+      (groupRef.current as any).add(layersGroupRef.current);
+      
+      // Position the layersGroup based on offset
+      if (defaultProps.positionOffset) {
+        groupRef.current.position.x = defaultProps.positionOffset * 100;
+      }
+      
+      // Base ThreeGlobe component setup
       globeRef.current = new ThreeGlobe();
-      (groupRef.current as any).add(globeRef.current);
+      
+      // Set scale for globe
+      globeRef.current.scale.set(
+        defaultProps.globeScale, 
+        defaultProps.globeScale, 
+        defaultProps.globeScale
+      );
+      
+      (layersGroupRef.current as any).add(globeRef.current);
+      
+      // Add ocean layer (semi-transparent sphere)
+      const oceanGeometry = new THREE.SphereGeometry(
+        1.02 * defaultProps.globeScale, 
+        50, 
+        50
+      );
+      const oceanMaterial = new THREE.MeshPhongMaterial({
+        color: new THREE.Color('#006994'),
+        transparent: true,
+        opacity: defaultProps.oceanOpacity,
+        shininess: 100,
+        side: THREE.DoubleSide,
+      });
+      oceanSphereRef.current = new THREE.Mesh(oceanGeometry, oceanMaterial);
+      
+      // Add the ocean to the same group that contains the globe
+      (layersGroupRef.current as any).add(oceanSphereRef.current);
+      
+      // Add twinkling stars layer
+      const starsGeometry = new THREE.BufferGeometry();
+      const starsVertices = [];
+      const starsSizes = [];
+      const starsColors = [];
+      
+      // Generate random stars around the globe
+      for (let i = 0; i < defaultProps.starsCount; i++) {
+        const radius = (1.04 + Math.random() * 0.05) * defaultProps.globeScale;
+        const phi = Math.random() * Math.PI * 2;
+        const theta = Math.random() * Math.PI;
+        
+        const x = radius * Math.sin(theta) * Math.cos(phi);
+        const y = radius * Math.sin(theta) * Math.sin(phi);
+        const z = radius * Math.cos(theta);
+        
+        starsVertices.push(x, y, z);
+        
+        // Random sizes for stars
+        starsSizes.push(0.01 + Math.random() * defaultProps.starsSize);
+        
+        // Colors with slight variations of white/blue
+        const r = 0.8 + Math.random() * 0.2;
+        const g = 0.8 + Math.random() * 0.2;
+        const b = 0.9 + Math.random() * 0.1;
+        starsColors.push(r, g, b);
+      }
+      
+      starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
+      starsGeometry.setAttribute('size', new THREE.Float32BufferAttribute(starsSizes, 1));
+      starsGeometry.setAttribute('color', new THREE.Float32BufferAttribute(starsColors, 3));
+      
+      const starsMaterial = new THREE.PointsMaterial({
+        size: defaultProps.starsSize,
+        vertexColors: true,
+        transparent: true,
+        depthWrite: false,
+      });
+      
+      starsLayerRef.current = new THREE.Points(starsGeometry, starsMaterial);
+      
+      // Add stars to the layersGroup instead of directly to the globe
+      (layersGroupRef.current as any).add(starsLayerRef.current);
+      
       setIsInitialized(true);
     }
   }, []);
+  
+  // Sync rotation for all layers
+  useEffect(() => {
+    if (!isInitialized || !globeRef.current || !layersGroupRef.current) return;
+    
+    const syncRotation = () => {
+      const frameId = requestAnimationFrame(syncRotation);
+      
+      // We don't need to manually update rotations as they're all in the same group
+      // This is just to ensure the animation frame keeps running for twinkling
+      
+      return () => cancelAnimationFrame(frameId);
+    };
+    
+    const frameId = requestAnimationFrame(syncRotation);
+    return () => cancelAnimationFrame(frameId);
+  }, [isInitialized]);
+  
+  // Animation loop for twinkling stars
+  useEffect(() => {
+    if (!starsLayerRef.current || !isInitialized) return;
+    
+    const starsTwinkle = () => {
+      if (!starsLayerRef.current) return;
+      
+      const sizes = starsLayerRef.current.geometry.attributes.size;
+      const count = sizes.count;
+      
+      for (let i = 0; i < count; i++) {
+        // Slightly vary size to create twinkling effect
+        const scale = 0.8 + Math.random() * 0.4;
+        sizes.array[i] *= scale;
+        
+        // Keep sizes within bounds
+        if (sizes.array[i] > defaultProps.starsSize * 1.2) {
+          sizes.array[i] = defaultProps.starsSize * 0.8;
+        } else if (sizes.array[i] < defaultProps.starsSize * 0.5) {
+          sizes.array[i] = defaultProps.starsSize * 0.7;
+        }
+      }
+      
+      sizes.needsUpdate = true;
+    };
+    
+    const interval = setInterval(starsTwinkle, 100);
+    return () => clearInterval(interval);
+  }, [isInitialized]);
 
   // Build material when globe is initialized or when relevant props change
   useEffect(() => {
@@ -102,11 +260,23 @@ export function Globe({ globeConfig, data }: WorldProps) {
       emissive: Color;
       emissiveIntensity: number;
       shininess: number;
+      transparent: boolean;
+      opacity: number;
     };
+    
+    // Make globe transparent
+    globeMaterial.transparent = true;
+    globeMaterial.opacity = defaultProps.globeTransparency;
+    
     globeMaterial.color = new Color(globeConfig.globeColor);
     globeMaterial.emissive = new Color(globeConfig.emissive);
     globeMaterial.emissiveIntensity = globeConfig.emissiveIntensity || 0.1;
     globeMaterial.shininess = globeConfig.shininess || 0.9;
+    
+    // Update ocean layer if config changes
+    if (oceanSphereRef.current) {
+      (oceanSphereRef.current.material as THREE.MeshPhongMaterial).opacity = defaultProps.oceanOpacity;
+    }
   }, [
     isInitialized,
     globeConfig.globeColor,
@@ -249,53 +419,52 @@ export function WebGLRendererConfig() {
 export function World(props: WorldProps) {
   const { globeConfig } = props;
   const scene = new Scene();
-  scene.fog = new Fog(0xffffff, 400, 2000);
+  scene.fog = new Fog(0xffffff, 400, 2500); // Increased fog distance
+  
+  // Increase camera distance to accommodate the larger globe
+  const adjustedCameraZ = cameraZ * (props.globeConfig.globeScale || 1.8) / 1.2;
+  
+  const cameraPosition = globeConfig.positionOffset ? 
+    new Vector3(0, 0, adjustedCameraZ) : 
+    new Vector3(-(globeConfig.positionOffset ?? 0) * 100, 0, adjustedCameraZ);
+  
+  const targetPosition = globeConfig.positionOffset ? 
+    new Vector3(globeConfig.positionOffset * 100, 0, 0) : 
+    new Vector3(0, 0, 0);
+  
   return (
-    <Canvas scene={scene} camera={new PerspectiveCamera(50, aspect, 180, 1800)}>
+    <Canvas scene={scene} camera={new PerspectiveCamera(50, aspect, 180, 2500)}>
       <WebGLRendererConfig />
-      <ambientLight color={globeConfig.ambientLight} intensity={0.6} />
+      <ambientLight color={globeConfig.ambientLight} intensity={0.8} />
       <directionalLight
         color={globeConfig.directionalLeftLight}
         position={new Vector3(-400, 100, 400)}
+        intensity={0.8}
       />
       <directionalLight
         color={globeConfig.directionalTopLight}
         position={new Vector3(-200, 500, 200)}
+        intensity={0.9}
       />
       <pointLight
         color={globeConfig.pointLight}
         position={new Vector3(-200, 500, 200)}
-        intensity={0.8}
+        intensity={1.0}
       />
       <Globe {...props} />
       <OrbitControls
         enablePan={false}
         enableZoom={false}
-        minDistance={cameraZ}
-        maxDistance={cameraZ}
+        minDistance={adjustedCameraZ}
+        maxDistance={adjustedCameraZ}
         autoRotateSpeed={1}
         autoRotate={true}
         minPolarAngle={Math.PI / 3.5}
         maxPolarAngle={Math.PI - Math.PI / 3}
+        target={targetPosition}
       />
     </Canvas>
   );
-}
-
-export function hexToRgb(hex: string) {
-  var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-  hex = hex.replace(shorthandRegex, function (m, r, g, b) {
-    return r + r + g + g + b + b;
-  });
-
-  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16),
-      }
-    : null;
 }
 
 export function genRandomNumbers(min: number, max: number, count: number) {

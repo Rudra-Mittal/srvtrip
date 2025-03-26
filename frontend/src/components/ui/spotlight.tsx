@@ -60,7 +60,7 @@ export const Spotlight = ({
       const easedProgress = ease(linearProgress);
       
       // Calculate current radius percentage
-      const radius = Math.min(100, Math.round(easedProgress * 100));
+      const radius = Math.min(150, Math.round(easedProgress * 150)); // Increased max radius to 150
       
       console.log(`Animating spotlight radius: ${radius}%`);
       gradient.setAttribute("r", `${radius}%`);
@@ -83,17 +83,17 @@ export const Spotlight = ({
   const primaryColor = mode === "light" ? "white" : "#111";
   const mixBlendMode = mode === "light" ? "screen" : "multiply";
   
-  // Calculate points
-  const halfSpread = width / 3;
+  // Calculate points - adjusted to make the spotlight extend to the bottom
+  const halfSpread = width / 2; // Increased spread
   const leftPoint = Math.min(0, 50 - halfSpread);
   const rightPoint = Math.max(100, 50 + halfSpread);
-  const points = `50,0 ${leftPoint},100 ${rightPoint},100`;
+  const points = `50,0 ${leftPoint},150 ${rightPoint},150`; // Increased vertical reach to 150
   
   return (
     <div className={cn("absolute inset-0 z-10", className)} style={{ pointerEvents: "none" }}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 100 100"
+        viewBox="0 0 100 150" // Extended viewBox height to 150
         width="100%"
         height="100%"
         style={{ 
@@ -109,10 +109,10 @@ export const Spotlight = ({
             ref={gradientRef}
             id={`${uniqueId}-gradient`}
             cx="50%"
-            cy="20%"
+            cy="10%" // Moved gradient origin higher
             r="0%" 
             fx="50%"
-            fy="20%"
+            fy="10%" // Moved focal point higher
             style={{ transition: "r" }}
           >
             <stop offset="0%" stopColor={primaryColor} stopOpacity={intensity} />

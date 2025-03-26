@@ -304,7 +304,7 @@ export const ProductCard = ({
     } else if (isLoaded && !hasScrolled) {
       // Initial state or after refresh
       if (!hasEverScrolled) {
-        setImageOpacity(spotlightActive ? 0.5 : 0.9);
+        setImageOpacity(spotlightActive ? 1: 0.9);
       }
     }
     
@@ -343,9 +343,6 @@ export const ProductCard = ({
         />
       
       <div className="absolute inset-0 h-full w-full opacity-0 group-hover/product:opacity-100 group-hover/product:transition-all duration-300 ease-out pointer-events-none"></div>
-      <h2 className="absolute bottom-4 left-4 opacity-0 group-hover/product:opacity-100 text-white">
-        {product.title}
-      </h2>
-    </motion.div>
+        </motion.div>
   );
 };
