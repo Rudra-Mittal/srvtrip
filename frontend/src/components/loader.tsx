@@ -1,12 +1,25 @@
-import { Canvas } from '@react-three/fiber'
-
+import { useEffect, useRef } from 'react';
 import * as THREE from 'three'  
 const Loader = () => {
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(100, window.innerWidth/window.innerHeight, 0.1, 1000);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const animationIdRef = useRef<number>(0);
+  useEffect(()=>{
+    if (!containerRef.current) return;
+    const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 1000);
   const renderer = new THREE.WebGLRenderer({ antialias: false });
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
+  sceneRef.current = scene;
+    cameraRef.current = camera;
+    rendererRef.current = renderer;
+
+    const container = containerRef.current;
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(renderer.domElement);
   const sphere = (() => {
       const geometry = new THREE.SphereGeometry(1.3, 25, 20);
       const edges = new THREE.EdgesGeometry(geometry);
@@ -149,8 +162,20 @@ camera.position.set(8, 5, 10);
   camera.lookAt(0, 2, 0);
 
   let lastTime = 0;
+
+      // Handle container resize
+      const resizeObserver = new ResizeObserver(() => {
+        if (!cameraRef.current || !rendererRef.current || !containerRef.current) return;
+        
+        const { clientWidth, clientHeight } = containerRef.current;
+        cameraRef.current.aspect = clientWidth / clientHeight;
+        cameraRef.current.updateProjectionMatrix();
+        rendererRef.current.setSize(clientWidth, clientHeight);
+      });
+  
+      resizeObserver.observe(containerRef.current);
   function animate(timestamp: number) {
-    requestAnimationFrame(animate);
+    if (!sceneRef.current || !cameraRef.current || !rendererRef.current) return;
     
     const deltaTime = (timestamp - lastTime) / 1000;
     lastTime = timestamp;
@@ -191,21 +216,27 @@ camera.position.set(8, 5, 10);
 
     updateObject(cameraWireframe, isCameraTurn);
     updateObject(suitcaseWireframe, !isCameraTurn);
-
+    rendererRef.current.render(sceneRef.current, cameraRef.current);
+    animationIdRef.current = requestAnimationFrame(animate);
     renderer.render(scene, camera);
 }
+animationIdRef.current = requestAnimationFrame(animate);
 
   window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth/window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
   });
-
-  animate(0);
-  return (
-    <>
-    </>
-  )
+  return () => {
+    resizeObserver.disconnect();
+    if (animationIdRef.current) cancelAnimationFrame(animationIdRef.current);
+    if (rendererRef.current) {
+      rendererRef.current.dispose();
+      container.removeChild(rendererRef.current.domElement);
+    }
+  };
+},[])
+return <div ref={containerRef} style={{ width: '50vh', height: '50vh' }} />;
 }
 
 export default Loader

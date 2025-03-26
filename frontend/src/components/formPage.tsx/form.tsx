@@ -40,8 +40,6 @@ export default function Form() {
 
   // Visual effect states
   const [isAggregating, setIsAggregating] = useState(false);
-  const [isSwirling, setIsSwirling] = useState(false);
-  const [showStar, setShowStar] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [formVisible, setFormVisible] = useState(false);
@@ -58,18 +56,6 @@ export default function Form() {
       opacity: 0, 
       y: -20,
       transition: { duration: 0.4, ease: "easeIn" }
-    }
-  };
-
-  
-  // Star animation control
-  const starAnimation = {
-    rotate: 360,
-    scale: [0, 1, 1.2, 1],
-    opacity: 1,
-    transition: {
-      duration: 1.5,
-      ease: "easeInOut"
     }
   };
 
@@ -114,17 +100,11 @@ export default function Form() {
   const handleAggregate = async () => {
     // Step 1: Start merging animation
     setIsAggregating(true);
-    setIsSwirling(true);
-
-    // Step 2: After merging, show animated star
     setTimeout(() => {
-      setIsSwirling(false);
-      setShowStar(true);
       console.log("Star should be visible now");
 
       // Animate the star
       setTimeout(() => {
-        setShowStar(false);
         setShowSummary(true);
       }, 2500);
     }, 1300);
@@ -134,9 +114,7 @@ export default function Form() {
   const nextStep = () => {
     if (currentStep < 4) {
       // Add a small delay for exit animation
-      setTimeout(() => {
-        setCurrentStep(currentStep + 1);
-      }, 200);
+      setCurrentStep(currentStep + 1);
     }
   };
 
@@ -144,9 +122,7 @@ export default function Form() {
   const prevStep = () => {
     if (currentStep > 1) {
       // Add a small delay for exit animation
-      setTimeout(() => {
         setCurrentStep(currentStep - 1);
-      }, 200);
     }
   };
 
@@ -154,9 +130,7 @@ export default function Form() {
   const goToStep = (step: number) => {
     if (step >= 1 && step <= 4) {
       // Add a small delay for exit animation
-      setTimeout(() => {
         setCurrentStep(step);
-      }, 200);
     }
   };
 
@@ -172,7 +146,9 @@ export default function Form() {
   return (
     <div className="relative min-h-screen bg-black text-white flex flex-col items-center justify-center p-4 overflow-hidden">
       <BackgroundBeams className="absolute inset-0 opacity-20" />
-      
+      {/* <div> */}
+     
+      {/* </div> */}
       {/* Animated background particles */}
       {particles.map(particle => (
         <motion.div
@@ -593,26 +569,26 @@ export default function Form() {
                       <div className="space-y-4 p-4 rounded-lg border border-blue-500/20 bg-black/40">
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <p className="text-gray-400 text-sm">Destination</p>
-                            <p className="text-white">{formData.destination || "Not specified"}</p>
+                            <p className="text-gray-400 text-sm md:text-base">Destination</p>
+                            <p className="text-white text-base md:text-lg font-medium">
+                              {formData.destination || "Not specified"}
+                            </p>
                           </div>
                           <div>
-                            <p className="text-gray-400 text-sm">Start Date</p>
-                            <p className="text-white">
+                            <p className="text-gray-400 text-sm md:text-base">Start Date</p>
+                            <p className="text-white text-base md:text-lg font-medium">
                               {formData.startDate ? format(formData.startDate, "PPP") : "Not specified"}
                             </p>
                           </div>
                           <div>
-                            <p className="text-gray-400 text-sm">Budget</p>
-                            <p className="text-white">${formData.budget}</p>
+                            <p className="text-gray-400 text-sm md:text-base">Budget</p>
+                            <p className="text-white text-base md:text-lg font-medium">${formData.budget}</p>
                           </div>
                           <div>
-                            <p className="text-gray-400 text-sm">Travelers</p>
-                            <p className="text-white">{formData.persons} {formData.persons === 1 ? "person" : "people"}</p>
+                            <p className="text-gray-400 text-sm md:text-base">Travelers</p>
+                            <p className="text-white text-base md:text-lg font-medium">{formData.persons} {formData.persons === 1 ? "person" : "people"}</p>
                           </div>
                           <div>
-                            <p className="text-gray-400 text-sm">Duration</p>
-                            <p className="text-white">{formData.days} days</p>
                           </div>
                           <div>
                             <p className="text-gray-400 text-sm">Interests</p>
@@ -626,7 +602,7 @@ export default function Form() {
                         
                         {formData.customRequests && (
                           <div className="mt-2">
-                            <p className="text-gray-400 text-sm">Special Requests</p>
+                            <p className="text-gray-400 text-md">Special Requests</p>
                             <p className="text-white">{formData.customRequests}</p>
                           </div>
                         )}
@@ -656,17 +632,18 @@ export default function Form() {
                 </AnimatePresence>
               </form>
             </BackgroundGradient>
+            {/* <Loader/> */}
           </motion.div>
         )}
 
         {/* Swirling aggregation effect */}
-        {isSwirling && (
+        {/* {isSwirling && (
           <motion.div 
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             exit={{ scale: 0 }}
             className="absolute inset-0 flex items-center justify-center z-20"
-          >
+            >
             <div className="relative w-40 h-40">
               {Array.from({ length: 12 }).map((_, i) => (
                 <motion.div
@@ -692,75 +669,35 @@ export default function Form() {
               ))}
             </div>
           </motion.div>
-        )}
+        )} */}
 
-        {/* Animated star effect */}
-        <AnimatePresence>
-          {showStar && (
-            <motion.div
-              className="absolute z-30"
-              initial={{ scale: 0, opacity: 0 }}
-              animate={starAnimation}
-              exit={{ scale: 1.5, opacity: 0, transition: { duration: 0.4 } }}
-            >
-              <div className="relative">
-                {/* Star shape with gradient */}
-                <div className="w-40 h-40 relative flex items-center justify-center">
-                  <svg viewBox="0 0 60 60" className="w-full h-full">
-                    <defs>
-                      <linearGradient id="starGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#FFD700">
-                          <animate
-                            attributeName="stop-color"
-                            values="#FFD700; #FFA500; #FF8C00; #FFD700"
-                            dur="3s"
-                            repeatCount="indefinite"
-                          />
-                        </stop>
-                        <stop offset="100%" stopColor="#FFA500">
-                          <animate
-                            attributeName="stop-color"
-                            values="#FFA500; #FF8C00; #FFD700; #FFA500"
-                            dur="3s"
-                            repeatCount="indefinite"
-                          />
-                        </stop>
-                      </linearGradient>
-                    </defs>
-                    <path
-                      d="M30 5L36.7553 22.4549H55.2257L40.2352 33.0902L46.9905 50.5451L30 39.9098L13.0095 50.5451L19.7648 33.0902L4.77427 22.4549H23.2447L30 5Z"
-                      fill="url(#starGradient)"
-                    />
-                  </svg>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
+     
         {/* Success summary */}
         <AnimatePresence>
           {showSummary && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-              className="text-center z-20"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="text-center z-20"
             >
+              <div>
+                <Loader/>
+                </div>
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
-              >
+                >
                 <Sparkles className="w-16 h-16 mx-auto text-blue-400 mb-4" />
                 <h2 className="text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
                   Creating Your Perfect Trip!
+                  
                 </h2>
                 <p className="text-blue-200 mb-8 max-w-md mx-auto">
                   We're generating a personalized itinerary for your {formData.days}-day adventure to {formData.destination}. This might take a moment.
                 </p>
-                {/* Need to fix this loader*/}
-              <Loader/>                
+                           
                 <div className="relative h-2 w-64 mx-auto bg-gray-700 rounded-full overflow-hidden">
                   <motion.div
                     className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-purple-500"
