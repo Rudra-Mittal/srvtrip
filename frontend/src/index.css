@@ -308,3 +308,23 @@
   display: none;
 }
 /* Add new keyframes for spotlight-x effect */
+/* Ensure consistent card sizing */
+.snap-center {
+  scroll-snap-align: center;
+}
+
+/* Improve scroll container performance */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  
+  &::-webkit-scrollbar {
+      display: none;
+  }
+}
+
+/* Card transition base styles */
+.day-card {
+  transition: transform 300ms ease, box-shadow 300ms ease;
+  transform-origin: center center;
+}

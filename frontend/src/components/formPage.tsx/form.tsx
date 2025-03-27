@@ -231,7 +231,7 @@ export default function Form() {
                         key={step}
                         type="button"
                         onClick={() => goToStep(step)}
-                        className={`text-xs px-2 py-1 rounded-md cursor-pointer ${
+                        className={`sm:text-sm   md:text-xl  px-2 py-1 rounded-md cursor-pointer ${
                           step === currentStep 
                             ? 'text-blue-400 font-medium' 
                             : 'text-gray-400 hover:text-gray-200'
@@ -256,7 +256,7 @@ export default function Form() {
                       transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 30 }}
                       className="space-y-6"
                     >
-                      <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
+                      <h2 className="sm:text-sm   md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
                         Where to?
                       </h2>
                       
@@ -268,7 +268,7 @@ export default function Form() {
                             value={formData.destination}
                             onChange={(e) => handleChange("destination", e.target.value)}
                             placeholder="Dream destination..."
-                            className="bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white h-12 pl-10"
+                            className="bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white h-12 pl-10 sm:text-sm   md:text-xl"
                           />
                           <span className="absolute left-3 top-3 text-blue-400">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

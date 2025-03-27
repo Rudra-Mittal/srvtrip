@@ -172,7 +172,7 @@ export const TravelPlannerForm: React.FC = () => {
                   type="text"
                   id="destination"
                   name="destination"
-                  placeholder="Paradise awaits..."
+                  placeholder="Paradise..."
                   value={formData.destination}
                   onChange={handleChange}
                   className="w-full pl-10 py-3 bg-gray-700/50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400 outline-none transition-all"
@@ -183,7 +183,7 @@ export const TravelPlannerForm: React.FC = () => {
 
             {/* Budget slider */}
             <motion.div className="mb-6" variants={itemVariants}>
-              <label className="block text-purple-300 mb-2 font-medium" htmlFor="budget">
+              <label className="block text-purple-300 mb-2 font-large" htmlFor="budget">
                 Budget (USD): ${formData.budget}
               </label>
               <input
@@ -197,7 +197,7 @@ export const TravelPlannerForm: React.FC = () => {
                 onChange={handleChange}
                 className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
               />
-              <div className="flex justify-between text-xs text-gray-400 mt-1">
+              <div className="flex justify-between text-s text-gray-400 mt-1">
                 <span>$100</span>
                 <span>$10,000</span>
               </div>
@@ -232,7 +232,7 @@ export const TravelPlannerForm: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-purple-300 mb-2 font-medium" htmlFor="days">
+                <label className="block text-purple-300 mb-2 font-large" htmlFor="days">
                   Duration (days)
                 </label>
                 <div className="relative">
