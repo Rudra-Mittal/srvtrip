@@ -8,6 +8,7 @@ import MapLanding from "@/components/landingPage/features/mapLanding";
 import Chatbot from "@/components/landingPage/features/chatbot";
 import CtaSection from "@/components/landingPage/footer/ctaSection";
 import ThreeDMarque from "@/components/landingPage/footer/threedmarquee";
+import {Navbar} from "@/components/Navbar";
   
 export default function LandingPage() {
   const [formVisible, setFormVisible] = useState(false);
@@ -22,6 +23,7 @@ export default function LandingPage() {
 
   return (
     <div className="bg-black min-h-screen text-white overflow-hidden">
+      <Navbar/>
       <HeroParallaxDemo/>
       <div className="relative">
         {/* Smart Form Section */}
