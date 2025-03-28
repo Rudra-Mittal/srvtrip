@@ -1,6 +1,6 @@
 import {motion} from "framer-motion";
 import {cn} from "@/lib/utils";
-import {useState, useEffect} from "react";
+import {useState, useEffect, useRef} from "react";
 import {AnimatePresence} from "framer-motion";
 
 interface DayCardProps {
@@ -15,7 +15,7 @@ interface DayCardProps {
 export const DayCard = ({ day, date, title, description, images, placesVisited }: DayCardProps) => {
     const [isHovered, setIsHovered] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
+    const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     // Auto-rotate images when card is expanded
     useEffect(() => {
         let interval: NodeJS.Timeout;
@@ -30,7 +30,22 @@ export const DayCard = ({ day, date, title, description, images, placesVisited }
             if (interval) clearInterval(interval);
         };
     }, [isHovered, images.length]);
-
+    const handleHoverStart = () => {
+        // Set a timeout for 1 second before expanding
+        hoverTimeoutRef.current = setTimeout(() => {
+            setIsHovered(true);
+            hoverTimeoutRef.current = null;
+        }, 1000);
+    };
+    const handleHoverEnd = () => {
+        // Clear the timeout if it exists
+        if (hoverTimeoutRef.current) {
+            clearTimeout(hoverTimeoutRef.current);
+            hoverTimeoutRef.current = null;
+        }
+        // Reset hover state
+        setIsHovered(false);
+    };
     // Fixed height for both collapsed and expanded states
     const cardHeight = 360; // Increased height to show more of the image
 
@@ -50,8 +65,8 @@ export const DayCard = ({ day, date, title, description, images, placesVisited }
                     damping: 20
                 }
             }}
-            onHoverStart={() => setIsHovered(true)}
-            onHoverEnd={() => setIsHovered(false)}
+            onHoverStart={handleHoverStart}
+            onHoverEnd={handleHoverEnd}
             style={{
                 boxShadow: isHovered 
                     ? "0 0 60px rgba(79, 70, 229, 0.3)" 

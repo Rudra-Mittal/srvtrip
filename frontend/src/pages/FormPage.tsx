@@ -7,7 +7,7 @@ export default function FormPage(){
         <Form/>
       </div>
       <div className="py-4">
-        <Globe/>
+        {/* <Globe/> */}
         
       </div>
     </div>

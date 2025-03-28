@@ -43,17 +43,17 @@ export default function Form() {
   const [showSummary, setShowSummary] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [formVisible, setFormVisible] = useState(false);
-  
+
   // Animation variants
   const formVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       transition: { duration: 0.6, ease: "easeOut" }
     },
-    exit: { 
-      opacity: 0, 
+    exit: {
+      opacity: 0,
       y: -20,
       transition: { duration: 0.4, ease: "easeIn" }
     }
@@ -69,7 +69,7 @@ export default function Form() {
 
   // Interest options
   const interestOptions = [
-    "Beach", "Mountains", "City", "History", "Food", 
+    "Beach", "Mountains", "City", "History", "Food",
     "Adventure", "Relaxation", "Shopping", "Nature", "Culture",
     "Nightlife", "Architecture", "Art", "Music", "Local Experiences"
   ];
@@ -122,7 +122,7 @@ export default function Form() {
   const prevStep = () => {
     if (currentStep > 1) {
       // Add a small delay for exit animation
-        setCurrentStep(currentStep - 1);
+      setCurrentStep(currentStep - 1);
     }
   };
 
@@ -130,7 +130,7 @@ export default function Form() {
   const goToStep = (step: number) => {
     if (step >= 1 && step <= 4) {
       // Add a small delay for exit animation
-        setCurrentStep(step);
+      setCurrentStep(step);
     }
   };
 
@@ -147,7 +147,7 @@ export default function Form() {
     <div className="relative min-h-screen bg-black text-white flex flex-col items-center justify-center p-4 overflow-hidden">
       <BackgroundBeams className="absolute inset-0 opacity-20" />
       {/* <div> */}
-     
+
       {/* </div> */}
       {/* Animated background particles */}
       {particles.map(particle => (
@@ -155,8 +155,8 @@ export default function Form() {
           key={particle.id}
           className="absolute rounded-full bg-blue-500/20 blur-md"
           style={{ width: particle.size, height: particle.size }}
-          initial={{ 
-            x: `${particle.x}vw`, 
+          initial={{
+            x: `${particle.x}vw`,
             y: `${particle.y}vh`,
             opacity: 0.2
           }}
@@ -185,7 +185,7 @@ export default function Form() {
           className="text-center"
           cursorClassName="bg-blue-400"
         />
-        <motion.p 
+        <motion.p
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.2, duration: 0.8 }}
@@ -197,7 +197,7 @@ export default function Form() {
 
       <AnimatePresence mode="wait">
         {formVisible && !isAggregating && (
-          <motion.div 
+          <motion.div
             key="form-container"
             variants={formVariants}
             initial="hidden"
@@ -211,8 +211,8 @@ export default function Form() {
                 <div className="mb-8">
                   <div className="flex justify-between">
                     {[1, 2, 3, 4].map(step => (
-                      <motion.div 
-                        key={step} 
+                      <motion.div
+                        key={step}
                         className={`w-1/4 h-1 rounded-full ${step <= currentStep ? 'bg-gradient-to-r from-blue-500 to-purple-500' : 'bg-gray-700'}`}
                         initial={{ scaleX: 0 }}
                         animate={{ scaleX: step <= currentStep ? 1 : 0 }}
@@ -231,11 +231,10 @@ export default function Form() {
                         key={step}
                         type="button"
                         onClick={() => goToStep(step)}
-                        className={`sm:text-sm   md:text-xl  px-2 py-1 rounded-md cursor-pointer ${
-                          step === currentStep 
-                            ? 'text-blue-400 font-medium' 
+                        className={`sm:text-sm   md:text-xl  px-2 py-1 rounded-md cursor-pointer ${step === currentStep
+                            ? 'text-blue-400 font-medium'
                             : 'text-gray-400 hover:text-gray-200'
-                        }`}
+                          }`}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
@@ -259,7 +258,7 @@ export default function Form() {
                       <h2 className="sm:text-sm   md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
                         Where to?
                       </h2>
-                      
+
                       {/* Destination Field */}
                       <div className="space-y-2">
                         <Label className="text-blue-200">Destination</Label>
@@ -278,7 +277,7 @@ export default function Form() {
                           </span>
                         </div>
                       </div>
-                      
+
                       {/* Start Date Field */}
                       <div className="space-y-2">
                         <Label className="text-blue-200">Start Date</Label>
@@ -307,7 +306,7 @@ export default function Form() {
                           </PopoverContent>
                         </Popover>
                       </div>
-                      
+
                       <div className="flex justify-end mt-8">
                         <HoverBorderGradient
                           as="button"
@@ -338,55 +337,55 @@ export default function Form() {
                       <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
                         Trip Details
                       </h2>
-                      
+
                       {/* Budget Slider with manual input - fix visibility issue */}
                       <div className="space-y-4">
-  <div className="flex justify-between items-center">
-    <Label className="text-blue-200">Budget (USD)</Label>
-    <div className="flex items-center">
-      <span className="text-white mr-2">$</span>
-      <Input
-        type="number"
-        value={formData.budget}
-        onChange={(e) => handleChange("budget", Number(e.target.value))}
-        className="w-24 h-8 bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white"
-        min={500}
-        max={20000}
-        step={100}
-      />
-    </div>
-  </div>
-  <div className="relative py-4">
-    {/* Enhanced slider with visible track and thumb */}
-    <Slider
-      value={[formData.budget]}
-      min={500}
-      max={20000}
-      step={500}
-      onValueChange={(value) => handleChange("budget", value[0])}
-      className="z-10 relative 
+                        <div className="flex justify-between items-center">
+                          <Label className="text-blue-200">Budget (USD)</Label>
+                          <div className="flex items-center">
+                            <span className="text-white mr-2">$</span>
+                            <Input
+                              type="number"
+                              value={formData.budget}
+                              onChange={(e) => handleChange("budget", Number(e.target.value))}
+                              className="w-24 h-8 bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white"
+                              min={500}
+                              max={20000}
+                              step={100}
+                            />
+                          </div>
+                        </div>
+                        <div className="relative py-4">
+                          {/* Enhanced slider with visible track and thumb */}
+                          <Slider
+                            value={[formData.budget]}
+                            min={500}
+                            max={20000}
+                            step={500}
+                            onValueChange={(value) => handleChange("budget", value[0])}
+                            className="z-10 relative 
       [&>span:nth-child(1)]:h-2 py-7 [&>span:nth-child(1)]:bg-gray-800/80 [&>span:nth-child(1)]:rounded-full
       [&>span:nth-child(2)]:h-4 [&>span:nth-child(2)]:bg-gradient-to-r [&>span:nth-child(2)]:from-blue-500 [&>span:nth-child(2)]:to-purple-500 [&>span:nth-child(2)]:rounded-full
       [&>span:nth-child(3)]:h-3 [&>span:nth-child(3)]:w-5 [&>span:nth-child(3)]:bg-gradient-to-r [&>span:nth-child(3)]:from-blue-500 [&>span:nth-child(3)]:to-purple-500 [&>span:nth-child(3)]:border-2 [&>span:nth-child(3)]:border-white/90 [&>span:nth-child(3)]:shadow-lg mt-0"
-    />
-    <div className="absolute inset-0 pointer-events-none z-11 mr-4">
-      <div 
-      className="h-2 bg-white rounded-full mt-11 " 
-      style={{ 
-        width: `${((formData.budget - 500) / (20000 - 500)) * 100}%`,
-        boxShadow: "0 0 8px rgba(147, 51, 234, 0.3)"
-      }} 
-      />
-    </div>
-    
-    {/* Add a glowing effect under the slider for better visibility */}
-  </div>
-  <div className="flex justify-between text-xs text-gray-400">
-    <span>$500</span>
-    <span>$20,000</span>
-  </div>
-</div>
-                      
+                          />
+                          <div className="absolute inset-0 pointer-events-none z-11 mr-4">
+                            <div
+                              className="h-2 bg-white rounded-full mt-11 "
+                              style={{
+                                width: `${((formData.budget - 500) / (20000 - 500)) * 100}%`,
+                                boxShadow: "0 0 8px rgba(147, 51, 234, 0.3)"
+                              }}
+                            />
+                          </div>
+
+                          {/* Add a glowing effect under the slider for better visibility */}
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-400">
+                          <span>$500</span>
+                          <span>$20,000</span>
+                        </div>
+                      </div>
+
                       {/* Number of Persons with manual input */}
                       <div className="space-y-2">
                         <div className="flex justify-between items-center mb-2">
@@ -408,8 +407,8 @@ export default function Form() {
                               onClick={() => handleChange("persons", num)}
                               className={cn(
                                 "w-10 h-10 rounded-full flex items-center justify-center transition-all",
-                                formData.persons === num 
-                                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white" 
+                                formData.persons === num
+                                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
                                   : "bg-black/50 border border-blue-500/20 text-blue-200"
                               )}
                               whileHover={{ scale: 1.1 }}
@@ -420,7 +419,7 @@ export default function Form() {
                           ))}
                         </div>
                       </div>
-                      
+
                       {/* Trip Duration with manual input */}
                       <div className="space-y-2">
                         <div className="flex justify-between items-center mb-2">
@@ -442,8 +441,8 @@ export default function Form() {
                               onClick={() => handleChange("days", num)}
                               className={cn(
                                 "h-10 px-3 rounded-full flex items-center justify-center transition-all",
-                                formData.days === num 
-                                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white" 
+                                formData.days === num
+                                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
                                   : "bg-black/50 border border-blue-500/20 text-blue-200"
                               )}
                               whileHover={{ scale: 1.05 }}
@@ -454,7 +453,7 @@ export default function Form() {
                           ))}
                         </div>
                       </div>
-                      
+
                       <div className="flex justify-between mt-8">
                         <Button
                           type="button"
@@ -493,7 +492,7 @@ export default function Form() {
                       <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
                         Your Interests
                       </h2>
-                      
+
                       <div className="space-y-4">
                         <Label className="text-blue-200">Select your travel interests</Label>
                         <div className="flex flex-wrap gap-2">
@@ -516,7 +515,7 @@ export default function Form() {
                           ))}
                         </div>
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label className="text-blue-200">Any specific requests?</Label>
                         <Textarea
@@ -526,7 +525,7 @@ export default function Form() {
                           className="bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white min-h-24 resize-none"
                         />
                       </div>
-                      
+
                       <div className="flex justify-between mt-8">
                         <Button
                           type="button"
@@ -565,7 +564,7 @@ export default function Form() {
                       <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
                         Review Your Trip
                       </h2>
-                      
+
                       <div className="space-y-4 p-4 rounded-lg border border-blue-500/20 bg-black/40">
                         <div className="grid grid-cols-2 gap-4">
                           <div>
@@ -593,13 +592,13 @@ export default function Form() {
                           <div>
                             <p className="text-gray-400 text-sm">Interests</p>
                             <p className="text-white">
-                              {formData.interests.length > 0 
-                                ? formData.interests.join(", ") 
+                              {formData.interests.length > 0
+                                ? formData.interests.join(", ")
                                 : "None specified"}
                             </p>
                           </div>
                         </div>
-                        
+
                         {formData.customRequests && (
                           <div className="mt-2">
                             <p className="text-gray-400 text-md">Special Requests</p>
@@ -607,7 +606,7 @@ export default function Form() {
                           </div>
                         )}
                       </div>
-                      
+
                       <div className="flex justify-between mt-8">
                         <Button
                           type="button"
@@ -671,33 +670,33 @@ export default function Form() {
           </motion.div>
         )} */}
 
-     
+
         {/* Success summary */}
         <AnimatePresence>
           {showSummary && (
             <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="text-center z-20"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="text-center z-20"
             >
               <div>
-                <Loader/>
-                </div>
+                <Loader />
+              </div>
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
-                >
+              >
                 <Sparkles className="w-16 h-16 mx-auto text-blue-400 mb-4" />
                 <h2 className="text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
                   Creating Your Perfect Trip!
-                  
+
                 </h2>
                 <p className="text-blue-200 mb-8 max-w-md mx-auto">
                   We're generating a personalized itinerary for your {formData.days}-day adventure to {formData.destination}. This might take a moment.
                 </p>
-                           
+
                 <div className="relative h-2 w-64 mx-auto bg-gray-700 rounded-full overflow-hidden">
                   <motion.div
                     className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-purple-500"
@@ -707,7 +706,7 @@ export default function Form() {
                   />
                 </div>
               </motion.div>
-              
+
             </motion.div>
           )}
         </AnimatePresence>

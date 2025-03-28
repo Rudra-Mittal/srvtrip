@@ -9,7 +9,7 @@ export const ItineraryPage = () => {
     const sliderRef = useRef<HTMLDivElement>(null);
     const cardRefs = useRef<(HTMLDivElement | null)[]>(Array(itineraryData.length).fill(null));
     const [scrollPosition] = useDebounce(useScrollPosition(sliderRef), 50);
-
+    const hoverTimeouts = useRef<(NodeJS.Timeout | null)[]>(Array(itineraryData.length).fill(null));
     const navigateSlider = useCallback((direction: 'prev' | 'next') => {
         if (!sliderRef.current) return;
         
@@ -78,82 +78,75 @@ export const ItineraryPage = () => {
     }, [scrollPosition, activeCardIndex]);
     // Handle navigation
    // Enhanced handleCardHover function with edge detection and smooth adjustments
-const handleCardHover = useCallback((index: number, isHovering: boolean) => {
-    if (!cardRefs.current[index] || !sliderRef.current) return;
+   const handleCardHover = useCallback((index: number, isHovering: boolean) => {
+        if (!cardRefs.current[index] || !sliderRef.current) return;
 
-    const card = cardRefs.current[index];
-    const slider = sliderRef.current;
-    const SCALE_FACTOR = 1.05;
-    const BASE_CARD_WIDTH = 440; // Match the cardWidth used in navigateSlider
-
-    if (isHovering) {
-        // Set elevated z-index first
-        card.style.zIndex = '30';
+        const card = cardRefs.current[index];
+        const slider = sliderRef.current;
         
-        // Calculate dimensions and potential overflow
-        const cardRect = card.getBoundingClientRect();
-        const sliderRect = slider.getBoundingClientRect();
-        const scaledWidth = BASE_CARD_WIDTH * SCALE_FACTOR;
-        const growthAmount = (scaledWidth - BASE_CARD_WIDTH) / 2;
-
-        // Calculate available space on both sides
-        const spaceLeft = cardRect.left - sliderRect.left;
-        const spaceRight = sliderRect.right - cardRect.right;
-
-        // Determine necessary translation
-        let translateX = 0;
-        if (spaceLeft < growthAmount) {
-            translateX = growthAmount - spaceLeft;
-        } else if (spaceRight < growthAmount) {
-            translateX = -(growthAmount - spaceRight);
-        }
-
-        // Apply transform with transition
-        card.style.transition = 'transform 300ms ease, box-shadow 300ms ease';
-        card.style.transform = `translateX(${translateX}px) scale(${SCALE_FACTOR})`;
-        card.style.boxShadow = '0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22)';
-        card.style.backgroundColor='black'
-
-        // Calculate required scroll adjustment
-        const cardGlobalLeft = card.offsetLeft + translateX;
-        const cardGlobalRight = cardGlobalLeft + scaledWidth;
-        const visibleLeft = slider.scrollLeft;
-        const visibleRight = visibleLeft + slider.clientWidth;
-
-        let targetScroll = slider.scrollLeft;
-        if (cardGlobalLeft < visibleLeft) {
-            targetScroll = cardGlobalLeft - 50; // Add 20px padding
-        } else if (cardGlobalRight > visibleRight) {
-            targetScroll = cardGlobalRight - slider.clientWidth + 20;
-        }
-
-        // Clamp and smooth scroll
-        targetScroll = Math.max(0, Math.min(targetScroll, slider.scrollWidth - slider.clientWidth));
-        if (Math.abs(targetScroll - slider.scrollLeft) > 1) {
-            slider.scrollTo({
-                left: targetScroll,
-                behavior: 'smooth'
-            });
-        }
-
-    } else {
-        // Reset styles with transition
-        card.style.transition = 'transform 300ms ease, box-shadow 300ms ease';
-        card.style.transform = 'none';
-        card.style.boxShadow = 'none';
-        card.style.backgroundColor='none'
+        // Define constants
+        const SCALE_FACTOR = 1.05;
+        const BUFFER_PX = 10;
         
-        // Delay z-index reset to prevent flickering
-        setTimeout(() => {
-            if (!card.matches(':hover')) {
-                card.style.zIndex = '10';
+        if (isHovering) {
+            // First set z-index to ensure card is on top
+            card.style.zIndex = '30';
+            
+            // Force layout recalculation before measuring
+            void card.offsetWidth;
+            
+            // Get accurate measurements
+            const cardRect = card.getBoundingClientRect();
+            const sliderRect = slider.getBoundingClientRect();
+            
+            // Calculate how much the card will grow on each side when scaled
+            const originalWidth = cardRect.width;
+            const expandedWidth = originalWidth * SCALE_FACTOR;
+            const growthPerSide = (expandedWidth - originalWidth) / 2;
+            
+            // Calculate space available on each side
+            const leftSpace = cardRect.left - sliderRect.left;
+            const rightSpace = sliderRect.right - cardRect.right;
+            
+            // Determine if adjustments are needed
+            let translateX = 0;
+            
+            if (leftSpace < growthPerSide + BUFFER_PX) {
+                // Not enough space on left, shift right
+                translateX = (growthPerSide + BUFFER_PX) - leftSpace;
+                console.log(`Card ${index} - LEFT adjustment: ${translateX}px`);
+            } 
+            else if (rightSpace < growthPerSide + BUFFER_PX) {
+                // Not enough space on right, shift left
+                translateX = -((growthPerSide + BUFFER_PX) - rightSpace);
+                console.log(`Card ${index} - RIGHT adjustment: ${translateX}px`);
             }
-        }, 300);
-    }
-}, []);
+            
+            // Apply transformations with hardware acceleration
+            card.style.willChange = 'transform';
+            card.style.transition = 'transform 300ms ease-out, box-shadow 300ms ease';
+            card.style.transform = `translateX(${translateX}px) scale(${SCALE_FACTOR})`;
+            card.style.boxShadow = '0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22)';
+            card.style.backgroundColor = 'black';
+        } else {
+            // Reset transforms
+            card.style.willChange = 'auto';
+            card.style.transition = 'transform 300ms ease, box-shadow 300ms ease';
+            card.style.transform = 'translateX(0) scale(1)';
+            card.style.boxShadow = 'none';
+            card.style.backgroundColor = 'transparent';
+            
+            // Reset z-index after transition completes
+            setTimeout(() => {
+                if (!card.matches(':hover')) {
+                    card.style.zIndex = '10';
+                }
+            }, 300);
+        }
+    }, []);
     return (
         <div className="bg-black max-h-screen max-w-screen overflow-hidden  ">
-            <div className="absolute inset-0 z-0 overflow-hidden opacity-50">
+            <div className="absolute inset-0 z-0 overflow-hidden min-w-secreen min-h-screen opacity-50">
                 <Boxes />
             </div>
 
@@ -239,7 +232,7 @@ const handleCardHover = useCallback((index: number, isHovering: boolean) => {
                         className="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-black to-transparent z-20 pointer-events-none"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ delay: 0.3 }}
+                        transition={{ delay: 0 }}
                     />
 
                     <div
@@ -254,10 +247,10 @@ const handleCardHover = useCallback((index: number, isHovering: boolean) => {
                                 className="snap-center flex-shrink-0 pointer-events-auto"
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: 0.5 + (index * 0.1), duration: 0.5 }}
+                                transition={{ delay: 0 , duration: 0.5 }}
                                 ref={el => { cardRefs.current[index] = el; }}
                                 onMouseEnter={() => {
-                                    setTimeout(()=>handleCardHover(index, true),501)
+                                    setTimeout(()=>handleCardHover(index, true),1600)
                                 }}
                                 onMouseLeave={() => handleCardHover(index, false)}
                                 style={{
