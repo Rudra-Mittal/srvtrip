@@ -192,7 +192,8 @@ export const DayNumCompo = () => {
         {/* Light blue spotlight effect */}
         <div className="absolute -top-10 left-1/4 w-1/2 h-32 bg-blue-600 opacity-[0.03] blur-3xl rounded-full"></div>
       
-        <div className="h-[calc(100vh-20rem)] sm:h-[calc(100vh-21rem)] md:h-[calc(100vh-22rem)] custom-scrollbar overflow-y-auto pr-2">
+        {/* Increased height to give more space */}
+        <div className="h-[500px] md:h-[600px] lg:h-[500px] custom-scrollbar overflow-y-auto pr-2"> {/* yaha se apna scrollable div ki height hoegi adjust */}
           <div className="p-3 md:p-4 space-y-4">
             <div className="grid grid-cols-1 gap-3">
               {/* Morning */}
@@ -324,4 +325,4 @@ export const DayNumCompo = () => {
       </div>
     </div>
   );
-}
+};
