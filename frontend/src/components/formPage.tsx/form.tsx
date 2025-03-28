@@ -280,7 +280,7 @@ export default function Form() {
                             value={formData.destination}
                             onChange={(e) => handleChange("destination", e.target.value)}
                             placeholder="Dream destination..."
-                            className="bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white h-12 sm:h-14 pl-10 text-sm sm:text-base lg:text-lg"
+                            className="bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white h-12 sm:h-14 pl-10 text-sm sm:text-base lg:text-lg "
                           />
                           <span className="absolute left-3 top-3 text-blue-400">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -379,7 +379,7 @@ export default function Form() {
                               type="number"
                               value={formData.budget}
                               onChange={(e) => handleChange("budget", Number(e.target.value))}
-                              className="w-24 sm:w-32 lg:w-36 h-10 sm:h-12 bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white text-sm sm:text-base lg:text-lg px-3 py-2"
+                              className="w-24 sm:w-32 lg:w-36 h-10 sm:h-12 bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white text-sm sm:text-base lg:text-lg px-3 py-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                               // Removed min/max constraints
                               step={100}
                             />
@@ -425,12 +425,12 @@ export default function Form() {
                         <div className="flex justify-between items-center mb-2">
                           <Label className="text-blue-200">Number of Travelers</Label>
                           <Input
-                            type="number"
-                            value={formData.persons}
-                            onChange={(e) => handleChange("persons", Number(e.target.value))}
-                            className="w-24 sm:w-28 h-10 sm:h-12 bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white text-sm sm:text-base lg:text-lg px-3 py-2"
-                            min={1}
-                            max={20}
+                          type="number"
+                          value={formData.persons}
+                          onChange={(e) => handleChange("persons", Number(e.target.value))}
+                          className="w-24 sm:w-28 h-10 sm:h-12 bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white text-sm sm:text-base lg:text-lg px-3 py-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          min={1}
+                          max={20}
                           />
                         </div>
                         <div className="flex items-center space-x-4">
@@ -462,7 +462,7 @@ export default function Form() {
                             type="number"
                             value={formData.days}
                             onChange={(e) => handleChange("days", Number(e.target.value))}
-                            className="w-24 sm:w-28 h-10 sm:h-12 bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white text-sm sm:text-base lg:text-lg px-3 py-2"
+                            className="w-24 sm:w-28 h-10 sm:h-12 bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white text-sm sm:text-base lg:text-lg px-3 py-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             min={1}
                             max={30}
                           />
@@ -493,7 +493,7 @@ export default function Form() {
                           type="button"
                           onClick={prevStep}
                           variant="outline"
-                          className="bg-black/50 border border-blue-500/20 text-blue-200 hover:bg-black/70"
+                          className="bg-black/50 border border-blue-500/20 text-blue-200 hover:bg-black/70 rounded-3xl"
                         >
                           Back
                         </Button>
@@ -565,7 +565,7 @@ export default function Form() {
                           type="button"
                           onClick={prevStep}
                           variant="outline"
-                          className="bg-black/50 border border-blue-500/20 text-blue-200 hover:bg-black/70 text-sm sm:text-base h-10 sm:h-12"
+                          className="bg-black/50 border border-blue-500/20 text-blue-200 hover:bg-black/70 text-sm sm:text-base h-10 sm:h-12 rounded-3xl"
                         >
                           Back
                         </Button>
@@ -634,10 +634,10 @@ export default function Form() {
                         </div>
 
                         {formData.customRequests && (
-                          <div className="mt-2">
+                            <div className="mt-2 overflow-auto scrollbar-hide">
                             <p className="text-gray-400 text-md">Special Requests</p>
                             <p className="text-white">{formData.customRequests}</p>
-                          </div>
+                            </div>
                         )}
                       </div>
 
@@ -646,7 +646,7 @@ export default function Form() {
                           type="button"
                           onClick={prevStep}
                           variant="outline"
-                          className="bg-black/50 border border-blue-500/20 text-blue-200 hover:bg-black/70"
+                          className="bg-black/50 border border-blue-500/20 text-blue-200 hover:bg-black/70 rounded-3xl"
                         >
                           Back
                         </Button>
