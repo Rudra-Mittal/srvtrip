@@ -15,7 +15,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import Loader from '../loader';
-
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 interface FormData {
   destination: string;
   budget: number;
@@ -24,6 +24,7 @@ interface FormData {
   interests: string[];
   startDate: Date | undefined;
   customRequests: string;
+  currency: string;
 }
 
 export default function Form() {
@@ -35,15 +36,27 @@ export default function Form() {
     days: 7,
     interests: [],
     startDate: undefined,
-    customRequests: ""
+    customRequests: "",
+    currency: "INR"
   });
-
+  const currencies = [
+    { value: "USD", label: "USD - $", symbol: "$" },
+    { value: "EUR", label: "EUR - €", symbol: "€" },
+    { value: "GBP", label: "GBP - £", symbol: "£" },
+    { value: "JPY", label: "JPY - ¥", symbol: "¥" },
+    { value: "CAD", label: "CAD - C$", symbol: "C$" },
+    { value: "AUD", label: "AUD - A$", symbol: "A$" },
+    { value: "INR", label: "INR - ₹", symbol: "₹" }
+  ];
   // Visual effect states
   const [isAggregating, setIsAggregating] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [formVisible, setFormVisible] = useState(false);
-
+  const getCurrencySymbol = () => {
+    const currency = currencies.find(c => c.value === formData.currency);
+    return currency ? currency.symbol : "₹";
+  };
   // Animation variants
   const formVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -177,10 +190,10 @@ export default function Form() {
       <div className="mb-8 text-center relative z-10">
         <TypewriterEffect
           words={[
-            { text: "Plan", className: "text-4xl font-bold" },
-            { text: "Your", className: "text-4xl font-bold" },
-            { text: "Dream", className: "text-4xl font-bold" },
-            { text: "Adventure", className: "text-4xl font-bold text-blue-500" },
+            { text: "Plan", className: "text-3xl sm:text-4xl lg:text-5xl font-bold" },
+            { text: "Your", className: "text-3xl sm:text-4xl lg:text-5xl font-bold" },
+            { text: "Dream", className: "text-3xl sm:text-4xl lg:text-5xl font-bold" },
+            { text: "Adventure", className: "text-3xl sm:text-4xl lg:text-5xl font-bold text-blue-500" },
           ]}
           className="text-center"
           cursorClassName="bg-blue-400"
@@ -189,13 +202,13 @@ export default function Form() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.2, duration: 0.8 }}
-          className="text-blue-300 mt-4 max-w-xl mx-auto"
+          className="text-blue-300 mt-4 max-w-xl mx-auto text-sm sm:text-base lg:text-lg"
         >
           Let's create your perfect journey, tailored exactly to your preferences.
         </motion.p>
       </div>
 
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="popLayout">
         {formVisible && !isAggregating && (
           <motion.div
             key="form-container"
@@ -231,9 +244,9 @@ export default function Form() {
                         key={step}
                         type="button"
                         onClick={() => goToStep(step)}
-                        className={`sm:text-sm   md:text-xl  px-2 py-1 rounded-md cursor-pointer ${step === currentStep
-                            ? 'text-blue-400 font-medium'
-                            : 'text-gray-400 hover:text-gray-200'
+                        className={`text-xs sm:text-sm lg:text-base px-2 py-1 rounded-md cursor-pointer ${step === currentStep
+                          ? 'text-blue-400 font-medium'
+                          : 'text-gray-400 hover:text-gray-200'
                           }`}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -245,7 +258,7 @@ export default function Form() {
                 </div>
 
                 {/* Step 1: Destination and dates */}
-                <AnimatePresence mode="wait">
+                <AnimatePresence mode="popLayout">
                   {currentStep === 1 && (
                     <motion.div
                       key="step1"
@@ -267,7 +280,7 @@ export default function Form() {
                             value={formData.destination}
                             onChange={(e) => handleChange("destination", e.target.value)}
                             placeholder="Dream destination..."
-                            className="bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white h-12 pl-10 sm:text-sm   md:text-xl"
+                            className="bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white h-12 sm:h-14 pl-10 text-sm sm:text-base lg:text-lg"
                           />
                           <span className="absolute left-3 top-3 text-blue-400">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -280,12 +293,12 @@ export default function Form() {
 
                       {/* Start Date Field */}
                       <div className="space-y-2">
-                        <Label className="text-blue-200">Start Date</Label>
+                        <Label className="text-blue-200 text-sm sm:text-base lg:text-lg">Start Date</Label>
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button
                               variant="outline"
-                              className="w-full justify-start text-left font-normal bg-black/60 border border-blue-500/20 focus:border-purple-500/50 h-12 hover:bg-black/70"
+                              className="w-full justify-start text-left font-normal bg-black/60 border border-blue-500/20 focus:border-purple-500/50 h-12 sm:h-12 hover:bg-black/70 text-sm sm:text-base lg:text-lg "
                             >
                               <CalendarIcon className="mr-2 h-4 w-4 text-blue-400" />
                               {formData.startDate ? (
@@ -301,7 +314,7 @@ export default function Form() {
                               selected={formData.startDate}
                               onSelect={(date) => handleChange("startDate", date)}
                               initialFocus
-                              className="bg-black text-white"
+                              className="bg-black text-white scale-90 sm:scale-100 max-w-[280px] sm:max-w-none"
                             />
                           </PopoverContent>
                         </Popover>
@@ -324,7 +337,7 @@ export default function Form() {
                 </AnimatePresence>
 
                 {/* Step 2: Trip details */}
-                <AnimatePresence mode="wait">
+                <AnimatePresence mode="popLayout">
                   {currentStep === 2 && (
                     <motion.div
                       key="step2"
@@ -334,23 +347,40 @@ export default function Form() {
                       transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 30 }}
                       className="space-y-6"
                     >
-                      <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
+                      <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
                         Trip Details
                       </h2>
 
                       {/* Budget Slider with manual input - fix visibility issue */}
                       <div className="space-y-4">
                         <div className="flex justify-between items-center">
-                          <Label className="text-blue-200">Budget (USD)</Label>
+                          <Label className="text-blue-200 text-sm sm:text-base lg:text-lg">Budget</Label>
                           <div className="flex items-center">
-                            <span className="text-white mr-2">$</span>
+                            <Select
+                              value={formData.currency}
+                              onValueChange={(value) => handleChange("currency", value)}
+                            >
+                              <SelectTrigger className="w-16 sm:w-20 h-10 sm:h-12 mr-2 bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white text-xs sm:text-sm">
+                                <SelectValue placeholder="USD" />
+                              </SelectTrigger>
+                              <SelectContent className="bg-black/90 border border-blue-500/30 text-white">
+                                {currencies.map((currency) => (
+                                  <SelectItem
+                                    key={currency.value}
+                                    value={currency.value}
+                                    className="hover:bg-blue-900/20 focus:bg-blue-900/20 text-xs sm:text-sm"
+                                  >
+                                    {currency.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                             <Input
                               type="number"
                               value={formData.budget}
                               onChange={(e) => handleChange("budget", Number(e.target.value))}
-                              className="w-24 h-8 bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white"
-                              min={500}
-                              max={20000}
+                              className="w-24 sm:w-32 lg:w-36 h-10 sm:h-12 bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white text-sm sm:text-base lg:text-lg px-3 py-2"
+                              // Removed min/max constraints
                               step={100}
                             />
                           </div>
@@ -358,7 +388,7 @@ export default function Form() {
                         <div className="relative py-4">
                           {/* Enhanced slider with visible track and thumb */}
                           <Slider
-                            value={[formData.budget]}
+                            value={[Math.min(formData.budget, 20000)]} // Cap slider display at 20000
                             min={500}
                             max={20000}
                             step={500}
@@ -372,17 +402,21 @@ export default function Form() {
                             <div
                               className="h-2 bg-white rounded-full mt-11 "
                               style={{
-                                width: `${((formData.budget - 500) / (20000 - 500)) * 100}%`,
+                                width: `${Math.min(((Math.min(formData.budget, 20000) - 500) / (20000 - 500)) * 100, 100)}%`,
                                 boxShadow: "0 0 8px rgba(147, 51, 234, 0.3)"
                               }}
                             />
                           </div>
-
+                          {formData.budget > 20000 && (
+                            <p className="text-blue-400 text-xs mt-1 italic">
+                              Custom budget: {getCurrencySymbol()}{formData.budget.toLocaleString()}
+                            </p>
+                          )}
                           {/* Add a glowing effect under the slider for better visibility */}
                         </div>
                         <div className="flex justify-between text-xs text-gray-400">
-                          <span>$500</span>
-                          <span>$20,000</span>
+                          <span>{getCurrencySymbol()}500</span>
+                          <span>{getCurrencySymbol()}20,000</span>
                         </div>
                       </div>
 
@@ -394,7 +428,7 @@ export default function Form() {
                             type="number"
                             value={formData.persons}
                             onChange={(e) => handleChange("persons", Number(e.target.value))}
-                            className="w-20 h-8 bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white"
+                            className="w-24 sm:w-28 h-10 sm:h-12 bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white text-sm sm:text-base lg:text-lg px-3 py-2"
                             min={1}
                             max={20}
                           />
@@ -428,7 +462,7 @@ export default function Form() {
                             type="number"
                             value={formData.days}
                             onChange={(e) => handleChange("days", Number(e.target.value))}
-                            className="w-20 h-8 bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white"
+                            className="w-24 sm:w-28 h-10 sm:h-12 bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white text-sm sm:text-base lg:text-lg px-3 py-2"
                             min={1}
                             max={30}
                           />
@@ -467,10 +501,10 @@ export default function Form() {
                           as="button"
                           type="button"
                           onClick={nextStep}
-                          className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 font-medium text-white shadow-lg shadow-purple-900/20"
+                          className="px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 font-medium text-white shadow-lg shadow-purple-900/20 text-sm sm:text-base"
                         >
                           <span className="flex items-center">
-                            Next <ArrowRight className="ml-2 h-4 w-4" />
+                            Next <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                           </span>
                         </HoverBorderGradient>
                       </div>
@@ -479,7 +513,7 @@ export default function Form() {
                 </AnimatePresence>
 
                 {/* Step 3: Interests */}
-                <AnimatePresence mode="wait">
+                <AnimatePresence mode="popLayout">
                   {currentStep === 3 && (
                     <motion.div
                       key="step3"
@@ -502,7 +536,7 @@ export default function Form() {
                               type="button"
                               onClick={() => toggleInterest(interest)}
                               className={cn(
-                                "px-4 py-2 rounded-full text-sm transition-all",
+                                "px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm transition-all",
                                 formData.interests.includes(interest)
                                   ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-900/20"
                                   : "bg-black/50 border border-blue-500/20 text-blue-200"
@@ -522,7 +556,7 @@ export default function Form() {
                           value={formData.customRequests}
                           onChange={(e) => handleChange("customRequests", e.target.value)}
                           placeholder="Tell us about any specific places you'd like to visit or experiences you'd like to have..."
-                          className="bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white min-h-24 resize-none"
+                          className="bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white min-h-24 sm:min-h-28 resize-none text-sm sm:text-base lg:text-lg p-2 sm:p-3 lg:p-4"
                         />
                       </div>
 
@@ -531,7 +565,7 @@ export default function Form() {
                           type="button"
                           onClick={prevStep}
                           variant="outline"
-                          className="bg-black/50 border border-blue-500/20 text-blue-200 hover:bg-black/70"
+                          className="bg-black/50 border border-blue-500/20 text-blue-200 hover:bg-black/70 text-sm sm:text-base h-10 sm:h-12"
                         >
                           Back
                         </Button>
@@ -539,10 +573,10 @@ export default function Form() {
                           as="button"
                           type="button"
                           onClick={nextStep}
-                          className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 font-medium text-white shadow-lg shadow-purple-900/20"
+                          className="px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 font-medium text-white shadow-lg shadow-purple-900/20 text-sm sm:text-base"
                         >
                           <span className="flex items-center">
-                            Next <ArrowRight className="ml-2 h-4 w-4" />
+                            Next <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                           </span>
                         </HoverBorderGradient>
                       </div>
@@ -551,7 +585,7 @@ export default function Form() {
                 </AnimatePresence>
 
                 {/* Step 4: Review and Submit */}
-                <AnimatePresence mode="wait">
+                <AnimatePresence mode="popLayout">
                   {currentStep === 4 && (
                     <motion.div
                       key="step4"
@@ -581,7 +615,7 @@ export default function Form() {
                           </div>
                           <div>
                             <p className="text-gray-400 text-sm md:text-base">Budget</p>
-                            <p className="text-white text-base md:text-lg font-medium">${formData.budget}</p>
+                            <p className="text-white text-base md:text-lg font-medium">{getCurrencySymbol()}{formData.budget}</p>
                           </div>
                           <div>
                             <p className="text-gray-400 text-sm md:text-base">Travelers</p>
@@ -607,7 +641,7 @@ export default function Form() {
                         )}
                       </div>
 
-                      <div className="flex justify-between mt-8">
+                      <div className="flex justify-between mt-8 align-items-center">
                         <Button
                           type="button"
                           onClick={prevStep}
@@ -618,11 +652,10 @@ export default function Form() {
                         </Button>
                         <HoverBorderGradient
                           as="button"
-                          type="submit"
                           className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 font-medium text-white shadow-lg shadow-purple-900/20"
                         >
-                          <span className="flex items-center">
-                            Generate My Itinerary <Sparkles className="ml-2 h-4 w-4" />
+                          <span className="flex items-center justify-center text-xs sm:text-sm md:text-xl">
+                            Generate My Itinerary <Sparkles className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                           </span>
                         </HoverBorderGradient>
                       </div>
@@ -631,46 +664,8 @@ export default function Form() {
                 </AnimatePresence>
               </form>
             </BackgroundGradient>
-            {/* <Loader/> */}
           </motion.div>
         )}
-
-        {/* Swirling aggregation effect */}
-        {/* {isSwirling && (
-          <motion.div 
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0 }}
-            className="absolute inset-0 flex items-center justify-center z-20"
-            >
-            <div className="relative w-40 h-40">
-              {Array.from({ length: 12 }).map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute w-6 h-6 rounded-full bg-gradient-to-r from-blue-400 to-purple-600"
-                  initial={{ 
-                    x: Math.random() * 400 - 200, 
-                    y: Math.random() * 400 - 200,
-                    opacity: 0 
-                  }}
-                  animate={{ 
-                    x: 0, 
-                    y: 0, 
-                    opacity: [0, 1, 0],
-                    scale: [1, 1.2, 0.8, 0] 
-                  }}
-                  transition={{ 
-                    duration: 1.3, 
-                    delay: i * 0.08,
-                    ease: "easeInOut" 
-                  }}
-                />
-              ))}
-            </div>
-          </motion.div>
-        )} */}
-
-
         {/* Success summary */}
         <AnimatePresence>
           {showSummary && (
@@ -688,15 +683,12 @@ export default function Form() {
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
               >
-                <Sparkles className="w-16 h-16 mx-auto text-blue-400 mb-4" />
-                <h2 className="text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
                   Creating Your Perfect Trip!
-
                 </h2>
-                <p className="text-blue-200 mb-8 max-w-md mx-auto">
+                <p className="text-blue-200 mb-8 max-w-md mx-auto text-sm sm:text-base lg:text-lg">
                   We're generating a personalized itinerary for your {formData.days}-day adventure to {formData.destination}. This might take a moment.
                 </p>
-
                 <div className="relative h-2 w-64 mx-auto bg-gray-700 rounded-full overflow-hidden">
                   <motion.div
                     className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-purple-500"
