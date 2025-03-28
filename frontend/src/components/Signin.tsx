@@ -25,13 +25,23 @@ export default function Signin() {
         }}></div>
       </div>
 
-      <div className="w-full max-w-6xl bg-white rounded-xl overflow-hidden flex flex-col md:flex-row shadow-lg relative z-10">
-        {/* Left side - Form */}
-        <LeftSideForm type='signin'/>
-        
-        {/* Right side - Image slider */}
-        <RightSideImg currentSlide={currentSlide} setCurrentSlide={setCurrentSlide} setBgColor={setBgColor}/>
-      </div>
+      {/* Updated container with dark theme */}
+            <div className="w-full max-w-6xl bg-black/90 backdrop-blur-sm rounded-xl overflow-hidden flex flex-col md:flex-row shadow-xl relative z-10"
+              style={{
+                borderTopLeftRadius: '0px',
+                borderTopRightRadius: '0px',
+                borderBottomLeftRadius: '0px',
+                borderBottomRightRadius: '40px',
+                border: '1px solid rgba(59, 130, 246, 0.2)', // Blue border with low opacity
+                boxShadow: '0 15px 35px rgba(91, 33, 182, 0.15), 0 2px 10px rgba(59, 130, 246, 0.1)' // Combined purple and blue shadow
+              }}
+            >
+              {/* Left side - Form - will be styled in LeftSideForm component */}
+              <LeftSideForm type='signin' />
+              
+              {/* Right side - Image slider - keeping the same */}
+              <RightSideImg currentSlide={currentSlide} setCurrentSlide={setCurrentSlide} setBgColor={setBgColor}/>
+            </div>
     </div>
   );
 }
