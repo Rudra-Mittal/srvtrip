@@ -90,6 +90,7 @@ const MapComponent = ({
       <div className="w-full h-full">
         <Map
           mapId={mapId}
+          colorScheme="DARK"
           defaultCenter={defaultCenter}
           defaultZoom={defaultZoom}
           mapTypeControl={false}
@@ -408,8 +409,8 @@ const MarkerManager = ({
                   >
                 <Pin 
                   background={selectedMarker?.lat === position.lat && selectedMarker?.lng === position.lng && selectedMarker?.name === position.name  || hoveredMarker?.lat === position.lat && hoveredMarker?.lng === position.lng && hoveredMarker?.name === position.name ? "#0000FF" : "#FF0000"}
-                  borderColor="#FFFFFF"
-                  glyphColor="#FFFFFF"
+                  borderColor="#000000"
+                  glyphColor="#000000"
                   glyph={(index + 1).toString()}
                   scale={selectedMarker?.lat === position.lat && selectedMarker?.lng === position.lng && selectedMarker?.name === position.name  || hoveredMarker?.lat === position.lat && hoveredMarker?.lng === position.lng && hoveredMarker?.name === position.name? 1.5 : 1}
                   />
@@ -428,10 +429,10 @@ const MarkerManager = ({
     pixelOffset={[0, 100]} // Increase vertical offset to position higher above marker
     onCloseClick={handleZoomOut}
     disableAutoPan={true} // Prevent automatic panning
-    className=""
+    className="bg-gray-700"
   >
     <div 
-      className="custom-infowindow"
+      // className="custom-infowindow"
       onMouseEnter={handlePopupMouseEnter}
       onMouseLeave={handlePopupMouseLeave}
     >
@@ -550,13 +551,13 @@ const MarkerManager = ({
       );
     })}
   </div>
-  <span className="text-xs text-gray-600 ml-1">
+  <span className="text-xs text-gray-100 ml-1">
     {(infoOpen.rating || 4.5).toFixed(1)} 
   </span>
 </div>
         
         {/* Location Type/Category */}
-        <div className="text-xs text-gray-500 mb-1">
+        <div className="text-xs text-gray-100 mb-1">
           {infoOpen.category || "Tourist Attraction"}
         </div>
       </div>

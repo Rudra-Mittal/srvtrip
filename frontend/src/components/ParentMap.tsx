@@ -47,7 +47,7 @@ function ParentMap() {
   return (
     <div className="flex w-full absolute inset-0">
       {/* Left side - Listings */}
-      <div className="w-1/2 p-6 overflow-y-auto bg-gray-50">
+      {/* <div className="w-1/2 p-6 overflow-y-auto bg-gray-50">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Places in Shimla</h2>
         <div className="space-y-4">
           {predefinedMarkers.map((marker, index) => (
@@ -78,10 +78,10 @@ function ParentMap() {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
       
       {/* Right side - Map */}
-      <div className="w-1/2 h-1/2">
+      <div className="w-full h-[35rem]">
         <APIProvider apiKey={apiKey} version="beta">
           <MapComponent 
             predefinedMarkers={predefinedMarkers}
