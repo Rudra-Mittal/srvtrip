@@ -124,8 +124,8 @@ export const HeroParallax = ({
           translateY,
         }}
         className="z-10 pointer-events-auto"
-        initial={{ opacity: 0.2 }}
-        animate={{ opacity: initialized ? 1 : 0.2 }}
+        initial={{ opacity: 1 }}
+        animate={{ opacity: initialized ? 1 : 1 }}
         transition={{ duration: 3}}
       >
         <motion.div 
@@ -195,13 +195,14 @@ export const HeroParallax = ({
 
 export const Header = ({ spotlightActive = false, textVisible = false }) => {
   return (
-    <div className="absolute top-0 left-0 w-full z-20 flex flex-col justify-center items-center py-10 sm:py-16 md:py-20 pointer-events-none">
+    <div className="absolute top-0 left-0 w-full  z-20 flex flex-col justify-center items-center py-10 sm:py-16 md:py-20 pointer-events-none">
     {/* Center spotlight with vertical animation */}
     {spotlightActive && (
       <>
        <Spotlight
-          className=""
+          className="w-full h-[140vh]"
           fill="rgb(255, 255, 255)"
+          mode="light"
         />
 
       </>
@@ -228,20 +229,20 @@ export const Header = ({ spotlightActive = false, textVisible = false }) => {
             ]
           }}
           transition={{ 
-            duration: 10, 
+            duration: 3, 
             repeat: Infinity,
             repeatType: "mirror" 
           }}
         >
-          <span className="text-5xl xs:text-6xl sm:text-7xl md:text-8xl">
+          <div className="xs:text-xs sm:text-sm md:text-2xl text-3xl">
             SrvTrip
-          </span>
+          </div>
         </motion.div>
           
           {/* Insert the component here */}
           <div className="h-[15rem] flex flex-col justify-center items-center px-4 mt-4">
             <div className="flex justify-center items-center gap-3 sm:gap-5 mb-4">
-              <span className="text-4xl sm:text-5xl md:text-6xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-indigo-400 to-purple-300 whitespace-nowrap">
+              <span className=" sm:text-xl md:text-3xl text-3xl font-semibold  bg-clip-text text-white whitespace-nowrap">
                 Build
               </span>
               <div className="w-[180px] sm:w-[220px] md:w-[280px] min-h-[60px] flex items-center">

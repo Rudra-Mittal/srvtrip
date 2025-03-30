@@ -28,13 +28,13 @@ export async function scrapeGoogleMapsReviews(placeName: string, maxScrolls: num
 
         // Open reviews section
         try {
-            const reviewSpan = page.locator('//span[contains(@class, "j8EM5b")]');
-            await reviewSpan.waitFor({ state: 'visible', timeout: 5000 });
-            await reviewSpan.click();
-        } catch {
             const reviewsButton = page.locator('//button[contains(@aria-label, "Reviews")]');
             await reviewsButton.waitFor({ state: 'visible', timeout: 5000 });
             await reviewsButton.click();
+        } catch {
+            const reviewSpan = page.locator('//span[contains(@class, "j8EM5b")]');
+            await reviewSpan.waitFor({ state: 'visible', timeout: 5000 });
+            await reviewSpan.click();
         }
 
         // Wait for reviews container

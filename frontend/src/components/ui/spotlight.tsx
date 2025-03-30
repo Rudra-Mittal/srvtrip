@@ -16,7 +16,7 @@ export const Spotlight = ({
   direction = "top-left",
   mode = "light",
   intensity = 0.3,
-  width = 50
+  width = 90
 }: SpotlightProps) => {
   // Create unique IDs to prevent conflicts when multiple spotlights are used
   const uniqueId = useRef(`spotlight-${Math.random().toString(36).substr(2, 9)}`).current;
@@ -60,9 +60,9 @@ export const Spotlight = ({
       const easedProgress = ease(linearProgress);
       
       // Calculate current radius percentage
-      const radius = Math.min(150, Math.round(easedProgress * 150)); // Increased max radius to 150
+      const radius = Math.min(250, Math.round(easedProgress * 150)); // Increased max radius to 150
       
-      console.log(`Animating spotlight radius: ${radius}%`);
+      // console.log(`Animating spotlight radius: ${radius}%`);
       gradient.setAttribute("r", `${radius}%`);
       
       // End animation when complete
@@ -110,7 +110,7 @@ export const Spotlight = ({
             id={`${uniqueId}-gradient`}
             cx="50%"
             cy="10%" // Moved gradient origin higher
-            r="0%" 
+            r="50%" 
             fx="50%"
             fy="10%" // Moved focal point higher
             style={{ transition: "r" }}
@@ -121,7 +121,7 @@ export const Spotlight = ({
           </radialGradient>
           
           <filter id={`${uniqueId}-filter`}>
-            <feGaussianBlur stdDeviation="6" />
+            <feGaussianBlur stdDeviation="8" />
           </filter>
         </defs>
       

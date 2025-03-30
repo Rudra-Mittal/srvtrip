@@ -76,7 +76,7 @@ export const FlipWords = ({
             className="inline-block  whitespace-nowrap"
           >
             {word.split("").map((letter, letterIndex) => (
-              <motion.span
+                <motion.span
                 key={word + letterIndex}
                 initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
