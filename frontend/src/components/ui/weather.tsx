@@ -77,8 +77,8 @@ const Weather = () => {
   return (
     <div className="p-4 border rounded-lg border-zinc-800 bg-black text-white overflow-hidden">
       <div className="flex justify-between items-center mb-2">
-        <h2 className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-blue-500 font-bold">Paris Weather</h2>
-        <span className="text-xs text-zinc-400">Today</span>
+        <h2 className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500 font-bold">Paris Weather</h2>
+        <span className="text-xs text-zinc-200">Today</span>
       </div>
 
       {weather && (

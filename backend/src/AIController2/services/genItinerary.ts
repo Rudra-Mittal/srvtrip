@@ -8,6 +8,8 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 export const generateItinerary = async (
   destination: string,
   number_of_days: number,
+  start_date: string,
+  currency: string,
   budget: number,
   number_of_persons: number,
   interests?: string
@@ -16,8 +18,8 @@ export const generateItinerary = async (
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt =`
-    Generate a detailed, optimized travel itinerary for a trip to **${destination}** spanning **${number_of_days}** days.
-    The total budget for this trip is **₹${budget}**, and it is planned for **${number_of_persons}** people.
+    Generate a detailed, optimized travel itinerary for a trip to **${destination}** spanning **${number_of_days}** days, starting from **${start_date}**.
+    The total budget for this trip is **${currency} ${budget}**, and it is planned for **${number_of_persons}** people.
     ${interests ? `Interests to consider: ${interests}. Take it as a priority.` : ""}
 
     ### **Strict Budget Utilization Guidelines:**
@@ -42,35 +44,37 @@ export const generateItinerary = async (
       "itinerary": {
         "destination": "${destination}",
         "number_of_days": ${number_of_days},
-        "budget": ${budget},
+        "start_date": "${start_date}",
+        "budget": "${budget}",
+        "currency": "${currency}",
         "number_of_persons": ${number_of_persons},
         "days": [
           {
             "day": 1,
             "morning": {
               "activities": "Arrive in #Hotel Combermere, Shimla# and explore #Mall Road, Shimla#.",
-              "food": "Breakfast at #Indian Coffee House, Shimla# - ₹250 per person.",
-              "transport": "Taxi from #Jubbarhatti Airport, Shimla# to #Hotel Combermere, Shimla# - ₹800 total.",
-              "cost": "₹1,050"
+              "food": "Breakfast at #Indian Coffee House, Shimla# - ${currency} 250 per person.",
+              "transport": "Taxi from #Jubbarhatti Airport, Shimla# to #Hotel Combermere, Shimla# - ${currency} 800 total.",
+              "cost": "${currency} 1,050"
             },
             "afternoon": {
               "activities": "Visit #The Ridge, Shimla# and #Christ Church, Shimla# for scenic views and photography.",
-              "food": "Lunch at #Wake & Bake Café, Shimla# - ₹600 per person.",
+              "food": "Lunch at #Wake & Bake Café, Shimla# - ${currency} 600 per person.",
               "transport": "Walking tour.",
-              "cost": "₹600"
+              "cost": "${currency} 600"
             },
             "evening": {
               "activities": "Enjoy a fine dining experience at #Eighteen71 Cookhouse & Bar, Shimla#.",
-              "food": "North Indian & Chinese cuisine - ₹800 per person.",
-              "transport": "Auto-rickshaw from #The Ridge, Shimla# to #Eighteen71 Cookhouse & Bar, Shimla# - ₹150.",
-              "cost": "₹950"
+              "food": "North Indian & Chinese cuisine - ${currency} 800 per person.",
+              "transport": "Auto-rickshaw from #The Ridge, Shimla# to #Eighteen71 Cookhouse & Bar, Shimla# - ${currency}150.",
+              "cost": "${currency}950"
             },
-            "budget_breakdown": "₹3,100",
+            "budget_breakdown": "${currency} 3,100",
             "tips": "Explore #Mall Road, Shimla# in the evening for a lively atmosphere. Arrive early at #The Ridge, Shimla# for better photos."
           }
         ],
-        "total_budget_used": "₹X,XXX",
-        "remaining_budget": "₹X,XXX"
+        "total_budget_used": "${currency} X,XXX",
+        "remaining_budget": "${currency} X,XXX"
       }
     }
     \`\`\`
@@ -78,6 +82,7 @@ export const generateItinerary = async (
     Ensure that the itinerary is engaging, **realistic**, and structured to provide a **seamless travel experience**.  
     It must be in **valid JSON format with no extra text**.
     `;
+
 
     const response = await model.generateContent(prompt);
     const result = response.response;
