@@ -18,7 +18,7 @@ interface AnimateZoomParams {
 }
 
 // Component to render directions between markers
-const DirectionsRenderer = ({predefinedMarkers,triggerDirections }: { predefinedMarkers: any[],triggerDirections: boolean }) => {
+const DirectionsRenderer = ({predefinedMarkers, triggerDirections }: { predefinedMarkers: any[], triggerDirections: boolean }) => {
   const routesLibrary = useMapsLibrary("routes");
   const map = useMap();
   // console.log("map",map)
@@ -61,6 +61,7 @@ const DirectionsRenderer = ({predefinedMarkers,triggerDirections }: { predefined
   
   return null;
 };
+
 // Main Map Component
 const MapComponent = ({ 
   predefinedMarkers,
@@ -79,18 +80,53 @@ const MapComponent = ({
 }) => {
   
   const [allMarkersVisible, setAllMarkersVisible] = useState(false);
+  const [isDarkTheme, setIsDarkTheme] = useState(true); // Default to dark theme
   
   const defaultCenter = predefinedMarkers[0];
   const defaultZoom = 12;
   
   const mapId = import.meta.env.VITE_GOOGLE_MAP_ID;
   
+  // Toggle map theme
+  const toggleMapTheme = () => {
+    setIsDarkTheme(!isDarkTheme);
+  };
+  
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full relative">
+      {/* Theme toggle button - Moved from right to left */}
+      <div className="absolute top-3 left-3 z-10 bg-black/40 backdrop-blur-md rounded-full p-2 shadow-lg">
+        <button 
+          onClick={toggleMapTheme}
+          className={`flex items-center justify-center space-x-2 px-3 py-1.5 rounded-full transition-colors ${
+            isDarkTheme 
+              ? 'bg-gray-800 text-blue-400 hover:bg-gray-700' 
+              : 'bg-white text-blue-600 hover:bg-gray-100'
+          }`}
+          aria-label={isDarkTheme ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {isDarkTheme ? (
+            <>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+              </svg>
+              <span className="text-sm font-medium">Light</span>
+            </>
+          ) : (
+            <>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+              </svg>
+              <span className="text-sm font-medium">Dark</span>
+            </>
+          )}
+        </button>
+      </div>
+      
       <div className="w-full h-full">
         <Map
           mapId={mapId}
-          colorScheme="DARK"
+          colorScheme={isDarkTheme ? "DARK" : "LIGHT"}
           defaultCenter={defaultCenter}
           defaultZoom={defaultZoom}
           mapTypeControl={false}
@@ -108,6 +144,7 @@ const MapComponent = ({
             selectedMarker={selectedMarker}
             setSelectedMarker={setSelectedMarker}
             hoveredMarker={hoveredMarker}
+            isDarkTheme={isDarkTheme}
           />
           {allMarkersVisible && <DirectionsRenderer predefinedMarkers={predefinedMarkers} triggerDirections={true} />}
         </Map>
@@ -124,7 +161,8 @@ const MarkerManager = ({
   selectedMarker, 
   setSelectedMarker,
   hoveredMarker,
-  predefinedMarkers
+  predefinedMarkers,
+  isDarkTheme
 }: {
   setAllMarkersVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setInfoOpen: React.Dispatch<React.SetStateAction<any>>;
@@ -133,6 +171,7 @@ const MarkerManager = ({
   setSelectedMarker: any;
   hoveredMarker: any;
   predefinedMarkers: any[];
+  isDarkTheme: boolean;
 }) => {
   console.log("selected",selectedMarker)
   const [visibleMarkerIndices, setVisibleMarkerIndices] = useState<number[]>([]);
@@ -422,148 +461,151 @@ const MarkerManager = ({
       })}
 
       {/* Info Window - positioned directly above marker */}
-     {/* Info Window - positioned directly above marker */}
-{infoOpen && (
-  <InfoWindow 
-    position={getInfoWindowPosition(infoOpen)}
-    pixelOffset={[0, 100]} // Increase vertical offset to position higher above marker
-    onCloseClick={handleZoomOut}
-    disableAutoPan={true} // Prevent automatic panning
-    className="bg-gray-700"
-  >
-    <div 
-      // className="custom-infowindow"
-      onMouseEnter={handlePopupMouseEnter}
-      onMouseLeave={handlePopupMouseLeave}
-    >
-      <div style={{ position: "relative" ,  overflow: "hidden" , height: "100px"}}>
-        {/* Carousel container */}
-        {carouselImages.map((image, index) => (
-          <img
-            key={index}
-            src={image}
-            alt={`Location ${index + 1}`}
-            style={{
-              width: "100%",
-              height: "150px",
-              objectFit: "cover",
-              borderRadius: "5px 5px 0 0",
-              marginBottom: "0",
-              position: 'absolute', // Make images absolute positioned
-              top: 0,
-              left: 0,
-              opacity: currentImageIndex === index ? 1 : 0,
-              transition: "opacity 0.5s ease-in-out",
-            }}
-          />
-        ))}
-        
-        {/* Left arrow */}
-        <div
-          onClick={handlePrevImage}
-          style={{
-            position: "absolute",
-            top: "50%",
-            left: "10px",
-            transform: "translateY(-50%)",
-            backgroundColor: "rgba(255, 255, 255, 0.7)",
-            borderRadius: "50%",
-            width: "30px",
-            height: "30px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            opacity: isInfoWindowHovered ? 1 : 0,
-            transition: "opacity 0.3s ease",
-            zIndex: 10
-          }}
+      {infoOpen && (
+        <InfoWindow 
+          position={getInfoWindowPosition(infoOpen)}
+          pixelOffset={[0, 100]} // Increase vertical offset to position higher above marker
+          onCloseClick={handleZoomOut}
+          disableAutoPan={true} // Prevent automatic panning
+          className={isDarkTheme ? "bg-gray-700" : "bg-white"}
         >
-          <span style={{ fontSize: "18px", fontWeight: "bold" }}>←</span>
-        </div>
-        
-        {/* Right arrow */}
-        <div
-          onClick={handleNextImage}
-          style={{
-            position: "absolute",
-            top: "50%",
-            right: "10px",
-            transform: "translateY(-50%)",
-            backgroundColor: "rgba(255, 255, 255, 0.7)",
-            borderRadius: "50%",
-            width: "30px",
-            height: "30px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            opacity: isInfoWindowHovered ? 1 : 0,
-            transition: "opacity 0.3s ease",
-            zIndex: 10
-          }}
-        >
-          <span style={{ fontSize: "18px", fontWeight: "bold" }}>→</span>
-        </div>
-      </div>
-      
-      <div style={{ padding: "8px", marginTop: "0" }}>
-        <h3 style={{ fontSize: "16px", fontWeight: "bold", margin: "3px 0" }}>
-          {infoOpen.name || "Location"}
-        </h3>
-        
-        {/* Star Rating Component */}
-       {/* Star Rating Component */}
-<div className="flex items-center mt-1 mb-2">
-  <div className="flex mr-1">
-    {[1, 2, 3, 4, 5].map((star) => {
-      const rating = infoOpen.rating || 4.5;
-      const isFullStar = star <= Math.floor(rating);
-      const isHalfStar = !isFullStar && star === Math.ceil(rating) && rating % 1 !== 0;
-      
-      return (
-        <div key={star} className="relative">
-          {/* Background star (always gray) */}
-          <svg 
-            className="w-4 h-4 text-gray-300"
-            fill="currentColor" 
-            viewBox="0 0 20 20" 
-            xmlns="http://www.w3.org/2000/svg"
+          <div 
+            // className="custom-infowindow"
+            onMouseEnter={handlePopupMouseEnter}
+            onMouseLeave={handlePopupMouseLeave}
           >
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-          </svg>
-          
-          {/* Full or half star overlay */}
-          {(isFullStar || isHalfStar) && (
-            <svg 
-              className="w-4 h-4 text-yellow-400 absolute top-0 left-0"
-              fill="currentColor" 
-              viewBox="0 0 20 20" 
-              xmlns="http://www.w3.org/2000/svg"
-              style={{
-                clipPath: isHalfStar ? 'polygon(0 0, 50% 0, 50% 100%, 0 100%)' : 'none'
-              }}
-            >
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-            </svg>
-          )}
-        </div>
-      );
-    })}
-  </div>
-  <span className="text-xs text-gray-100 ml-1">
-    {(infoOpen.rating || 4.5).toFixed(1)} 
-  </span>
-</div>
-        
-        {/* Location Type/Category */}
-        <div className="text-xs text-gray-100 mb-1">
-          {infoOpen.category || "Tourist Attraction"}
-        </div>
-      </div>
-    </div>
-  </InfoWindow>
-)}
+            <div style={{ position: "relative", overflow: "hidden", height: "100px"}}>
+              {/* Carousel container */}
+              {carouselImages.map((image, index) => (
+                <img
+                  key={index}
+                  src={image}
+                  alt={`Location ${index + 1}`}
+                  style={{
+                    width: "100%",
+                    height: "150px",
+                    objectFit: "cover",
+                    borderRadius: "5px 5px 0 0",
+                    marginBottom: "0",
+                    position: 'absolute', // Make images absolute positioned
+                    top: 0,
+                    left: 0,
+                    opacity: currentImageIndex === index ? 1 : 0,
+                    transition: "opacity 0.5s ease-in-out",
+                  }}
+                />
+              ))}
+              
+              {/* Left arrow */}
+              <div
+                onClick={handlePrevImage}
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "10px",
+                  transform: "translateY(-50%)",
+                  backgroundColor: "rgba(255, 255, 255, 0.7)",
+                  borderRadius: "50%",
+                  width: "30px",
+                  height: "30px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  opacity: isInfoWindowHovered ? 1 : 0,
+                  transition: "opacity 0.3s ease",
+                  zIndex: 10
+                }}
+              >
+                <span style={{ fontSize: "18px", fontWeight: "bold" }}>←</span>
+              </div>
+              
+              {/* Right arrow */}
+              <div
+                onClick={handleNextImage}
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  right: "10px",
+                  transform: "translateY(-50%)",
+                  backgroundColor: "rgba(255, 255, 255, 0.7)",
+                  borderRadius: "50%",
+                  width: "30px",
+                  height: "30px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  opacity: isInfoWindowHovered ? 1 : 0,
+                  transition: "opacity 0.3s ease",
+                  zIndex: 10
+                }}
+              >
+                <span style={{ fontSize: "18px", fontWeight: "bold" }}>→</span>
+              </div>
+            </div>
+            
+            <div style={{ padding: "8px", marginTop: "0" }}>
+              <h3 style={{ 
+                fontSize: "16px", 
+                fontWeight: "bold", 
+                margin: "3px 0",
+                color: isDarkTheme ? "#ffffff" : "#333333" 
+              }}>
+                {infoOpen.name || "Location"}
+              </h3>
+              
+              {/* Star Rating Component */}
+              <div className="flex items-center mt-1 mb-2">
+                <div className="flex mr-1">
+                  {[1, 2, 3, 4, 5].map((star) => {
+                    const rating = infoOpen.rating || 4.5;
+                    const isFullStar = star <= Math.floor(rating);
+                    const isHalfStar = !isFullStar && star === Math.ceil(rating) && rating % 1 !== 0;
+                    
+                    return (
+                      <div key={star} className="relative">
+                        {/* Background star (always gray) */}
+                        <svg 
+                          className={`w-4 h-4 ${isDarkTheme ? 'text-gray-300' : 'text-gray-200'}`}
+                          fill="currentColor" 
+                          viewBox="0 0 20 20" 
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                        </svg>
+                        
+                        {/* Full or half star overlay */}
+                        {(isFullStar || isHalfStar) && (
+                          <svg 
+                            className="w-4 h-4 text-yellow-400 absolute top-0 left-0"
+                            fill="currentColor" 
+                            viewBox="0 0 20 20" 
+                            xmlns="http://www.w3.org/2000/svg"
+                            style={{
+                              clipPath: isHalfStar ? 'polygon(0 0, 50% 0, 50% 100%, 0 100%)' : 'none'
+                            }}
+                          >
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                          </svg>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <span className={`text-xs ${isDarkTheme ? 'text-gray-100' : 'text-gray-700'} ml-1`}>
+                  {(infoOpen.rating || 4.5).toFixed(1)} 
+                </span>
+              </div>
+              
+              {/* Location Type/Category */}
+              <div className={`text-xs ${isDarkTheme ? 'text-gray-100' : 'text-gray-600'} mb-1`}>
+                {infoOpen.category || "Tourist Attraction"}
+              </div>
+            </div>
+          </div>
+        </InfoWindow>
+      )}
     </div>
   );
 };

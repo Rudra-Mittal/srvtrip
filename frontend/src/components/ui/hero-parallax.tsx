@@ -321,7 +321,7 @@ export const ProductCard = ({
         y: -20,
       }}
       key={product.title}
-      className="group/product h-96 w-[30rem] relative shrink-0"
+      className="group/product h-64 sm:h-80 md:h-96 w-[16rem] sm:w-[24rem] md:w-[30rem] relative shrink-0"
     >
         <motion.img
           src={product.thumbnail}
@@ -343,6 +343,6 @@ export const ProductCard = ({
         />
       
       <div className="absolute inset-0 h-full w-full opacity-0 group-hover/product:opacity-100 group-hover/product:transition-all duration-300 ease-out pointer-events-none"></div>
-        </motion.div>
+    </motion.div>
   );
 };

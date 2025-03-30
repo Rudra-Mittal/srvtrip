@@ -34,6 +34,7 @@
     "cobe": "^0.6.3",
     "colorthief": "^2.6.0",
     "date-fns": "^4.1.0",
+    "firebase": "^11.5.0",
     "framer-motion": "^12.5.0",
     "gsap": "^3.12.7",
     "lucide-react": "^0.483.0",

@@ -58,7 +58,7 @@ export default function SmartForm({smartFormRef,formVisible}:{smartFormRef:React
       );
     }
   return (
-    <div className="container mx-auto px-4">
+    <div className="container mx-auto px-4 -mt-[55rem] sm:-mt-96">
       {/* Replace TextGenerateEffect with TypewriterEffect */}
       <motion.div
         initial={{ opacity: 0 }}

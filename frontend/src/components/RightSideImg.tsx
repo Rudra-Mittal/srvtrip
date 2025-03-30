@@ -25,23 +25,22 @@ export default function RightSideImg({currentSlide,setCurrentSlide,setBgColor}: 
         img.src = testimonials[currentSlide].image;
 
         img.onload = () => {
-        const colorThief = new ColorThief();
-        const palette = colorThief.getPalette(img, 5);
-        const vibrantColor = palette[0] || palette[1];
-        const color = `rgb(${vibrantColor[0]}, ${vibrantColor[1]}, ${vibrantColor[2]})`;
-        setBgColor(color); // Passing the color to the parent component
+            const colorThief = new ColorThief();
+            const palette = colorThief.getPalette(img, 5);
+            const vibrantColor = palette[0] || palette[1];
+            const color = `rgb(${vibrantColor[0]}, ${vibrantColor[1]}, ${vibrantColor[2]})`;
+            setBgColor(color); // Passing the color to the parent component
         };
     }, [currentSlide]);
 
-    return(
-        <>
+    return (
         <div 
-          className="w-full md:w-7/12 relative bg-black/80 p-4" 
+          className="h-full relative bg-black/80 p-4" 
           style={{
             borderRadius: '40px 0 12px 40px', // Prominent border
             padding: '16px', // Padding around the image
             backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            boxShadow: 'inset 0 0 0 1px rgba(59, 130, 246, 0.15)'
+            boxShadow: 'inset 0 0 0 1px rgba(167, 139, 250, 0.15)' // Updated to lavender
           }}
         >
             {/* Image container with padding */}
@@ -70,27 +69,27 @@ export default function RightSideImg({currentSlide,setCurrentSlide,setBgColor}: 
                         boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
                       }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-black/50 flex flex-col justify-end p-12">
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-black/50 flex flex-col justify-end p-8 sm:p-12">
                       <div className="text-white mb-4">
                         {/* Quote Icon with gradient */}
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mb-4">
                           <defs>
                             <linearGradient id="quoteGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                              <stop offset="0%" stopColor="#3B82F6" />
-                              <stop offset="100%" stopColor="#A855F7" />
+                              <stop offset="0%" stopColor="#a78bfa" />
+                              <stop offset="100%" stopColor="#8b5cf6" />
                             </linearGradient>
                           </defs>
                           <path d="M14.5 10C14.5 8.3 15.8 7 17.5 7C19.2 7 20.5 8.3 20.5 10C20.5 11.7 19.2 13 17.5 13C17.2 13 17 13 16.8 13C17.3 15.9 18.9 17 22.5 17V19C17.5 19 14.5 16 14.5 10ZM3.5 10C3.5 8.3 4.8 7 6.5 7C8.2 7 9.5 8.3 9.5 10C9.5 11.7 8.2 13 6.5 13C6.2 13 6 13 5.8 13C6.3 15.9 7.9 17 11.5 17V19C6.5 19 3.5 16 3.5 10Z" fill="url(#quoteGradient)"/>
                         </svg>
 
-                        <p className="text-2xl font-light leading-relaxed mb-4">{testimonial.quote}</p>
-                        <h3 className="text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">{testimonial.author}</h3>
-                        <p className="text-sm text-blue-200 opacity-80">{testimonial.position}</p>
-                        <p className="text-sm mt-1 text-blue-100 font-medium">📍 {testimonial.location}</p>
+                        <p className="text-lg sm:text-2xl font-light leading-relaxed mb-4">{testimonial.quote}</p>
+                        <h3 className="text-lg sm:text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-lavender-400 to-purple-400">{testimonial.author}</h3>
+                        <p className="text-xs sm:text-sm text-lavender-200 opacity-80">{testimonial.position}</p>
+                        <p className="text-xs sm:text-sm mt-1 text-lavender-100 font-medium">📍 {testimonial.location}</p>
                       </div>
 
                       {/* Buttons with animated gradient borders */}
-                      <div className="absolute bottom-9 right-12 flex space-x-3">
+                      <div className="absolute bottom-6 sm:bottom-9 right-6 sm:right-12 flex space-x-3">
                         <motion.button
                           onClick={prevSlide}
                           whileHover={{ scale: 1.1 }}
@@ -98,7 +97,7 @@ export default function RightSideImg({currentSlide,setCurrentSlide,setBgColor}: 
                           className="relative w-10 h-10 rounded-full flex items-center justify-center text-white overflow-hidden group"
                         >
                           {/* Animated border */}
-                          <span className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 opacity-75 group-hover:opacity-100 animate-spin-slow"></span>
+                          <span className="absolute inset-0 rounded-full bg-gradient-to-r from-lavender-500 via-purple-500 to-lavender-500 opacity-75 group-hover:opacity-100 animate-spin-slow"></span>
                           {/* Dark inner background */}
                           <span className="absolute inset-[1.5px] rounded-full bg-black/80 z-10"></span>
                           {/* Icon */}
@@ -106,8 +105,8 @@ export default function RightSideImg({currentSlide,setCurrentSlide,setBgColor}: 
                             <path d="M15 19L8 12L15 5" stroke="url(#navGradient)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
                             <defs>
                               <linearGradient id="navGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stopColor="#3B82F6" />
-                                <stop offset="100%" stopColor="#A855F7" />
+                                <stop offset="0%" stopColor="#a78bfa" />
+                                <stop offset="100%" stopColor="#8b5cf6" />
                               </linearGradient>
                             </defs>
                           </svg>
@@ -119,7 +118,7 @@ export default function RightSideImg({currentSlide,setCurrentSlide,setBgColor}: 
                           className="relative w-10 h-10 rounded-full flex items-center justify-center text-white overflow-hidden group"
                         >
                           {/* Animated border */}
-                          <span className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 opacity-75 group-hover:opacity-100 animate-spin-slow"></span>
+                          <span className="absolute inset-0 rounded-full bg-gradient-to-r from-lavender-500 via-purple-500 to-lavender-500 opacity-75 group-hover:opacity-100 animate-spin-slow"></span>
                           {/* Dark inner background */}
                           <span className="absolute inset-[1.5px] rounded-full bg-black/80 z-10"></span>
                           {/* Icon */}
@@ -141,7 +140,7 @@ export default function RightSideImg({currentSlide,setCurrentSlide,setBgColor}: 
                   key={index} 
                   className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
                     index === currentSlide 
-                      ? 'w-8 bg-gradient-to-r from-blue-500 to-purple-500' 
+                      ? 'w-8 bg-gradient-to-r from-lavender-500 to-purple-500' 
                       : 'w-2 bg-gray-700 hover:bg-gray-600'
                   }`}
                   onClick={() => setCurrentSlide(index)}
@@ -149,6 +148,5 @@ export default function RightSideImg({currentSlide,setCurrentSlide,setBgColor}: 
               ))}
             </div>
         </div>
-        </>
     )
 }
