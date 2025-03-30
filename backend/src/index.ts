@@ -1,6 +1,7 @@
 import express from 'express';
 import { getPhotoUri, placeInfo } from './controllers/places';
 import { generate } from './AiController1/main';
+import cors from 'cors';
 import { replacePlace } from './utils/replaceName';
 import { extract2, generate2 } from './AIController2';
 import { extractPlacesByRegex } from './AIController2/services/extractPlacesbyRegex';
@@ -19,6 +20,9 @@ import connectPlace from './utils/connectPlace';
 import createPlace from './utils/createPlace';
 import createItenary from './utils/createItenary';
 import createDay from './utils/createDay';
+// import { authMiddleware } from './middlewares/authMiddleware';
+import { firebaseAuth } from './middleware/firebaseAuth';
+import { createUser, findUserByFirebaseId } from './controllers/auth/usercontroller';
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import { Request, Response, NextFunction } from 'express';
@@ -53,35 +57,181 @@ const authMiddleware=(req:AuthRequest,res:Response,next:NextFunction)=>{
     }
 }
 
-
+app.use(cors({
+  origin: 'http://localhost:5173', // Your frontend URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true, // Important for cookies
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.get('/', (req, res) => {
     res.send('Hello World!');
 })
 
-app.post('/api/auth/signup',(req,res)=>{
-    const {email,password,name} = req.body;
-    // doing some authentication generating token and saving to db
-    signup(email,password,name).then((token)=>{
-        res.cookie('token',token,{httpOnly:true});
-        res.status(200).json({token,"message":"User created successfully"});
-    }).catch((err)=>{
-        console.log(err)
-        res.status(403).json({"error":err.message});
-    })
-})
-app.post('/api/auth/signin',(req,res)=>{
-    const {email,password} = req.body;
+app.post('/signup', firebaseAuth, async (req, res) => {
+  try {
+    const { email, password, name, firebaseUserId } = req.body;
+    
+    // Check if user with this Firebase ID already exists
+    const existingUser = await findUserByFirebaseId(firebaseUserId);
+    if (existingUser) {
+      // Just return a token for the existing user
+      const token = jwt.sign({ userId: existingUser.id }, process.env.JWT_SECRET as string);
+      
+      res.cookie('token', token, {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+      
+      res.status(200).json({ token });
+      return;
+    }
+    
+    // Create user in your database using the createUser function directly
+    try {
+      const dbUser = await createUser(email, password, name, firebaseUserId);
+      
+      // Generate token with the database user ID
+      const token = jwt.sign({ userId: dbUser.id }, process.env.JWT_SECRET as string);
+      
+      res.cookie('token', token, {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+      
+      res.status(200).json({ token });
+    } catch (dbErr) {
+      console.error('Database user creation error:', dbErr);
+      res.status(500).json({ error: 'Failed to create user in database' });
+    }
+  } catch (err: any) {
+    console.error('Signup error:', err);
+    res.clearCookie('token');
+    res.status(403).json({ error: err.message });
+  }
+});
+  
+app.post('/signin', firebaseAuth, async (req, res) => {
+  try {
+    const { email, password, googleAuth, firebaseUserId, name } = req.body;
+    
+    console.log("Received signin request with:", { email, googleAuth, firebaseUserId, name });
+    
+    // For Google Auth, check if user exists or create them
+    if (googleAuth) {
+      // Check if user with this Firebase ID exists
+      let user = await findUserByFirebaseId(firebaseUserId);
+      
+      if (!user) {
+        // If not, create the user directly with createUser
+        try {
+          user = await createUser(
+            email, 
+            'FIREBASE_AUTH', // Placeholder password for Google auth users
+            name || 'User',
+            firebaseUserId
+          );
+        } catch (dbErr) {
+          console.error('Google auth user creation error:', dbErr);
+          res.status(500).json({ error: 'Failed to create user in database' });
+          return;
+        }
+      }
+      
+      // Generate token with the database user ID
+      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET as string);
+      
+      res.cookie('token', token, {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+      
+      res.status(200).json({ token });
+      return;
+    }
+    
+    // Check if the user has a Firebase ID
+    if (firebaseUserId) {
+      // Find or create the user by Firebase ID
+      let user = await findUserByFirebaseId(firebaseUserId);
+      
+      if (!user) {
+        // This is unusual - they authenticated with Firebase but we don't have them in our DB
+        try {
+          user = await createUser(
+            email, 
+            'FIREBASE_AUTH', // Placeholder password
+            name || 'User',
+            firebaseUserId
+          );
+        } catch (dbErr) {
+          console.error('Firebase user creation error:', dbErr);
+          res.status(500).json({ error: 'Failed to create user in database' });
+          return;
+        }
+      }
+      
+      // Generate token with the database user ID
+      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET as string);
+      
+      res.cookie('token', token, {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+      
+      res.status(200).json({ token });
+      return;
+    }
+    
+    // Regular email/password signin only if Firebase ID isn't provided
+    if (!password) {
+      res.status(400).json({ error: 'Password is required for regular signin' });
+      return;
+    }
+    
+    try {
+      const token = await signin(email, password);
+      
+      res.cookie('token', token, {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+      
+      res.status(200).json({ token });
+    } catch (signInErr) {
+      console.error('Regular signin error:', signInErr);
+      res.status(401).json({ error: 'Invalid credentials' });
+    }
+  } catch (err: any) {
+    console.error('Signin error:', err);
+    res.clearCookie('token');
+    res.status(403).json({ error: err.message });
+  }
+});
 
-    signin(email,password).then((token)=>{
-        res.cookie('token',token,{httpOnly:true});
+// app.post('/api/auth/signup',(req,res)=>{
+//     const {email,password,name} = req.body;
+//     // doing some authentication generating token and saving to db
+//     signup(email,password,name).then((token)=>{
+//         res.cookie('token',token,{httpOnly:true});
+//         res.status(200).json({token,"message":"User created successfully"});
+//     }).catch((err)=>{
+//         console.log(err)
+//         res.status(403).json({"error":err.message});
+//     })
+// })
+// app.post('/api/auth/signin',(req,res)=>{
+//     const {email,password} = req.body;
 
-        res.status(200).json({token,"message":"User signed in successfully"});
-    }).catch((err)=>{
-        console.log(err)
-        res.clearCookie('token');
-        res.status(403).json({"error":err.message});
-    })
-})
+//     signin(email,password).then((token)=>{
+//         res.cookie('token',token,{httpOnly:true});
+
+//         res.status(200).json({token,"message":"User signed in successfully"});
+//     }).catch((err)=>{
+//         console.log(err)
+//         res.clearCookie('token');
+//         res.status(403).json({"error":err.message});
+//     })
+// })
 
 app.post('/api/auth/signout',(req,res)=>{
     res.clearCookie('token');
