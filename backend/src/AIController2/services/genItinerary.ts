@@ -19,7 +19,7 @@ export const generateItinerary = async (
 
     const prompt =`
     Generate a detailed, optimized travel itinerary for a trip to **${destination}** spanning **${number_of_days}** days, starting from **${start_date}**.
-    The total budget for this trip is **${currency}${budget}**, and it is planned for **${number_of_persons}** people.
+    The total budget for this trip is **${currency} ${budget}**, and it is planned for **${number_of_persons}** people.
     ${interests ? `Interests to consider: ${interests}. Take it as a priority.` : ""}
 
     ### **Strict Budget Utilization Guidelines:**
@@ -53,28 +53,28 @@ export const generateItinerary = async (
             "day": 1,
             "morning": {
               "activities": "Arrive in #Hotel Combermere, Shimla# and explore #Mall Road, Shimla#.",
-              "food": "Breakfast at #Indian Coffee House, Shimla# - ${currency}250 per person.",
-              "transport": "Taxi from #Jubbarhatti Airport, Shimla# to #Hotel Combermere, Shimla# - ${currency}800 total.",
-              "cost": "${currency}1,050"
+              "food": "Breakfast at #Indian Coffee House, Shimla# - ${currency} 250 per person.",
+              "transport": "Taxi from #Jubbarhatti Airport, Shimla# to #Hotel Combermere, Shimla# - ${currency} 800 total.",
+              "cost": "${currency} 1,050"
             },
             "afternoon": {
               "activities": "Visit #The Ridge, Shimla# and #Christ Church, Shimla# for scenic views and photography.",
-              "food": "Lunch at #Wake & Bake Café, Shimla# - ${currency}600 per person.",
+              "food": "Lunch at #Wake & Bake Café, Shimla# - ${currency} 600 per person.",
               "transport": "Walking tour.",
-              "cost": "${currency}600"
+              "cost": "${currency} 600"
             },
             "evening": {
               "activities": "Enjoy a fine dining experience at #Eighteen71 Cookhouse & Bar, Shimla#.",
-              "food": "North Indian & Chinese cuisine - ${currency}800 per person.",
+              "food": "North Indian & Chinese cuisine - ${currency} 800 per person.",
               "transport": "Auto-rickshaw from #The Ridge, Shimla# to #Eighteen71 Cookhouse & Bar, Shimla# - ${currency}150.",
               "cost": "${currency}950"
             },
-            "budget_breakdown": "${currency}3,100",
+            "budget_breakdown": "${currency} 3,100",
             "tips": "Explore #Mall Road, Shimla# in the evening for a lively atmosphere. Arrive early at #The Ridge, Shimla# for better photos."
           }
         ],
-        "total_budget_used": "${currency}X,XXX",
-        "remaining_budget": "${currency}X,XXX"
+        "total_budget_used": "${currency} X,XXX",
+        "remaining_budget": "${currency} X,XXX"
       }
     }
     \`\`\`

@@ -19,10 +19,39 @@ import connectPlace from './utils/connectPlace';
 import createPlace from './utils/createPlace';
 import createItenary from './utils/createItenary';
 import createDay from './utils/createDay';
+import jwt from 'jsonwebtoken';
+import cookieParser from 'cookie-parser';
+import { Request, Response, NextFunction } from 'express';
 
 const app = express();
 const PORT = 4000;
 app.use(express.json());
+app.use(cookieParser()); // Enable cookie parsing middleware
+
+// Define a custom interface extending Express Request
+interface AuthRequest extends Request {
+    user?: {
+      userId: string;
+      // Add other properties from your JWT payload if needed
+    };
+}
+
+const authMiddleware=(req:AuthRequest,res:Response,next:NextFunction)=>{
+    const token=req.cookies.token;
+    if(!token){
+        res.status(401).json({"error":"Unauthorized:No token provided"});
+        return
+    }
+    try{
+        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as jwt.JwtPayload & { userId: string };
+        req.user={userId:decoded.userId};//adding userId to request object
+        next();
+    }
+    catch(err){
+        res.status(401).json({"error":"Unauthorized:Invalid token"});
+        return
+    }
+}
 
 
 app.get('/', (req, res) => {
@@ -53,11 +82,27 @@ app.post('/api/auth/signin',(req,res)=>{
         res.status(403).json({"error":err.message});
     })
 })
-// app.use(authMiddleware);
-app.post('/api/itenary', async(req,res)=>{
-    const {prompt,userId} = req.body;
+
+app.post('/api/auth/signout',(req,res)=>{
+    res.clearCookie('token');
+    res.status(200).json({"message":"User signed out successfully"});
+})
+
+app.use(authMiddleware);//use auth middleware for all routes after this line 
+
+app.post('/api/itenary', async(req:AuthRequest,res)=>{
+    const {prompt} = req.body;
+    console.log(prompt);
     //generating itenary
     // const itenary=await generate(prompt)
+
+    const userId=req.user?.userId;//get userId from token
+
+    if(!userId){
+        res.status(403).json({"error":"User not found"});
+        return
+    }
+
     const itenary=await generate2(prompt)
 
     const allDayPlaces=  extractPlacesByRegex(itenary)//get the 2d array of places (daywise places)
@@ -122,3 +167,4 @@ app.post('/api/itenary', async(req,res)=>{
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+

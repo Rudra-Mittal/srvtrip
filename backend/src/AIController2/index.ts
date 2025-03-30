@@ -33,7 +33,7 @@ export async function generate2(req:ReqBody){
     return JSON.stringify({ error: "Internal Server Error" });
   }
 }
-generate2({destination:"Haridwar",number_of_days:3,start_date:"05-04-2025",currency:"USD",budget:2000,number_of_persons:2,interests:"Adventure, Culture, Food"});
+// generate2({destination:"Haridwar",number_of_days:3,start_date:"05-04-2025",currency:"USD",budget:2000,number_of_persons:2,interests:"Adventure, Culture, Food"});
 
 export function extract2(req:{itinerary:string}){
     try {

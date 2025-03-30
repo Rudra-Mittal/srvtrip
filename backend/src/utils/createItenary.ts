@@ -15,7 +15,7 @@ export default async function createItenary(itenary:string,userId:string):Promis
             userId:userId,
             destination:itenaryJ.destination,
             duration:itenaryJ.number_of_days,
-            budget:itenaryJ.budget,
+            budget:parseFloat(itenaryJ.budget),
             numberOfPersons:itenaryJ.number_of_persons,
             interests:itenaryJ.interests||[],
         }
