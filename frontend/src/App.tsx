@@ -9,6 +9,7 @@ import LandingPage from './pages/LandingPage'
 import FormPage from './pages/FormPage'
 // import Loader from './components/loader'
 import { ItineraryPage } from './pages/ItineraryPage'
+import VerifyOtpPage from './pages/VerifyOtpPage'
 // import { AuthProvider } from './providers/AuthProvider.tsx'
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
             <Route path="/features" element={<Features/>} />
             <Route path="/form" element={<FormPage/>} />
             <Route path="/itinerary" element={<ItineraryPage/>}/>
+            <Route path="/verify-otp" element={<VerifyOtpPage />} /> 
           </Routes>
         </BrowserRouter>
     </>
