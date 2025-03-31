@@ -26,7 +26,10 @@ import { createUser, findUserByFirebaseId } from './controllers/auth/usercontrol
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import { Request, Response, NextFunction } from 'express';
+import nodemailer from 'nodemailer';
 
+import dotenv from 'dotenv';
+dotenv.config();
 const app = express();
 const PORT = 4000;
 app.use(express.json());
@@ -205,6 +208,83 @@ app.post('/signin', firebaseAuth, async (req, res) => {
     console.error('Signin error:', err);
     res.clearCookie('token');
     res.status(403).json({ error: err.message });
+  }
+});
+
+const otps = new Map<string, { otp: string; expiresAt: number }>(); // Temporary in-memory storage for OTPs
+
+app.post('/generate-otp', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // Generate a 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Store the OTP with a 5-minute expiration
+    otps.set(email, { otp, expiresAt: Date.now() + 5 * 60 * 1000 });
+
+    // Send the OTP via email
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER, // Your email
+        pass: process.env.EMAIL_PASS, // Your email password or app password
+      },
+    });
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Your OTP for Signup',
+      text: `Your OTP for signup is: ${otp}. It is valid for 5 minutes.`,
+    });
+
+    res.status(200).json({ message: 'OTP sent to email' });
+  } catch (err) {
+    console.error('Error sending OTP:', err);
+    res.status(500).json({ error: 'Failed to send OTP' });
+  }
+});
+
+
+app.post('/verify-otp', async (req : any, res : any) => {
+  try {
+    const { email, otp, password, name } = req.body;
+
+    // Check if the OTP exists and is valid
+    const storedOtp = otps.get(email);
+    if (!storedOtp || storedOtp.otp !== otp || storedOtp.expiresAt < Date.now()) {
+      return res.status(400).json({ error: 'Invalid or expired OTP' });
+    }
+
+    // OTP is valid, proceed with the existing signup logic
+    const firebaseUserId = 'TEMP_FIREBASE_ID'; // Replace with actual Firebase ID if needed
+
+    try {
+      const dbUser = await createUser(email, password, name, firebaseUserId);
+
+      // Generate token with the database user ID
+      const token = jwt.sign({ userId: dbUser.id }, process.env.JWT_SECRET as string);
+
+      res.cookie('token', token, {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+
+      // Remove the OTP after successful verification
+      otps.delete(email);
+
+      res.status(200).json({ token, message: 'Signup successful' });
+    } catch (err: any) {
+      if (err.message.includes('User already exists')) {
+        console.error('User already exists:', err.message);
+        return res.status(400).json({ error: 'User already exists with this email' });
+      }
+      throw err;
+    }
+  } catch (err) {
+    console.error('Error verifying OTP:', err);
+    res.status(500).json({ error: 'Failed to verify OTP' });
   }
 });
 
