@@ -8,7 +8,8 @@ import {
   updateProfile,
   GoogleAuthProvider,
   signInWithPopup,
-  User
+  User,
+  sendEmailVerification, applyActionCode
 } from "firebase/auth";
 import { useState, useEffect } from "react";
 
@@ -53,7 +54,12 @@ export function useAuth() {
       // Update profile with name
       if (userCredential.user) {
         await updateProfile(userCredential.user, { displayName: name });
+        await sendEmailVerification(userCredential.user, {
+          url: `${window.location.origin}/verify-otp`, // Redirect to OTP verification page
+          handleCodeInApp: true,
+        });
       }
+      
       
       // Get Firebase token for backend integration
       const idToken = await userCredential.user.getIdToken();

@@ -9,6 +9,10 @@ export async function createUser(email: string, password: string, name: string, 
     
     // Hash the password before storing it (even for Firebase users)
     // For Firebase users with placeholder password, still hash it
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+    
     const hashedPassword = await bcrypt.hash(password, 10);
     
     const user = await prisma.user.create({
