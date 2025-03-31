@@ -6,7 +6,8 @@ const weaviateApiKey = process.env.WEAVIATE_API_KEY as string
 const jinaaiApiKey = process.env.JINAAI_API_KEY as string
 const mistralapikey= process.env.MISTRAL_API_KEY as string
 const studioapikey= process.env.GOOGLE_API_KEY as string
-export default async function summarizeReview(query:string,placeId:string):Promise<String>{
+const query= process.env.SUMMARIZE_REVIEW_QUERY as string
+export default async function summarizeReview(placeId:string):Promise<String>{
   const client = await weaviate.connectToWeaviateCloud(
     weaviateURL,
     { authCredentials: new weaviate.ApiKey(weaviateApiKey),
@@ -23,6 +24,6 @@ export default async function summarizeReview(query:string,placeId:string):Promi
     },{
       filters: jeopardy.filter.byProperty('place').containsAny([placeId]),
     })
-    console.log("\nReposne of summarized review\n",resGen.generated);
-    return resGen.generated as string
+    console.log("\nReposne of summarized review\n",resGen.generated?.split('json')[1].split('```')[0]);
+    return resGen.generated?.split('json')[1].split('```')[0] as string
 }

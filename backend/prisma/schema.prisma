@@ -53,6 +53,7 @@ model Place {
   latitude          Float
   longitude         Float
   url               String?   
+  rating            Float?
   images            Image[]
   summarizedReview  String?
   day               Day[] 
