@@ -6,34 +6,71 @@ import dotenv from 'dotenv';
 import { migrateData } from "./controllers/migrate";
 import { updateEnv } from "./utils/updateEnv";
 import summarizeReview from "./controllers/summarizeReview";
+// import { saveReview } from "./utils/saveReview";
 dotenv.config();
 const app= express();
 app.use(express.json())
+interface ScrapingTask {
+    placeName: string;
+    maxScrolls: number;
+    placeId: string;
+}
+
+class ScrapingQueue {
+    private queue: ScrapingTask[] = [];
+    private limit: number = 3;
+    private inProgress: number = 0;
+    enqueue(task: ScrapingTask): void {
+        this.queue.push(task);
+        this.processNext();
+    }
+    
+    private dequeue(): ScrapingTask | undefined {
+        return this.queue.shift();
+    }
+    
+    private async processNext(): Promise<void> {
+        if (this.queue.length === 0) return;
+        if(this.inProgress>=this.limit)return ;
+        const task = this.dequeue();
+        if (!task) {
+            return;
+        }
+        this.inProgress++;
+        try {
+            const review = await scrapeGoogleMapsReviews(task.placeName, task.maxScrolls);
+            this.inProgress--;
+            if (review.reviews.length > 0) {
+                await insertData({...review, placeId: task.placeId});
+                const summarizedReview = await summarizeReview(task.placeId);
+                
+                fetch(BACKEND_URL + '/api/summarize', {
+                    method: 'POST',
+                    body: JSON.stringify({review: summarizedReview, placeId: task.placeId}),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                console.log("Sent request to DB");
+            } else {
+                console.log("No reviews found");
+            }
+        } catch (error) {
+            console.log("Error sever")
+        } finally {
+            this.processNext();
+        }
+    }
+}
+
+const scrapingQueue = new ScrapingQueue();
 const BACKEND_URL=process.env.BACKEND_URL as string
 // auth middleware pending
 app.post('/scraper',async (req,res)=>{
     const {placeName,maxScrolls,placeId}=req.body;
-    const review=await scrapeGoogleMapsReviews(placeName,maxScrolls);
-    // console.log(review)
-    if(review.reviews.length>0) {
-        insertData({...review,placeId}).then(()=>{
-            summarizeReview(placeId).then((summarizedReview)=>{
-                 fetch(BACKEND_URL+'/api/summarize',{
-                    method:'POST',
-                    body:JSON.stringify({review:summarizedReview,placeId}),
-                    headers:{
-                        'Content-Type':'application/json'
-                    }
-                 })
-                })
-                res.status(200).json({message:"Reviews scrapped successfully",data:review})
-                return 
-            })
-    }else{
-        res.status(404).json({message:"No reviews found"})
-        return
-    }
-    
+    scrapingQueue.enqueue({placeId,placeName,maxScrolls})
+    res.status(200).json({"message":"Sent request successfully"})
+    return ;
 })
 app.listen(3000,()=>{
     console.log("Server is running on port 3000")

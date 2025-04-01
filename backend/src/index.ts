@@ -26,7 +26,7 @@ import { createUser, findUserByFirebaseId } from './controllers/auth/usercontrol
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import { Request, Response, NextFunction } from 'express';
-import nodemailer from 'nodemailer';
+// import nodemailer from 'nodemailer';
 import saveReview from './utils/saveReview';
 
 import dotenv from 'dotenv';
@@ -381,7 +381,7 @@ app.post('/api/itenary', async (req: AuthRequest, res) => {
         if (!placeD) {
           console.log("Error creating place")
         }
-        else  await callWebScrapper(place.displayName, 5, place.id)
+        else  callWebScrapper(place.displayName, 5, place.id)
       }
     }
     dayNum++;

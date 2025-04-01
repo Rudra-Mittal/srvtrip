@@ -54,6 +54,8 @@ model Place {
   longitude         Float
   url               String?   
   rating            Float?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
   images            Image[]
   summarizedReview  String?
   day               Day[] 
