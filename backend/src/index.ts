@@ -212,7 +212,7 @@ app.post('/signin', async (req, res) => {
   }
 });
 
-// const otps = new Map<string, { otp: string; expiresAt: number }>(); // Temporary in-memory storage for OTPs
+const otps = new Map<string, { otp: string; expiresAt: number }>(); // Temporary in-memory storage for OTPs
 
 app.post('/generate-otp', async (req, res) => {
   try {
@@ -405,10 +405,6 @@ app.post('/api/summarize',async (req,res)=>{
   res.status(200).json({message:"Saved to DB"})
   // res.json({summarizedReview,placeId})
 })
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
-
 app.post('/query',(req,res)=>{
   const {query,placeName,limit}=req.body;
   searchQuery(query,placeName,limit)
@@ -420,4 +416,8 @@ app.post('/query',(req,res)=>{
       res.json({"error":"Server err"})
   })
 })
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+
 
