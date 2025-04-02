@@ -252,6 +252,7 @@ app.post('/generate-otp', async (req, res) => {
     });
 
     res.status(200).json({ message: 'OTP sent to email' });
+    return 
   } catch (err) {
     console.error('Error sending OTP:', err);
     res.status(500).json({ error: 'Failed to send OTP' });
@@ -277,15 +278,16 @@ app.post('/verify-otp', async (req : any, res : any) => {
       // Generate token with the database user ID
       const token = jwt.sign({ userId: dbUser.id }, process.env.JWT_SECRET as string);
 
+      
+      // Remove the OTP after successful verification
+      otps.delete(email);
+      
       res.cookie('token', token, {
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
-
-      // Remove the OTP after successful verification
-      otps.delete(email);
-
       res.status(200).json({ token, message: 'Signup successful' });
+      return 
     } catch (err: any) {
       if (err.message.includes('User already exists')) {
         console.error('User already exists:', err.message);

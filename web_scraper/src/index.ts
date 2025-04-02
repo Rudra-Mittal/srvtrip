@@ -38,8 +38,11 @@ class ScrapingQueue {
         }
         this.inProgress++;
         try {
+            console.log("Processing task:", task);
             const review = await scrapeGoogleMapsReviews(task.placeName, task.maxScrolls);
             this.inProgress--;
+            this.processNext();
+            console.log("Task completed:", task);
             if (review.reviews.length > 0) {
                 await insertData({...review, placeId: task.placeId});
                 const summarizedReview = await summarizeReview(task.placeId);
@@ -57,8 +60,6 @@ class ScrapingQueue {
             }
         } catch (error) {
             console.log("Error sever")
-        } finally {
-            this.processNext();
         }
     }
 }

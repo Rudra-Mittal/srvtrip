@@ -17,7 +17,7 @@ import { useEffect, useState } from 'react'
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -29,7 +29,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
           }
         });
         const data = await response.json();
-        setUser(data.user || null);
+        setUser(data.userId || null);
       } catch (err) {
         console.log(err);
         setUser(null);

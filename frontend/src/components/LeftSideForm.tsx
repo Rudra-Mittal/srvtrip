@@ -77,13 +77,14 @@ export default function LeftSideForm({ type }: { type: string }) {
           password,
           name,
         }),
+        credentials:'include'
       });
 
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Invalid or expired OTP');
       }
-
+      console.log('OTP verified successfully',response);
       toast.success('Account created successfully!');
       navigate('/'); // Navigate to home after successful verification
     } catch (err: any) {
@@ -98,6 +99,19 @@ export default function LeftSideForm({ type }: { type: string }) {
     try {
       await signinWithGoogle();
       navigate('/');
+      const response = await fetch('http://localhost:4000/signin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+        credentials:'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Invalid credentials');
+      }
+
+      toast.success('Sign in successful!');
+      navigate('/'); // Redirect to the landing page
     } catch (err: any) {
       setError(err.message);
     }
