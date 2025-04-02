@@ -26,10 +26,14 @@ export default function LandingPage() {
       <Navbar/>
       <HeroParallaxDemo/>
       <div className="relative">
-        {/* Smart Form Section */}
-        <section id="smart-form" className="" ref={smartFormRef}>
-          <SmartForm smartFormRef={smartFormRef} formVisible={formVisible}/>
-        </section>
+     {/* Smart Form Section */}
+<section 
+  id="smart-form" 
+  className="md:py-10 -mt-[35rem] md:-mt-96" // Negative margin on mobile only
+  ref={smartFormRef}
+>
+  <SmartForm smartFormRef={smartFormRef} formVisible={formVisible}/>
+</section>
         {/* AI-Generated Itinerary Timeline */}
         <section id="itinerary" className="py-20 relative" ref={itineraryRef}>
           <BackgroundBeams className="absolute inset-0 opacity-20" />
