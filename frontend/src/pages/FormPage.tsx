@@ -1,4 +1,4 @@
-import Form from "@/components/formPage.tsx/form";
+import Form from "@/components/formPage/form";
 import { Globe } from "@/components/globe";
 export default function FormPage(){
   return (

@@ -3,9 +3,9 @@ import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-export async function createUser(email: string, password: string, name: string, firebaseUserId: string) {
+export async function createUser(email: string, password: string, name: string) {
   try {
-    console.log(`Creating user with email: ${email}, firebaseUserId: ${firebaseUserId}`);
+    // console.log(`Creating user with email: ${email}, firebaseUserId: ${firebaseUserId}`);
     
     // Hash the password before storing it (even for Firebase users)
     // For Firebase users with placeholder password, still hash it
@@ -20,7 +20,6 @@ export async function createUser(email: string, password: string, name: string, 
         email,
         password: hashedPassword, // Store hashed password
         name,
-        firebaseUserId,
       },
     });
     
@@ -43,13 +42,13 @@ export async function createUser(email: string, password: string, name: string, 
   }
 }
 
-export async function findUserByFirebaseId(firebaseUserId: string) {
+export async function findByEmail(email: string) {
   try {
-    console.log(`Looking for user with firebaseUserId: ${firebaseUserId}`);
+    // console.log(`Looking for user with firebaseUserId: ${firebaseUserId}`);
     
     const user = await prisma.user.findFirst({
       where: {
-        firebaseUserId: firebaseUserId,
+        email
       },
     });
     

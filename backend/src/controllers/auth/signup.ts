@@ -22,8 +22,7 @@ export default async function signup(email: string, password: string, name: stri
       data: {
         email,
         password: hashedPassword,
-        name,
-        firebaseUserId: firebaseUserId || '', // Provide a default value
+        name
       },
     });
     

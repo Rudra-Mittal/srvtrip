@@ -22,7 +22,7 @@ import createItenary from './utils/createItenary';
 import createDay from './utils/createDay';
 // import { authMiddleware } from './middlewares/authMiddleware';
 import { firebaseAuth } from './middleware/firebaseAuth';
-import { createUser, findUserByFirebaseId } from './controllers/auth/usercontroller';
+import { createUser ,findByEmail} from './controllers/auth/usercontroller';
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import { Request, Response, NextFunction } from 'express';
@@ -75,10 +75,10 @@ app.get('/', (req, res) => {
 
 app.post('/signup', firebaseAuth, async (req, res) => {
   try {
-    const { email, password, name, firebaseUserId } = req.body;
+    const { email, password, name } = req.body;
     
     // Check if user with this Firebase ID already exists
-    const existingUser = await findUserByFirebaseId(firebaseUserId);
+    const existingUser = await findByEmail(email);
     if (existingUser) {
       // Just return a token for the existing user
       const token = jwt.sign({ userId: existingUser.id }, process.env.JWT_SECRET as string);
@@ -94,7 +94,7 @@ app.post('/signup', firebaseAuth, async (req, res) => {
     
     // Create user in your database using the createUser function directly
     try {
-      const dbUser = await createUser(email, password, name, firebaseUserId);
+      const dbUser = await createUser(email, password, name);
       
       // Generate token with the database user ID
       const token = jwt.sign({ userId: dbUser.id }, process.env.JWT_SECRET as string);
@@ -116,16 +116,16 @@ app.post('/signup', firebaseAuth, async (req, res) => {
   }
 });
   
-app.post('/signin', firebaseAuth, async (req, res) => {
+app.post('/signin', async (req, res) => {
   try {
-    const { email, password, googleAuth, firebaseUserId, name } = req.body;
+    const { email, password, googleAuth, name } = req.body;
     
-    console.log("Received signin request with:", { email, googleAuth, firebaseUserId, name });
+    // console.log("Received signin request with:", { email, googleAuth, firebaseUserId, name });
     
     // For Google Auth, check if user exists or create them
     if (googleAuth) {
       // Check if user with this Firebase ID exists
-      let user = await findUserByFirebaseId(firebaseUserId);
+      let user = await findByEmail(email);
       
       if (!user) {
         // If not, create the user directly with createUser
@@ -134,7 +134,6 @@ app.post('/signin', firebaseAuth, async (req, res) => {
             email, 
             'FIREBASE_AUTH', // Placeholder password for Google auth users
             name || 'User',
-            firebaseUserId
           );
         } catch (dbErr) {
           console.error('Google auth user creation error:', dbErr);
@@ -156,37 +155,36 @@ app.post('/signin', firebaseAuth, async (req, res) => {
     }
     
     // Check if the user has a Firebase ID
-    if (firebaseUserId) {
-      // Find or create the user by Firebase ID
-      let user = await findUserByFirebaseId(firebaseUserId);
+    // if (firebaseUserId) {
+    //   // Find or create the user by Firebase ID
+    //   let user = await findUserByFirebaseId(firebaseUserId);
       
-      if (!user) {
-        // This is unusual - they authenticated with Firebase but we don't have them in our DB
-        try {
-          user = await createUser(
-            email, 
-            'FIREBASE_AUTH', // Placeholder password
-            name || 'User',
-            firebaseUserId
-          );
-        } catch (dbErr) {
-          console.error('Firebase user creation error:', dbErr);
-          res.status(500).json({ error: 'Failed to create user in database' });
-          return;
-        }
-      }
+    //   if (!user) {
+    //     // This is unusual - they authenticated with Firebase but we don't have them in our DB
+    //     try {
+    //       user = await createUser(
+    //         email, 
+    //         'FIREBASE_AUTH', // Placeholder password
+    //         name || 'User',
+    //       );
+    //     } catch (dbErr) {
+    //       console.error('Firebase user creation error:', dbErr);
+    //       res.status(500).json({ error: 'Failed to create user in database' });
+    //       return;
+    //     }
+    //   }
       
-      // Generate token with the database user ID
-      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET as string);
+    //   // Generate token with the database user ID
+    //   const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET as string);
       
-      res.cookie('token', token, {
-        httpOnly: true,
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      });
+    //   res.cookie('token', token, {
+    //     httpOnly: true,
+    //     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    //   });
       
-      res.status(200).json({ token });
-      return;
-    }
+    //   res.status(200).json({ token });
+    //   return;
+    // }
     
     // Regular email/password signin only if Firebase ID isn't provided
     if (!password) {
@@ -272,10 +270,9 @@ app.post('/verify-otp', async (req : any, res : any) => {
     }
 
     // OTP is valid, proceed with the existing signup logic
-    const firebaseUserId = 'TEMP_FIREBASE_ID'; // Replace with actual Firebase ID if needed
 
     try {
-      const dbUser = await createUser(email, password, name, firebaseUserId);
+      const dbUser = await createUser(email, password, name);
 
       // Generate token with the database user ID
       const token = jwt.sign({ userId: dbUser.id }, process.env.JWT_SECRET as string);
