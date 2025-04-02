@@ -16,6 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Slider } from "@/components/ui/slider";
 import Loader from '../loader';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { genitinerary } from '@/api/formroute';
 
 interface FormData {
   destination: string;
@@ -655,6 +656,7 @@ export default function Form() {
                         <HoverBorderGradient
                           as="button"
                           className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 font-medium text-white shadow-lg shadow-purple-900/20"
+                          onClick={()=>genitinerary(formData)}
                         >
                           <span className="flex items-center justify-center text-xs sm:text-sm md:text-xl">
                             Generate My Itinerary <Sparkles className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />

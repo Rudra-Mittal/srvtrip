@@ -77,19 +77,19 @@ function App() {
           
           {/* Protected Routes */}
           <Route path="/day/:daynumber" element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <DayNumPage/>
-            </ProtectedRoute>
+            // </ProtectedRoute>
           } />
           <Route path="/form" element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <FormPage/>
-            </ProtectedRoute>
+            // </ProtectedRoute>
           } />
           <Route path="/itinerary" element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <ItineraryPage/>
-            </ProtectedRoute>
+            // </ProtectedRoute>
           } />
           {/* <Route path="/verify-otp" element={<VerifyOtpPage />} />  */}
         </Routes>

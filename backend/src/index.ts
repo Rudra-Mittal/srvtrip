@@ -340,9 +340,10 @@ app.get("/api/auth/user",authMiddleware,(req:AuthRequest,res)=>{
   return
 })
 
-app.use(authMiddleware);//use auth middleware for all routes after this line 
+// app.use(authMiddleware);//use auth middleware for all routes after this line 
 
 app.post('/api/itenary', async (req: AuthRequest, res) => {
+  // console.log("Inside itenary route",req.body);
   const { prompt,userId } = req.body;
   console.log(prompt);
   //generating itenary
