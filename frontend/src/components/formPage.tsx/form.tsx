@@ -16,6 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Slider } from "@/components/ui/slider";
 import Loader from '../loader';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 interface FormData {
   destination: string;
   budget: number;
@@ -39,6 +40,7 @@ export default function Form() {
     customRequests: "",
     currency: "INR"
   });
+  
   const currencies = [
     { value: "USD", label: "USD - $", symbol: "$" },
     { value: "EUR", label: "EUR - €", symbol: "€" },

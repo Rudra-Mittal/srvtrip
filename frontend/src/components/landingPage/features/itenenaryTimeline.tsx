@@ -86,20 +86,26 @@ export default function IteneraryTimeline(){
                                 </div>
                               </BackgroundGradient>
                               
-                              {/* Timeline for the day */}
-                            <div className="pl-4 mt-16 space-y-12 relative">
-                              {/* Gradient line with proper spacing and constraints */}
-                              <div className="absolute top-0 bottom-0 left-0 ml-[19px] w-[2px] bg-gradient-to-b from-blue-500 via-purple-500 to-blue-500 max-h-[95%] mt-5"></div>
-                              
-                              <Timeline 
-                                data={day.activities.map((activity, idx) => ({
-                                  title: activity.title,
-                                  content: <p className="text-sm text-gray-400">{activity.description}</p>,
-                                  time: activity.time,
-                                  icon: <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white relative z-10">{idx + 1}</div>
-                                }))}
-                              />
-                            </div>
+         {/* Timeline for the day */}
+<div className="pl-4 mt-16 space-y-12 relative">
+  {/* Gradient line with proper constraints and fixed positioning */}
+  <div 
+    className="absolute top-0 left-0 ml-[19px] w-[2px] bg-gradient-to-b from-blue-500 via-purple-500 to-blue-500" 
+    style={{ 
+      height: 'calc(100% - 20px)', // Slightly shorter than container
+      pointerEvents: 'none' // Ensures line doesn't interfere with interactions
+    }}
+  />
+  
+  <Timeline 
+    data={day.activities.map((activity, idx) => ({
+      title: activity.title,
+      content: <p className="text-sm text-gray-400">{activity.description}</p>,
+      time: activity.time,
+      icon: <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white relative z-10">{idx + 1}</div>
+    }))}
+  />
+</div>
                             </motion.div>
                           )
                         ))}
