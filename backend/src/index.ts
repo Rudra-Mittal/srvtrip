@@ -26,7 +26,7 @@ import { createUser, findUserByFirebaseId } from './controllers/auth/usercontrol
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import { Request, Response, NextFunction } from 'express';
-// import nodemailer from 'nodemailer';
+import nodemailer from 'nodemailer';
 import saveReview from './utils/saveReview';
 
 import dotenv from 'dotenv';
@@ -73,223 +73,234 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 })
 
-// app.post('/signup', firebaseAuth, async (req, res) => {
-//   try {
-//     const { email, password, name, firebaseUserId } = req.body;
+app.post('/signup', firebaseAuth, async (req, res) => {
+  try {
+    const { email, password, name, firebaseUserId } = req.body;
     
-//     // Check if user with this Firebase ID already exists
-//     const existingUser = await findUserByFirebaseId(firebaseUserId);
-//     if (existingUser) {
-//       // Just return a token for the existing user
-//       const token = jwt.sign({ userId: existingUser.id }, process.env.JWT_SECRET as string);
+    // Check if user with this Firebase ID already exists
+    const existingUser = await findUserByFirebaseId(firebaseUserId);
+    if (existingUser) {
+      // Just return a token for the existing user
+      const token = jwt.sign({ userId: existingUser.id }, process.env.JWT_SECRET as string);
       
-//       res.cookie('token', token, {
-//         httpOnly: true,
-//         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-//       });
+      res.cookie('token', token, {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
       
-//       res.status(200).json({ token });
-//       return;
-//     }
+      res.status(200).json({ token });
+      return;
+    }
     
-//     // Create user in your database using the createUser function directly
-//     try {
-//       const dbUser = await createUser(email, password, name, firebaseUserId);
+    // Create user in your database using the createUser function directly
+    try {
+      const dbUser = await createUser(email, password, name, firebaseUserId);
       
-//       // Generate token with the database user ID
-//       const token = jwt.sign({ userId: dbUser.id }, process.env.JWT_SECRET as string);
+      // Generate token with the database user ID
+      const token = jwt.sign({ userId: dbUser.id }, process.env.JWT_SECRET as string);
       
-//       res.cookie('token', token, {
-//         httpOnly: true,
-//         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-//       });
+      res.cookie('token', token, {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
       
-//       res.status(200).json({ token });
-//     } catch (dbErr) {
-//       console.error('Database user creation error:', dbErr);
-//       res.status(500).json({ error: 'Failed to create user in database' });
-//     }
-//   } catch (err: any) {
-//     console.error('Signup error:', err);
-//     res.clearCookie('token');
-//     res.status(403).json({ error: err.message });
-//   }
-// });
+      res.status(200).json({ token });
+    } catch (dbErr) {
+      console.error('Database user creation error:', dbErr);
+      res.status(500).json({ error: 'Failed to create user in database' });
+    }
+  } catch (err: any) {
+    console.error('Signup error:', err);
+    res.clearCookie('token');
+    res.status(403).json({ error: err.message });
+  }
+});
   
-// app.post('/signin', firebaseAuth, async (req, res) => {
-//   try {
-//     const { email, password, googleAuth, firebaseUserId, name } = req.body;
+app.post('/signin', firebaseAuth, async (req, res) => {
+  try {
+    const { email, password, googleAuth, firebaseUserId, name } = req.body;
     
-//     console.log("Received signin request with:", { email, googleAuth, firebaseUserId, name });
+    console.log("Received signin request with:", { email, googleAuth, firebaseUserId, name });
     
-//     // For Google Auth, check if user exists or create them
-//     if (googleAuth) {
-//       // Check if user with this Firebase ID exists
-//       let user = await findUserByFirebaseId(firebaseUserId);
+    // For Google Auth, check if user exists or create them
+    if (googleAuth) {
+      // Check if user with this Firebase ID exists
+      let user = await findUserByFirebaseId(firebaseUserId);
       
-//       if (!user) {
-//         // If not, create the user directly with createUser
-//         try {
-//           user = await createUser(
-//             email, 
-//             'FIREBASE_AUTH', // Placeholder password for Google auth users
-//             name || 'User',
-//             firebaseUserId
-//           );
-//         } catch (dbErr) {
-//           console.error('Google auth user creation error:', dbErr);
-//           res.status(500).json({ error: 'Failed to create user in database' });
-//           return;
-//         }
-//       }
+      if (!user) {
+        // If not, create the user directly with createUser
+        try {
+          user = await createUser(
+            email, 
+            'FIREBASE_AUTH', // Placeholder password for Google auth users
+            name || 'User',
+            firebaseUserId
+          );
+        } catch (dbErr) {
+          console.error('Google auth user creation error:', dbErr);
+          res.status(500).json({ error: 'Failed to create user in database' });
+          return;
+        }
+      }
       
-//       // Generate token with the database user ID
-//       const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET as string);
+      // Generate token with the database user ID
+      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET as string);
       
-//       res.cookie('token', token, {
-//         httpOnly: true,
-//         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-//       });
+      res.cookie('token', token, {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
       
-//       res.status(200).json({ token });
-//       return;
-//     }
+      res.status(200).json({ token });
+      return;
+    }
     
-//     // Check if the user has a Firebase ID
-//     if (firebaseUserId) {
-//       // Find or create the user by Firebase ID
-//       let user = await findUserByFirebaseId(firebaseUserId);
+    // Check if the user has a Firebase ID
+    if (firebaseUserId) {
+      // Find or create the user by Firebase ID
+      let user = await findUserByFirebaseId(firebaseUserId);
       
-//       if (!user) {
-//         // This is unusual - they authenticated with Firebase but we don't have them in our DB
-//         try {
-//           user = await createUser(
-//             email, 
-//             'FIREBASE_AUTH', // Placeholder password
-//             name || 'User',
-//             firebaseUserId
-//           );
-//         } catch (dbErr) {
-//           console.error('Firebase user creation error:', dbErr);
-//           res.status(500).json({ error: 'Failed to create user in database' });
-//           return;
-//         }
-//       }
+      if (!user) {
+        // This is unusual - they authenticated with Firebase but we don't have them in our DB
+        try {
+          user = await createUser(
+            email, 
+            'FIREBASE_AUTH', // Placeholder password
+            name || 'User',
+            firebaseUserId
+          );
+        } catch (dbErr) {
+          console.error('Firebase user creation error:', dbErr);
+          res.status(500).json({ error: 'Failed to create user in database' });
+          return;
+        }
+      }
       
-//       // Generate token with the database user ID
-//       const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET as string);
+      // Generate token with the database user ID
+      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET as string);
       
-//       res.cookie('token', token, {
-//         httpOnly: true,
-//         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-//       });
+      res.cookie('token', token, {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
       
-//       res.status(200).json({ token });
-//       return;
-//     }
+      res.status(200).json({ token });
+      return;
+    }
     
-//     // Regular email/password signin only if Firebase ID isn't provided
-//     if (!password) {
-//       res.status(400).json({ error: 'Password is required for regular signin' });
-//       return;
-//     }
+    // Regular email/password signin only if Firebase ID isn't provided
+    if (!password) {
+      res.status(400).json({ error: 'Password is required for regular signin' });
+      return;
+    }
     
-//     try {
-//       const token = await signin(email, password);
+    try {
+      const token = await signin(email, password);
       
-//       res.cookie('token', token, {
-//         httpOnly: true,
-//         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-//       });
+      res.cookie('token', token, {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
       
-//       res.status(200).json({ token });
-//     } catch (signInErr) {
-//       console.error('Regular signin error:', signInErr);
-//       res.status(401).json({ error: 'Invalid credentials' });
-//     }
-//   } catch (err: any) {
-//     console.error('Signin error:', err);
-//     res.clearCookie('token');
-//     res.status(403).json({ error: err.message });
-//   }
-// });
+      res.status(200).json({ token });
+    } catch (signInErr) {
+      console.error('Regular signin error:', signInErr);
+      res.status(401).json({ error: 'Invalid credentials' });
+    }
+  } catch (err: any) {
+    console.error('Signin error:', err);
+    res.clearCookie('token');
+    res.status(403).json({ error: err.message });
+  }
+});
 
 // const otps = new Map<string, { otp: string; expiresAt: number }>(); // Temporary in-memory storage for OTPs
 
-// app.post('/generate-otp', async (req, res) => {
-//   try {
-//     const { email } = req.body;
+app.post('/generate-otp', async (req, res) => {
+  try {
+    const { email } = req.body;
 
-//     // Generate a 6-digit OTP
-//     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // Generate a 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // Store the OTP with a 5-minute expiration
+    otps.set(email, { otp, expiresAt: Date.now() + 5 * 60 * 1000 });
+    
+    // Send the OTP via email
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER, // Your email
+        pass: process.env.EMAIL_PASS, // Your email password or app password
+      },
+    });
+    // console.log('Generated OTP:', otp, 'for email:', email,transporter);
 
-//     // Store the OTP with a 5-minute expiration
-//     otps.set(email, { otp, expiresAt: Date.now() + 5 * 60 * 1000 });
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Your OTP for Signup',
+      text: `Your OTP for signup is: ${otp}. It is valid for 5 minutes.`,
+      html: `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+      <h2 style="color: #4a4a4a;">Verify Your Account</h2>
+      <p>Thank you for registering with SrvTrip. To complete your registration, please use the following OTP:</p>
+      <div style="background-color: #f7f7f7; padding: 15px; border-radius: 4px; text-align: center; font-size: 24px; letter-spacing: 5px; font-weight: bold; margin: 20px 0;">
+        ${otp}
+      </div>
+      <p>This OTP is valid for 5 minutes. If you didn't request this, you can safely ignore this email.</p>
+      <p style="margin-top: 30px; font-size: 12px; color: #777;">© ${new Date().getFullYear()} SrvTrip. All rights reserved.</p>
+    </div>
+  `, 
+    });
 
-//     // Send the OTP via email
-//     const transporter = nodemailer.createTransport({
-//       service: 'gmail',
-//       auth: {
-//         user: process.env.EMAIL_USER, // Your email
-//         pass: process.env.EMAIL_PASS, // Your email password or app password
-//       },
-//     });
-
-//     await transporter.sendMail({
-//       from: process.env.EMAIL_USER,
-//       to: email,
-//       subject: 'Your OTP for Signup',
-//       text: `Your OTP for signup is: ${otp}. It is valid for 5 minutes.`,
-//     });
-
-//     res.status(200).json({ message: 'OTP sent to email' });
-//   } catch (err) {
-//     console.error('Error sending OTP:', err);
-//     res.status(500).json({ error: 'Failed to send OTP' });
-//   }
-// });
+    res.status(200).json({ message: 'OTP sent to email' });
+  } catch (err) {
+    console.error('Error sending OTP:', err);
+    res.status(500).json({ error: 'Failed to send OTP' });
+  }
+});
 
 
-// app.post('/verify-otp', async (req : any, res : any) => {
-//   try {
-//     const { email, otp, password, name } = req.body;
+app.post('/verify-otp', async (req : any, res : any) => {
+  try {
+    const { email, otp, password, name } = req.body;
 
-//     // Check if the OTP exists and is valid
-//     const storedOtp = otps.get(email);
-//     if (!storedOtp || storedOtp.otp !== otp || storedOtp.expiresAt < Date.now()) {
-//       return res.status(400).json({ error: 'Invalid or expired OTP' });
-//     }
+    // Check if the OTP exists and is valid
+    const storedOtp = otps.get(email);
+    if (!storedOtp || storedOtp.otp !== otp || storedOtp.expiresAt < Date.now()) {
+      return res.status(400).json({ error: 'Invalid or expired OTP' });
+    }
 
-//     // OTP is valid, proceed with the existing signup logic
-//     const firebaseUserId = 'TEMP_FIREBASE_ID'; // Replace with actual Firebase ID if needed
+    // OTP is valid, proceed with the existing signup logic
+    const firebaseUserId = 'TEMP_FIREBASE_ID'; // Replace with actual Firebase ID if needed
 
-//     try {
-//       const dbUser = await createUser(email, password, name, firebaseUserId);
+    try {
+      const dbUser = await createUser(email, password, name, firebaseUserId);
 
-//       // Generate token with the database user ID
-//       const token = jwt.sign({ userId: dbUser.id }, process.env.JWT_SECRET as string);
+      // Generate token with the database user ID
+      const token = jwt.sign({ userId: dbUser.id }, process.env.JWT_SECRET as string);
 
-//       res.cookie('token', token, {
-//         httpOnly: true,
-//         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-//       });
+      res.cookie('token', token, {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
 
-//       // Remove the OTP after successful verification
-//       otps.delete(email);
+      // Remove the OTP after successful verification
+      otps.delete(email);
 
-//       res.status(200).json({ token, message: 'Signup successful' });
-//     } catch (err: any) {
-//       if (err.message.includes('User already exists')) {
-//         console.error('User already exists:', err.message);
-//         return res.status(400).json({ error: 'User already exists with this email' });
-//       }
-//       throw err;
-//     }
-//   } catch (err) {
-//     console.error('Error verifying OTP:', err);
-//     res.status(500).json({ error: 'Failed to verify OTP' });
-//   }
-// });
+      res.status(200).json({ token, message: 'Signup successful' });
+    } catch (err: any) {
+      if (err.message.includes('User already exists')) {
+        console.error('User already exists:', err.message);
+        return res.status(400).json({ error: 'User already exists with this email' });
+      }
+      throw err;
+    }
+  } catch (err) {
+    console.error('Error verifying OTP:', err);
+    res.status(500).json({ error: 'Failed to verify OTP' });
+  }
+});
 
 app.post('/api/auth/signup',(req,res)=>{
     const {email,password,name} = req.body;
