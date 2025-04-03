@@ -117,10 +117,10 @@ const signin = async (email: string, password: string) => {
     setLoading(true);
     setError(null);
     
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    // const userCredential = await signInWithEmailAndPassword(auth, email, password);
     
     // Get Firebase token for backend integration
-    const idToken = await userCredential.user.getIdToken();
+    // const idToken = await userCredential.user.getIdToken();
     
     // Verify with backend
     try {
@@ -128,12 +128,14 @@ const signin = async (email: string, password: string) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${idToken}`
+          // 'Authorization': `Bearer ${idToken}`
         },
+        credentials: 'include', // Include cookies in the request
         body: JSON.stringify({
           email,
           password, // Include the password
-          firebaseUserId: userCredential.user.uid
+          googleAuth: false,
+          // firebaseUserId: userCredential.user.uid
         })
       });
       
@@ -147,7 +149,8 @@ const signin = async (email: string, password: string) => {
       // Continue since Firebase login succeeded
     }
     
-    return userCredential.user;
+    // return userCredential.user;
+    return 
   } catch (err: any) {
     console.error('Signin error:', err);
     setError(err.message);

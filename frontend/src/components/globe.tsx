@@ -27,7 +27,7 @@ export function Globe() {
     initialPosition: { lat: 22.3193, lng: 114.1694 },
     autoRotate: false,
     autoRotateSpeed: 1.0,
-    globeScale: 1.0,
+    globeScale: 1.15,
   };
   
   
