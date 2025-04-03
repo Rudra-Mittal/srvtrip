@@ -1,0 +1,1 @@
+export const otps = new Map<string, { otp: string; expiresAt: number }>(); // Temporary in-memory storage for OTPs
