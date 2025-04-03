@@ -26,6 +26,7 @@ export const firebaseAuth = async (
     }
     
     const token = authHeader.split('Bearer ')[1];
+    console.log('Token:', token);
     
     try {
       // Verify Firebase ID token

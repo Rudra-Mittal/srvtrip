@@ -81,8 +81,7 @@ app.post('/signup', firebaseAuth, async (req, res) => {
     const existingUser = await findByEmail(email);
     if (existingUser) {
       // Just return a token for the existing user
-      const token = jwt.sign({ userId: existingUser.id }, process.env.JWT_SECRET as string);
-      
+      const token = jwt.sign({ userId: existingUser.id }, process.env.JWT_SECRET as string); 
       res.cookie('token', token, {
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
@@ -119,14 +118,12 @@ app.post('/signup', firebaseAuth, async (req, res) => {
 app.post('/signin', async (req, res) => {
   try {
     const { email, password, googleAuth, name } = req.body;
-    
+    console.log("Received signin request with:", { email, googleAuth, name });
     // console.log("Received signin request with:", { email, googleAuth, firebaseUserId, name });
-    
     // For Google Auth, check if user exists or create them
     if (googleAuth) {
       // Check if user with this Firebase ID exists
       let user = await findByEmail(email);
-      
       if (!user) {
         // If not, create the user directly with createUser
         try {
@@ -141,19 +138,15 @@ app.post('/signin', async (req, res) => {
           return;
         }
       }
-      
       // Generate token with the database user ID
       const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET as string);
-      
       res.cookie('token', token, {
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
-      
       res.status(200).json({ token });
       return;
     }
-    
     // Check if the user has a Firebase ID
     // if (firebaseUserId) {
     //   // Find or create the user by Firebase ID
@@ -301,30 +294,30 @@ app.post('/verify-otp', async (req : any, res : any) => {
   }
 });
 
-app.post('/api/auth/signup',(req,res)=>{
-    const {email,password,name} = req.body;
-    // doing some authentication generating token and saving to db
-    signup(email,password,name).then((token)=>{
-        res.cookie('token',token,{httpOnly:true});
-        res.status(200).json({token,"message":"User created successfully"});
-    }).catch((err)=>{
-        console.log(err)
-        res.status(403).json({"error":err.message});
-    })
-})
-app.post('/api/auth/signin',(req,res)=>{
-    const {email,password} = req.body;
+// app.post('/api/auth/signup',(req,res)=>{
+//     const {email,password,name} = req.body;
+//     // doing some authentication generating token and saving to db
+//     signup(email,password,name).then((token)=>{
+//         res.cookie('token',token,{httpOnly:true});
+//         res.status(200).json({token,"message":"User created successfully"});
+//     }).catch((err)=>{
+//         console.log(err)
+//         res.status(403).json({"error":err.message});
+//     })
+// })
+// app.post('/api/auth/signin',(req,res)=>{
+//     const {email,password} = req.body;
 
-    signin(email,password).then((token)=>{
-        res.cookie('token',token,{httpOnly:true});
+//     signin(email,password).then((token)=>{
+//         res.cookie('token',token,{httpOnly:true});
 
-        res.status(200).json({token,"message":"User signed in successfully"});
-    }).catch((err)=>{
-        console.log(err)
-        res.clearCookie('token');
-        res.status(403).json({"error":err.message});
-    })
-})
+//         res.status(200).json({token,"message":"User signed in successfully"});
+//     }).catch((err)=>{
+//         console.log(err)
+//         res.clearCookie('token');
+//         res.status(403).json({"error":err.message});
+//     })
+// })
 
 app.post('/api/auth/signout', (req, res) => {
   res.clearCookie('token');
