@@ -178,6 +178,7 @@ const signin = async (email: string, password: string) => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${idToken}`
           },
+          credentials: 'include',
           body: JSON.stringify({
             email,
             name,

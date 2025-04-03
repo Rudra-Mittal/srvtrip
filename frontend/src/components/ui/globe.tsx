@@ -105,12 +105,12 @@ export function Globe({ globeConfig, data }: WorldProps) {
     arcLength: 0.9,
     rings: 1,
     maxRings: 3,
-    globeScale: 1.2,             // Scale factor for the globe
-    globeTransparency: 0.7,      // Transparency for the globe
+    globeScale: 2.0,             // Scale factor for the globe
+    globeTransparency: 1,      // Transparency for the globe
     oceanOpacity: 0.6,           // Opacity for ocean layer
     starsCount: 5000,            // Number of star particles
     starsSize: 0.05,             // Size of star particles
-    positionOffset: 0.5,         // Right-side positioning offset (0 is center, 1 is far right)
+    // positionOffset: 0.5,         // Right-side positioning offset (0 is center, 1 is far right)
     ...globeConfig,
   };
 
