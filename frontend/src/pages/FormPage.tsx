@@ -6,7 +6,7 @@ export default function FormPage(){
       <div className="p-2">
         <Form/>
       </div>
-      <div className="py-4">
+      <div className="py-4 ml-[20rem] z-20">
         <Globe/>
         
       </div>

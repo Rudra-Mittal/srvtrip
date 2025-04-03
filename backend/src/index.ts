@@ -73,7 +73,7 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 })
 
-app.post('/signup', firebaseAuth, async (req, res) => {
+app.post('/signup',async (req, res) => {
   try {
     const { email, password, name } = req.body;
     
@@ -93,10 +93,9 @@ app.post('/signup', firebaseAuth, async (req, res) => {
     
     // Create user in your database using the createUser function directly
     try {
-      const dbUser = await createUser(email, password, name);
+      const token = await signup(email, password, name);
       
       // Generate token with the database user ID
-      const token = jwt.sign({ userId: dbUser.id }, process.env.JWT_SECRET as string);
       
       res.cookie('token', token, {
         httpOnly: true,
@@ -104,18 +103,21 @@ app.post('/signup', firebaseAuth, async (req, res) => {
       });
       
       res.status(200).json({ token });
+      return
     } catch (dbErr) {
       console.error('Database user creation error:', dbErr);
       res.status(500).json({ error: 'Failed to create user in database' });
+      return
     }
   } catch (err: any) {
     console.error('Signup error:', err);
     res.clearCookie('token');
     res.status(403).json({ error: err.message });
+    return
   }
 });
   
-app.post('/signin', async (req, res) => {
+app.post('/signin', firebaseAuth ,async (req, res) => {
   try {
     const { email, password, googleAuth, name } = req.body;
     console.log("Received signin request with:", { email, googleAuth, name });
@@ -187,21 +189,24 @@ app.post('/signin', async (req, res) => {
     
     try {
       const token = await signin(email, password);
-      
+      console.log("Generated token:", token);
       res.cookie('token', token, {
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
       
-      res.status(200).json({ token });
+      res.status(200).send("success");
+      return
     } catch (signInErr) {
       console.error('Regular signin error:', signInErr);
       res.status(401).json({ error: 'Invalid credentials' });
+      return
     }
   } catch (err: any) {
     console.error('Signin error:', err);
     res.clearCookie('token');
     res.status(403).json({ error: err.message });
+    return
   }
 });
 

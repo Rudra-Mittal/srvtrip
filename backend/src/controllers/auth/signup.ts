@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-export default async function signup(email: string, password: string, name: string, firebaseUserId?: string) {
+export default async function signup(email: string, password: string, name: string) {
   try {
     const prisma = new PrismaClient();
     const hashedPassword = await bcrypt.hash(password, 10);

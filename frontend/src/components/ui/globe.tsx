@@ -106,7 +106,7 @@ export function Globe({ globeConfig, data }: WorldProps) {
     rings: 1,
     maxRings: 3,
     globeScale: 2.0,             // Scale factor for the globe
-    globeTransparency: 1,      // Transparency for the globe
+    globeTransparency: 0.9,      // Transparency for the globe
     oceanOpacity: 0.6,           // Opacity for ocean layer
     starsCount: 5000,            // Number of star particles
     starsSize: 0.05,             // Size of star particles
@@ -140,7 +140,7 @@ export function Globe({ globeConfig, data }: WorldProps) {
       
       // Add ocean layer (semi-transparent sphere)
       const oceanGeometry = new THREE.SphereGeometry(
-        1.02 * defaultProps.globeScale, 
+        1.02 * defaultProps.globeScale, // This keeps the ocean at a fixed distance from the globe
         50, 
         50
       );
