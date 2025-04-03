@@ -18,6 +18,14 @@ export const firebaseAuth = async (
   next: NextFunction
 ): Promise<void> => {
   try {
+    const body = req.body;
+    console.log('Request Body:', body);
+  const googleauth = req.body.googleAuth;
+  console.log('Google Auth:', googleauth);
+    if(!googleauth){
+      next();
+      return
+    }
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
