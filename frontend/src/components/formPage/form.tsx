@@ -21,8 +21,8 @@ import { genitinerary } from '@/api/formroute';
 interface FormData {
   destination: string;
   budget: number;
-  persons: number;
-  days: number;
+  number_of_persons: number;
+  number_of_days: number;
   interests: string[];
   startDate: Date | undefined;
   customRequests: string;
@@ -34,8 +34,8 @@ export default function Form() {
   const [formData, setFormData] = useState<FormData>({
     destination: "",
     budget: 5000,
-    persons: 2,
-    days: 7,
+    number_of_persons: 2,
+    number_of_days: 7,
     interests: [],
     startDate: undefined,
     customRequests: "",
@@ -429,8 +429,8 @@ export default function Form() {
                           <Label className="text-blue-200">Number of Travelers</Label>
                           <Input
                           type="number"
-                          value={formData.persons}
-                          onChange={(e) => handleChange("persons", Number(e.target.value))}
+                          value={formData.number_of_persons}
+                          onChange={(e) => handleChange("number_of_persons", Number(e.target.value))}
                           className="w-24 sm:w-28 h-10 sm:h-12 bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white text-sm sm:text-base lg:text-lg px-3 py-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           min={1}
                           max={20}
@@ -441,10 +441,10 @@ export default function Form() {
                             <motion.button
                               key={num}
                               type="button"
-                              onClick={() => handleChange("persons", num)}
+                              onClick={() => handleChange("number_of_persons", num)}
                               className={cn(
                                 "w-10 h-10 rounded-full flex items-center justify-center transition-all",
-                                formData.persons === num
+                                formData.number_of_persons === num
                                   ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
                                   : "bg-black/50 border border-blue-500/20 text-blue-200"
                               )}
@@ -463,8 +463,8 @@ export default function Form() {
                           <Label className="text-blue-200">Trip Duration (days)</Label>
                           <Input
                             type="number"
-                            value={formData.days}
-                            onChange={(e) => handleChange("days", Number(e.target.value))}
+                            value={formData.number_of_days}
+                            onChange={(e) => handleChange("number_of_days", Number(e.target.value))}
                             className="w-24 sm:w-28 h-10 sm:h-12 bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white text-sm sm:text-base lg:text-lg px-3 py-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             min={1}
                             max={30}
@@ -475,10 +475,10 @@ export default function Form() {
                             <motion.button
                               key={num}
                               type="button"
-                              onClick={() => handleChange("days", num)}
+                              onClick={() => handleChange("number_of_days", num)}
                               className={cn(
                                 "h-10 px-3 rounded-full flex items-center justify-center transition-all",
-                                formData.days === num
+                                formData.number_of_days === num
                                   ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
                                   : "bg-black/50 border border-blue-500/20 text-blue-200"
                               )}

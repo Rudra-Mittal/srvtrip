@@ -99,19 +99,19 @@ export default function LeftSideForm({ type }: { type: string }) {
     try {
       await signinWithGoogle();
       navigate('/');
-      const response = await fetch('http://localhost:4000/signin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-        credentials:'include'
-      });
+      // const response = await fetch('http://localhost:4000/signin', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ email, password }),
+      //   credentials:'include'
+      // });
 
-      if (!response.ok) {
-        throw new Error('Invalid credentials');
-      }
+      // if (!response.ok) {
+      //   throw new Error('Invalid credentials');
+      // }
 
-      toast.success('Sign in successful!');
-      navigate('/'); // Redirect to the landing page
+      // toast.success('Sign in successful!');
+      // navigate('/'); // Redirect to the landing page
     } catch (err: any) {
       setError(err.message);
     }

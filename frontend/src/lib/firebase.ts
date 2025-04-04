@@ -179,7 +179,8 @@ const signin = async (email: string, password: string) => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${idToken}`
+            'Authorization': `Bearer ${idToken}`,
+            'google-auth': 'true'
           },
           credentials: 'include',
           body: JSON.stringify({
