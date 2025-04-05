@@ -656,7 +656,10 @@ export default function Form() {
                         <HoverBorderGradient
                           as="button"
                           className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 font-medium text-white shadow-lg shadow-purple-900/20"
-                          onClick={()=>genitinerary(formData)}
+                          onClick={()=>genitinerary(formData).then(async (res)=>{
+                            console.log(await JSON.parse(res.newItenary));
+                            console.log(await JSON.parse(res.placesData));
+                          })}
                         >
                           <span className="flex items-center justify-center text-xs sm:text-sm md:text-xl">
                             Generate My Itinerary <Sparkles className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />

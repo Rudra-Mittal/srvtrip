@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "db":"sudo docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres && npx prisma migrate dev"
   },
   "keywords": [],
   "author": "",

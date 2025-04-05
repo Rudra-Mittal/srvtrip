@@ -1,5 +1,5 @@
  export const genitinerary = async (data: any) => {
-    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}`+"api/itenary", {
+    return await fetch(`${import.meta.env.VITE_BACKEND_URL}`+"api/itenary", {
         method: 'POST',
         headers: {
         'Content-Type': 'application/json',
@@ -11,5 +11,7 @@
             throw new Error('Network response was not ok');
         }
         return res.json();
+    }).catch((err)=>{
+        console.log(err)
     });
     }

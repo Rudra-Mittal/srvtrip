@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 
-export default async function connectPlace(placeId:string,dayId:string):Promise<{"id":string}>{
+export default async function connectPlace(placeId:string,dayId:string):Promise<string|null>{
     const prisma=new PrismaClient();
     try{
         const placeD= await prisma.place.update({
@@ -15,9 +15,9 @@ export default async function connectPlace(placeId:string,dayId:string):Promise<
                 }
             }
         })
-        return {"id":placeD.id};
+        return placeD.id;
     }catch(err){
         console.error("Error connecting place:",err);
-        return {"id":""};
+        return null
     }
 }

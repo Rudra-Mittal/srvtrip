@@ -11,9 +11,11 @@ dotenv.config();
 const app= express();
 app.use(express.json())
 interface ScrapingTask {
+    placeId: string,
     placeName: string;
     maxScrolls: number;
-    placeId: string;
+    placeAddress:string,
+    iteration:number 
 }
 
 class ScrapingQueue {
@@ -53,10 +55,17 @@ class ScrapingQueue {
                     headers: {
                         'Content-Type': 'application/json'
                     }
+                }).catch((err)=>{
+                    console.log("Error in sending request",err)
                 });
                 console.log("Sent request to DB");
             } else {
-                console.log("No reviews found");
+                if(task.iteration==1){
+                    console.log("No reviews found, retrying... ");
+                    this.queue.push({...task, placeName: task.placeName+' ,'+task.placeAddress , iteration:2})
+                }else{
+                    console.log("No reviews found in second iteration");
+                }
             }
         } catch (error) {
             console.log("Error sever")
@@ -68,8 +77,8 @@ const scrapingQueue = new ScrapingQueue();
 const BACKEND_URL=process.env.BACKEND_URL as string
 // auth middleware pending
 app.post('/scraper',async (req,res)=>{
-    const {placeName,maxScrolls,placeId}=req.body;
-    scrapingQueue.enqueue({placeId,placeName,maxScrolls})
+    const {placeName,maxScrolls,placeId,placeAddress}=req.body;
+    scrapingQueue.enqueue({placeId,placeName,maxScrolls,placeAddress,iteration:1})
     res.status(200).json({"message":"Sent request successfully"})
     return ;
 })

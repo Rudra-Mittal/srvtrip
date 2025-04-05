@@ -6,7 +6,7 @@ import { getPhotoUri, placeInfo } from "./places";
 import { replacePlace } from "../utils/replaceName";
 import createItenary from "../utils/createItenary";
 import createDay from "../utils/createDay";
-import checkPlace from "./checkPlaceInDb";
+import checkPlaceAndReturnPhotos from "./checkPlaceInDb";
 import connectPlace from "../utils/connectPlace";
 import createPlace from "../utils/createPlace";
 import callWebScrapper from "./callWebScrapper";
@@ -42,26 +42,28 @@ export const itenaryRoute = async (req: AuthRequest, res:Response) => {
   for (const day of placesData) {
     const dayId = await createDay(dayNum, itenaryid, newItenary);
     for (const place of day) {
-      const placeId = await checkPlace(place);
-      if (placeId.id) {
+      const placeD= await checkPlaceAndReturnPhotos(place);
+      if (placeD.id) {
         console.log("Place already exist in db")
-        const id = connectPlace(placeId.id, dayId);
-        if (!id) {
-          console.log("Error connecting place")
+        const id = await connectPlace(placeD.id, dayId);
+        if (id) {
+          place.photos = placeD.images.map((image) => image.imageUrl);
         }
+        else console.log("Error connecting place")
       }
       else {
         //call the photos api
         const placePhotos = await Promise.all((place.photos?.map((reference: string) => getPhotoUri(reference))));
+        place.photos= placePhotos
         const placeD = await  createPlace(place, dayId, placePhotos);
         if (!placeD) {
           console.log("Error creating place")
         }
-        else  callWebScrapper(place.displayName, 5, place.id)
+        else  callWebScrapper(place.displayName, 5, place.id,place.formattedAddress)
       }
     }
     dayNum++;
   }
-  res.send(newItenary);
+  res.json({newItenary,placesData:JSON.stringify(placesData)});
   return
 }
