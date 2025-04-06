@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { DayCard } from "@/components/ItineraryDayCard";
 import { itineraryData } from "@/data/iteneraryData";
 import { useDebounce } from "use-debounce";
+import { useSelector } from "react-redux";
 export const ItineraryPage = () => {
     const [activeCardIndex, setActiveCardIndex] = useState(0);
     const sliderRef = useRef<HTMLDivElement>(null);
@@ -12,7 +13,6 @@ export const ItineraryPage = () => {
     const hoverTimeouts = useRef<(NodeJS.Timeout | null)[]>(Array(itineraryData.length).fill(null));
     const navigateSlider = useCallback((direction: 'prev' | 'next') => {
         if (!sliderRef.current) return;
-        
         let newIndex;
         if (direction === 'prev') {
             newIndex = Math.max(0, activeCardIndex - 1);
@@ -144,6 +144,11 @@ export const ItineraryPage = () => {
             }, 300);
         }
     }, []);
+    const itinerary= useSelector((state) => state.itinerary.itineraries);
+    const places= useSelector((state) => state.place.places);
+    console.log("itinerary ",itinerary);
+    console.log("places ",places);
+
     return (
         <div className="bg-black max-h-screen max-w-screen overflow-hidden  ">
             <div className="absolute inset-0 z-0 overflow-hidden min-w-secreen min-h-screen opacity-50">

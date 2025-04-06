@@ -13,6 +13,7 @@
         return res.json();
     }).catch((err)=>{
         console.log(err)
+        return {error: 'Failed to generate itinerary'}
     });
     }
 
@@ -32,6 +33,7 @@
     }
     ).catch((err)=>{
         console.log(err)
+        return {error: 'Failed to send OTP'}
     }
     );
    
@@ -56,4 +58,5 @@
         return res.json();
     }).catch((err) => {
         console.log(err);
+        return { error: 'Failed to verify OTP' };
     });

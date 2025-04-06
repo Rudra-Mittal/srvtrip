@@ -1,4 +1,4 @@
-import { Response } from "express";
+import express, { Response } from "express";
 import { AuthRequest, placesData } from "../utils/types";
 import { generate2 } from "../AIController2";
 import { extractPlacesByRegex } from "../AIController2/services/extractPlacesbyRegex";
@@ -42,6 +42,7 @@ export const itenaryRoute = async (req: AuthRequest, res:Response) => {
   for (const day of placesData) {
     const dayId = await createDay(dayNum, itenaryid, newItenary);
     for (const place of day) {
+      console.log("Place:", place)
       const placeD= await checkPlaceAndReturnPhotos(place);
       if (placeD.id) {
         console.log("Place already exist in db")

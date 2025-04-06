@@ -13,6 +13,7 @@ import { userRoute } from './controllers/auth/userRoute';
 import { itenaryRoute } from './controllers/itenaryRoute';
 import { summarizeRoute } from './controllers/summarizeRoute';
 import { queryRoute } from './controllers/queryRoute';
+import { itenarariesRoute } from './controllers/itenarariesRoute';
 dotenv.config();
 const app = express();
 const PORT = 4000;
@@ -47,7 +48,7 @@ app.post('/api/summarize',summarizeRoute)
 app.use(authMiddleware);//use auth middleware for all routes after this line 
 
 app.post('/api/itenary', itenaryRoute)
-
+app.get('/api/itineraries', itenarariesRoute)
 app.post('/query',queryRoute)
 
 app.listen(PORT, () => {

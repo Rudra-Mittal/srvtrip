@@ -23,7 +23,7 @@ export async function placeInfo(placename: string,dayNum:number,photoLimit=5): P
                 formattedAddress:place.formattedAddress,
                 displayName:place.displayName.text,
                 location:place.location,
-                photos:place.photos.slice(0,photoLimit).map((photo:any)=>photo.name)
+                photos:(place.photos)?place.photos.slice(0,photoLimit).map((photo:any)=>photo.name):""
             };
         })
         .catch((err) => {

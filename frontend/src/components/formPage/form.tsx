@@ -17,6 +17,10 @@ import { Slider } from "@/components/ui/slider";
 import Loader from '../loader';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { genitinerary } from '@/api/formroute';
+import { useDispatch } from 'react-redux';
+import { addItinerary } from '@/store/slices/itinerarySlice';
+import { addPlace } from '@/store/slices/placeSlice';
+import { useNavigate } from 'react-router-dom';
 
 interface FormData {
   destination: string;
@@ -105,7 +109,7 @@ export default function Form() {
       }
     });
   };
-
+  const dispatch= useDispatch()
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -149,7 +153,16 @@ export default function Form() {
       setCurrentStep(step);
     }
   };
-
+  const navigate=useNavigate()
+   const handleGenerateItinerary = async (formData: FormData) => {
+    setShowSummary(true);
+    genitinerary(formData).then(async (res)=>{
+      console.log(JSON.parse(res.newItenary))
+      dispatch(addItinerary( await JSON.parse(res.newItenary)))
+      dispatch(addPlace( await JSON.parse(res.placesData)))
+      navigate("/itinerary");
+    })
+   }
   // Particles for background animation
   const particles = Array.from({ length: 20 }, (_, i) => ({
     id: i,
@@ -656,10 +669,8 @@ export default function Form() {
                         <HoverBorderGradient
                           as="button"
                           className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 font-medium text-white shadow-lg shadow-purple-900/20"
-                          onClick={()=>genitinerary(formData).then(async (res)=>{
-                            console.log(await JSON.parse(res.newItenary));
-                            console.log(await JSON.parse(res.placesData));
-                          })}
+                          onClick={()=>handleGenerateItinerary(formData)}
+                          type="button"
                         >
                           <span className="flex items-center justify-center text-xs sm:text-sm md:text-xl">
                             Generate My Itinerary <Sparkles className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />

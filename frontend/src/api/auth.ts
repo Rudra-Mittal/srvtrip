@@ -12,5 +12,6 @@ export const auth=async()=>{
         return data;
       } catch (err) {
         console.log(err);
+        return { error: "Failed to fetch user data" };
       }
 }

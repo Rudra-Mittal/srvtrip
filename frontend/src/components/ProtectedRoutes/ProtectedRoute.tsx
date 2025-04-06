@@ -3,6 +3,8 @@ import { useDispatch } from "react-redux";
 import { loginUser } from "@/store/slices/userSlice";
 import { auth } from "@/api/auth";
 import {useNavigate} from "react-router-dom";
+import { setItineraries } from "@/store/slices/itinerarySlice";
+import { it } from "node:test";
 
 
 // Simple protected route helper function that handles its own loading state
@@ -18,6 +20,22 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         navigate("/signin", { replace: true });
       }
       else{
+          const itineraries= localStorage.getItem("itineraries");
+          console.log(typeof(itineraries))
+          if(!itineraries){
+            fetch("http://localhost:4000/api/itineraries", {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json", 
+              },
+              credentials: "include",
+          }).then(async (response) => {
+            console.log(await response.json())
+            // dispatch(setItineraries(response));
+          }).catch((err)=>{
+            console.log(err)
+          })
+          }
           setLoading(false);
           console.log(user)
           dispatch(loginUser(user));

@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState={
-    itineraries: [{}],
+    itineraries: [],
     selectedItinerary: {},
 } 
 
@@ -10,6 +10,7 @@ const itinerarySlice = createSlice({
     initialState,
     reducers: {
         setItineraries: (state, action) => {
+            console.log("Setting itineraries", action.payload);
             state.itineraries = action.payload;
             localStorage. setItem("itineraries", JSON.stringify(action.payload));
         },
@@ -22,3 +23,5 @@ const itinerarySlice = createSlice({
         }
     },
 });
+export const {setItineraries,addItinerary,setSelectedItinerary} = itinerarySlice.actions;
+export default itinerarySlice.reducer;

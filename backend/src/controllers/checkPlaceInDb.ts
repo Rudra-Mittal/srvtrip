@@ -4,6 +4,7 @@ import { place } from "../utils/types";
 const prisma=new PrismaClient();
 
 export default async function checkPlaceAndReturnPhotos(place:place):Promise<{"images":{"imageUrl":string}[],id:string|null}>{
+    console.log("Checking place in db:",place)
     try{
         const placeD= await prisma.place.findUnique({
             where:{
