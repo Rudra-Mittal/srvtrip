@@ -3,6 +3,8 @@ import googlelogo from '../assets/googlelogo.png';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/firebase';
 import { toast } from 'react-hot-toast';
+import { genotp, verifyotp } from '@/api/formroute';
+import { verify } from 'crypto';
 
 export default function LeftSideForm({ type }: { type: string }) {
   const [name, setName] = useState('');
@@ -31,18 +33,7 @@ export default function LeftSideForm({ type }: { type: string }) {
         // Send OTP instead of directly creating account
         setOtpLoading(true);
         try {
-          const response = await fetch('http://localhost:4000/generate-otp', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email }),
-          });
-
-          if (!response.ok) {
-            throw new Error('Failed to send OTP');
-          }
-
+          genotp(email);
           toast.success('OTP sent to your email!');
           setStep('otp');
         } catch (err: any) {
@@ -66,25 +57,10 @@ export default function LeftSideForm({ type }: { type: string }) {
     setOtpLoading(true);
     
     try {
-      const response = await fetch('http://localhost:4000/verify-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          otp,
-          password,
-          name,
-        }),
-        credentials:'include'
-      });
+       verifyotp(email, otp, password, name);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Invalid or expired OTP');
-      }
-      console.log('OTP verified successfully',response);
+      
+      // console.log('OTP verified successfully',response);
       toast.success('Account created successfully!');
       navigate('/'); // Navigate to home after successful verification
     } catch (err: any) {

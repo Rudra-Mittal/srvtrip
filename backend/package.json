@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "tsx watch src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "db":"sudo docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres && npx prisma migrate dev"
+    "db": "sudo docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres && npx prisma migrate dev"
   },
   "keywords": [],
   "author": "",
@@ -36,6 +37,7 @@
     "@types/jsonwebtoken": "^9.0.9",
     "@types/nodemailer": "^6.4.17",
     "jsonwebtoken": "^9.0.2",
-    "prisma": "^6.5.0"
+    "prisma": "^6.5.0",
+    "tsx": "^4.19.3"
   }
 }
