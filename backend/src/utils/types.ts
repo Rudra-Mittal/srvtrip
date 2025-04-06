@@ -25,6 +25,8 @@ export interface AuthRequest extends Request {
     cookies: any;
     user?: {
       userId: string;
+      email:string
+      name:string
       // Add other properties from your JWT payload if needed
     };
   }

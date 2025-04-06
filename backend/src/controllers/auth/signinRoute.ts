@@ -27,7 +27,7 @@ export const signinRoute=async (req:Request, res:Response) => {
         }
       }
       // Generate token with the database user ID
-      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET as string);
+      const token = jwt.sign({ userId: user.id,email,name }, process.env.JWT_SECRET as string);
       res.cookie('token', token, {
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days

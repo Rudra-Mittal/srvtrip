@@ -16,7 +16,7 @@ export async function signin(email: string, password: string) {
     if (!valid) {
         throw new Error('Invalid Username or password');
     }
-    const jwtToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET as string);
+    const jwtToken = jwt.sign({ userId: user.id,email,name:user.name }, process.env.JWT_SECRET as string);
     return jwtToken;
     }catch(err:any){
         throw new Error(err.message);

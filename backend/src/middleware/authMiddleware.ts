@@ -9,8 +9,8 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
     return
   }
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as jwt.JwtPayload & { userId: string };
-    req.user = { userId: decoded.userId };//adding userId to request object
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as jwt.JwtPayload & { userId: string,email:string,name:string };
+    req.user = { userId: decoded.userId,email:decoded.email, name:decoded.name};//adding userId to request object
     next();
   }
   catch (err) {
