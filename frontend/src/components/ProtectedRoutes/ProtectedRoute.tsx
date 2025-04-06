@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
-import { UseSelector,useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { loginUser } from "@/store/slices/userSlice";
 import { auth } from "@/api/auth";
 import {useNavigate} from "react-router-dom";
@@ -11,7 +10,7 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
     const [loading, setLoading] = useState(true);
     const navigate=useNavigate();
-
+    const dispatch = useDispatch();
     useEffect(()=>{
      auth().then((user)=>{
       if(user.error){
@@ -20,9 +19,8 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       }
       else{
           setLoading(false);
-          const dispatch = useDispatch();
+          console.log(user)
           dispatch(loginUser(user));
-          navigate("/", { replace: true });
       }
      });
       

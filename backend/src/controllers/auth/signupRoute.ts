@@ -11,7 +11,7 @@ export const signupRoute=async (req:Request, res:Response) => {
     const existingUser = await findByEmail(email);
     if (existingUser) {
       // Just return a token for the existing user
-      const token = jwt.sign({ userId: existingUser.id }, process.env.JWT_SECRET as string); 
+      const token = jwt.sign({ userId: existingUser.id,name,email }, process.env.JWT_SECRET as string); 
       res.cookie('token', token, {
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days

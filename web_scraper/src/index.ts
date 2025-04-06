@@ -56,7 +56,8 @@ class ScrapingQueue {
                         'Content-Type': 'application/json'
                     }
                 }).catch((err)=>{
-                    console.log("Error in sending request",err)
+                    console.log("Error in sending request",err
+                        
                 });
                 console.log("Sent request to DB");
             } else {
