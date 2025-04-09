@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import { migrateData } from "./controllers/migrate";
 import { updateEnv } from "./utils/updateEnv";
 import summarizeReview from "./controllers/summarizeReview";
+import { verifyServerApiKey } from "./middleware/serverAuthMiddleware";
 // import { saveReview } from "./utils/saveReview";
 dotenv.config();
 const app= express();
@@ -53,10 +54,11 @@ class ScrapingQueue {
                     method: 'POST',
                     body: JSON.stringify({review: summarizedReview, placeId: task.placeId}),
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'SERVER-API-KEY': `${process.env.SERVER_API_KEY}` // Add this header
                     }
                 }).catch((err)=>{
-                    console.log("Error in sending request",err
+                    console.log("Error in sending request",err)
                         
                 });
                 console.log("Sent request to DB");
@@ -77,7 +79,7 @@ class ScrapingQueue {
 const scrapingQueue = new ScrapingQueue();
 const BACKEND_URL=process.env.BACKEND_URL as string
 // auth middleware pending
-app.post('/scraper',async (req,res)=>{
+app.post('/scraper',verifyServerApiKey, async (req,res)=>{
     const {placeName,maxScrolls,placeId,placeAddress}=req.body;
     scrapingQueue.enqueue({placeId,placeName,maxScrolls,placeAddress,iteration:1})
     res.status(200).json({"message":"Sent request successfully"})

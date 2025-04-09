@@ -14,6 +14,7 @@ import { itenaryRoute } from './controllers/itenaryRoute';
 import { summarizeRoute } from './controllers/summarizeRoute';
 import { queryRoute } from './controllers/queryRoute';
 import { itenarariesRoute } from './controllers/itenarariesRoute';
+import { serverAuthMiddleware } from './middleware/serverAuthMiddleware';
 dotenv.config();
 const app = express();
 const PORT = 4000;
@@ -23,8 +24,8 @@ app.use(cookieParser()); // Enable cookie parsing middleware
 app.use(cors({
   origin: 'http://localhost:5173', // Your frontend URL
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true, // Important for cookies
-  allowedHeaders: ['Content-Type', 'Authorization','Google-Auth'],
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'Google-Auth', 'SERVER-API-KEY'], // Add X-API-KEY
 }));
 
 app.get('/', (req, res) => {
@@ -43,7 +44,7 @@ app.post('/api/auth/signout', signoutRoute)
 
 app.get("/api/auth/user",authMiddleware,userRoute)
 
-app.post('/api/summarize',summarizeRoute)
+app.post('/api/summarize',serverAuthMiddleware, summarizeRoute)
 
 app.use(authMiddleware);//use auth middleware for all routes after this line 
 
