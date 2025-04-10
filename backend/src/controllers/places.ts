@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export async function placeInfo(placename: string,dayNum:number,photoLimit=5): Promise<any> {
-    // console.log(placename)
+    console.log(placename)
     return fetch('https://places.googleapis.com/v1/places:searchText', {
         method: 'POST',
         body: JSON.stringify({ textQuery: placename }),

@@ -26,7 +26,7 @@ export default async function signup(email: string, password: string, name: stri
       },
     });
     
-    const jwtToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET as string);
+    const jwtToken = jwt.sign({ userId: user.id,email,name:user.name }, process.env.JWT_SECRET as string);
     return jwtToken;
   } catch (err: any) {
     throw new Error(err.message);

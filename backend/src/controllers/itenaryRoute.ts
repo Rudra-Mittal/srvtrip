@@ -12,7 +12,8 @@ import createPlace from "../utils/createPlace";
 import callWebScrapper from "./callWebScrapper";
 
 export const itenaryRoute = async (req: AuthRequest, res:Response) => {
-  const { prompt } = req.body;
+  try{
+    const { prompt } = req.body;
   console.log(prompt);
 
   const userId = req.user?.userId;//get userId from token
@@ -67,4 +68,9 @@ export const itenaryRoute = async (req: AuthRequest, res:Response) => {
   }
   res.json({newItenary,placesData:JSON.stringify(placesData)});
   return
+  }catch(err){
+    console.log(err);
+    res.status(500).json({errror:"Internal server error"})
+    return 
+  }
 }
