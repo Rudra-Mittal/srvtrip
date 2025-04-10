@@ -158,7 +158,7 @@ export default function Form() {
     setFormVisible(false);
     setShowSummary(true);
     genitinerary(formData).then(async (res)=>{
-      console.log(JSON.parse(res.newItenary))
+      console.log("newitinerary",JSON.parse(res.newItenary))
       dispatch(addItinerary( await JSON.parse(res.newItenary)))
       dispatch(addPlace( await JSON.parse(res.placesData)))
       navigate("/itinerary");
