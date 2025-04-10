@@ -1,27 +1,47 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState={
-    chats: [],
-    selectedChat: {},
+    chats: {},//key:placeId, value:array of chat msgs { [placeId]: [{ type: "user"|"ai", message: string }] }
+    selectedChat: null,//selected chat id
 }
 
 const chatSlice = createSlice({
     name: "chat",
     initialState,
     reducers: {
-        setChats: (state, action) => {
-            state.chats = action.payload;
-            sessionStorage.setItem("chats", JSON.stringify(action.payload));
-        },
-        addChat: (state, action) => {
-            state.chats.push(action.payload);
-            sessionStorage.setItem("chats", JSON.stringify(state.chats));
-        },
-        setSelectedChat: (state, action) => {
-            state.selectedChat = action.payload;
+    // Load chat messages for a specific placeId from sessionStorage
+    loadChatForPlace: (state, action) => {
+        const placeId = action.payload;
+        const stored = sessionStorage.getItem("chats");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed[placeId]) {
+            state.chats[placeId] = parsed[placeId];
+          }
         }
+      },
+  
+    // Set selected placeId when chatbot opens
+    setSelectedPlaceId: (state, action) => {
+        state.selectedPlaceId = action.payload;
+    },
+  
+      // Add a new chat message (user or AI)
+    addChat: (state, action) => {
+        const { placeId, message } = action.payload;
+        if (!state.chats[placeId]) {
+          state.chats[placeId] = [];
+        }
+        state.chats[placeId].push(message);
+  
+        // Update sessionStorage only for this place
+        const stored = sessionStorage.getItem("chats");
+        const parsed = stored ? JSON.parse(stored) : {};
+        parsed[placeId] = state.chats[placeId];
+        sessionStorage.setItem("chats", JSON.stringify(parsed));
+      },
     },
 });
 
-export const {setChats,addChat,setSelectedChat} = chatSlice.actions;
+export const {loadChatForPlace,addChat,setSelectedPlaceId} = chatSlice.actions;
 export default chatSlice.reducer;

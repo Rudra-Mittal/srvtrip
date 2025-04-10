@@ -2,12 +2,72 @@ import { FaCommentDots } from "react-icons/fa";
 import { HoverBorderGradient } from "../../ui/hover-border-gradient";
 import { motion, AnimatePresence } from "framer-motion";
 import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { addChat, loadChatForPlace, setSelectedPlaceId } from "@/store/slices/chatSlice";
 
-export default function ChatbotD({chatbotRef}:{chatbotRef: React.RefObject<HTMLDivElement|null>}) {
+export default function ChatbotD({chatbotRef,placeId}:{chatbotRef: React.RefObject<HTMLDivElement|null>,placeId:string}) {
   const [isOpen, setIsOpen] = useState(false);
+  const [input, setInput] = useState("");
 
-  const toggleChatbot = () => {
+  // const toggleChatbot = () => {
+  //   setIsOpen(!isOpen);
+  // };
+
+  const dispatch=useDispatch();
+  const toggleChatbot=()=>{
+   // load chat for the selected placeId from sessionStorage if it exists
+    if(!isOpen){
+      dispatch(loadChatForPlace(placeId));
+      dispatch(setSelectedPlaceId(placeId));
+    }
     setIsOpen(!isOpen);
+  }
+
+  const {selectedPlaceId,chats}=useSelector((state:any)=>state.chat);
+  const messages=chats[selectedPlaceId] || [];
+
+  const handleSendQuery = async () => {
+    if (!input.trim()) return;
+  
+    dispatch(addChat({
+      placeId,
+      message: { type: "user", message: input }
+    }));
+    setInput("");
+  
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/query`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: input,
+          placeName: placeId,
+          limit: 5,
+        }),
+      });
+  
+      const data = await res.json();
+  
+      if (data?.result) {
+        dispatch(addChat({
+          placeId,
+          message: { type: "ai", message: data.result }
+        }));
+      } else {
+        dispatch(addChat({
+          placeId,
+          message: { type: "ai", message: "Sorry, I couldn't understand that." }
+        }));
+      }
+  
+    } catch (error) {
+      dispatch(addChat({
+        placeId,
+        message: { type: "ai", message: "Oops, something went wrong. Try again later." }
+      }));
+    }
   };
 
   return (
@@ -75,20 +135,24 @@ export default function ChatbotD({chatbotRef}:{chatbotRef: React.RefObject<HTMLD
                     `}
                   </style>
                   <div className="chat-scroll flex flex-col gap-5">
-                    {/* Sample AI message */}
-                    <motion.div 
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.2 }}
-                      className="flex gap-3"
-                    >
-                      <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-xs">
-                        AI
-                      </div>
-                      <div className="bg-gray-800 rounded-lg p-3 max-w-[80%]">
-                        <p className="text-gray-200 text-sm">Hello! I can help with information about your travel destinations. What would you like to know?</p>
-                      </div>
-                    </motion.div>
+                  {messages.map((msg, idx) => (
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.05 }}
+                        className={`flex gap-3 ${msg.type === "user" ? "justify-end" : "justify-start"}`}
+                      >
+                        {msg.type === "ai" && (
+                          <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-xs">
+                            AI
+                          </div>
+                        )}
+                        <div className={`rounded-lg p-3 max-w-[80%] ${msg.type === "user" ? "bg-blue-600 text-white" : "bg-gray-800 text-gray-200"}`}>
+                          <p className="text-sm">{msg.message}</p>
+                        </div>
+                      </motion.div>
+                    ))}
                   </div>
                 </div>
                 
@@ -98,11 +162,17 @@ export default function ChatbotD({chatbotRef}:{chatbotRef: React.RefObject<HTMLD
                     <input
                       type="text"
                       placeholder="Ask about any place..."
+                      value={input}
+                      onChange={(e)=>setInput(e.target.value)}
+                      onKeyDown={(e)=>{
+                        if(e.key==="Enter") handleSendQuery();
+                      }}
                       className="flex-1 bg-gray-800/80 border border-blue-500/20 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40"
                     />
                     <motion.button 
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
+                      onClick={handleSendQuery}
                       className="p-2.5 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 text-white"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
