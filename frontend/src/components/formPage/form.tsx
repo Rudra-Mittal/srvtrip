@@ -155,6 +155,7 @@ export default function Form() {
   };
   const navigate=useNavigate()
    const handleGenerateItinerary = async (formData: FormData) => {
+    setFormVisible(false);
     setShowSummary(true);
     genitinerary(formData).then(async (res)=>{
       console.log(JSON.parse(res.newItenary))
@@ -668,9 +669,9 @@ export default function Form() {
                         </Button>
                         <HoverBorderGradient
                           as="button"
+                          type="button"
                           className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 font-medium text-white shadow-lg shadow-purple-900/20"
                           onClick={()=>handleGenerateItinerary(formData)}
-                          type="button"
                         >
                           <span className="flex items-center justify-center text-xs sm:text-sm md:text-xl">
                             Generate My Itinerary <Sparkles className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
@@ -712,7 +713,7 @@ export default function Form() {
                     className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-purple-500"
                     initial={{ width: "0%" }}
                     animate={{ width: "100%" }}
-                    transition={{ duration: 3, ease: "easeInOut" }}
+                    transition={{ duration: 200, ease: "easeInOut" }}
                   />
                 </div>
               </motion.div>
