@@ -2,7 +2,8 @@ export default async function callWebScrapper(placeName:string,maxScrolls:Number
    return fetch("http://localhost:3000/scraper",{
         method:'POST',
         headers:{
-            'Content-Type':'application/json'
+            'Content-Type':'application/json',
+            'SERVER-API-KEY': `${process.env.SERVER_API_KEY}`
         },
         body:JSON.stringify({placeName,maxScrolls,placeId,placeAddress})
     }).then((res)=>res.json())
