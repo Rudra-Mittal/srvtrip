@@ -37,6 +37,7 @@ export async function generate2(req:ReqBody){
 
 export function extract2(req:{itinerary:string}){
     try {
+      console.log("request reached in extrct")
       const places = extractPlacesByRegex(req.itinerary);
       return JSON.stringify({ success: true, places });
     } catch (error) {

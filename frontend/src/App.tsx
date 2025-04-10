@@ -27,9 +27,9 @@ function App() {
              </ProtectedRoute>
           } />
           <Route path="/form" element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <FormPage/>
-             </ProtectedRoute>
+             /* </ProtectedRoute> */
           } />
           <Route path="/itinerary" element={
              <ProtectedRoute>

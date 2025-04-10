@@ -1,4 +1,5 @@
 export const extractPlacesByRegex = (itinerary: any): string[][] => {
+    console.log("control reached in regex")
     const allDayPlaces: string[][]=[];
     try {
         // Convert JSON itinerary to a string for regex search
