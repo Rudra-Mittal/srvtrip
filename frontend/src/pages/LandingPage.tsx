@@ -8,32 +8,27 @@ import MapLanding from "@/components/landingPage/features/mapLanding";
 import Chatbot from "@/components/landingPage/features/chatbot";
 import CtaSection from "@/components/landingPage/footer/ctaSection";
 import ThreeDMarque from "@/components/landingPage/footer/threedmarquee";
-import {Navbar} from "@/components/Navbar";
-  
-export default function LandingPage() {
+
+const LandingPage: React.FC = () => {
   const [formVisible, setFormVisible] = useState(false);
   const smartFormRef = React.useRef<HTMLDivElement>(null);  
   const itineraryRef = React.useRef<HTMLDivElement>(null);
   const chatbotRef = React.useRef<HTMLDivElement>(null);
-  useEffect(()=>{
-    setTimeout(()=>{
-      setFormVisible(true)
-    },200)
-  },[])
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFormVisible(true);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="bg-black min-h-screen text-white overflow-hidden">
-      <Navbar/>
       <HeroParallaxDemo/>
       <div className="relative">
-     {/* Smart Form Section */}
-<section 
-  id="smart-form" 
-  className="md:py-10 -mt-[35rem] md:-mt-96" // Negative margin on mobile only
-  ref={smartFormRef}
->
-  <SmartForm smartFormRef={smartFormRef} formVisible={formVisible}/>
-</section>
+        {/* Smart Form Section */}
+        <section id="smart-form" className="py-6 sm:py-10 lg:py-14" ref={smartFormRef}>
+          <SmartForm smartFormRef={smartFormRef} formVisible={formVisible}/>
+        </section>
         {/* AI-Generated Itinerary Timeline */}
         <section id="itinerary" className="py-20 relative" ref={itineraryRef}>
           <BackgroundBeams className="absolute inset-0 opacity-20" />
@@ -62,3 +57,4 @@ export default function LandingPage() {
   );
 };
 
+export default LandingPage;
