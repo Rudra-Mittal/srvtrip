@@ -1,4 +1,12 @@
+import { useSelector } from "react-redux";
+
 export default function HistoryPage() {
+    // const itineraries = useSelector((state: any) => state.itinerary.itineraries);
+    // const places = useSelector((state: any) => state.itinerary.places);
+    // const parsedItineraries = itineraries ? JSON.parse(itineraries) : [];
+    // const parsedPlaces = places ? JSON.parse(places) : [];
+    // console.log(parsedPlaces);
+    // console.log(parsedItineraries);
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">

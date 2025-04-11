@@ -11,7 +11,7 @@ export default async function createItenary(itenary:string,userId:string):Promis
     if(!user) return null;
     console.log(itenaryJ);
     const itenaryD=await  prisma.itinerary.create({
-        data:{
+    data:{
             userId:userId,
             destination:itenaryJ.destination,
             duration:itenaryJ.number_of_days,

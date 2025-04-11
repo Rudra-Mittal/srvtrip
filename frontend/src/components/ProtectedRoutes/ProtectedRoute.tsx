@@ -4,7 +4,7 @@ import { loginUser } from "@/store/slices/userSlice";
 import { auth } from "@/api/auth";
 import {useNavigate} from "react-router-dom";
 import { setItineraries } from "@/store/slices/itinerarySlice";
-import { it } from "node:test";
+import { setPlaces } from "@/store/slices/placeSlice";
 
 
 // Simple protected route helper function that handles its own loading state
@@ -32,7 +32,9 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
               credentials: "include",
           }).then(async (response) => {
             console.log("response")
-            dispatch(setItineraries(await response.json()));
+            const data = await response.json();
+            dispatch(setItineraries(data.itineraries));
+            dispatch(setPlaces(data.placesData));
           }).catch((err)=>{
             console.log(err)
           })
