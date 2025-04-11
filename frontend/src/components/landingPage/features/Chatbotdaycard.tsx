@@ -3,9 +3,9 @@ import { HoverBorderGradient } from "../../ui/hover-border-gradient";
 import { motion, AnimatePresence } from "framer-motion";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addChat, loadChatForPlace, setSelectedPlaceId } from "@/store/slices/chatSlice";
+import { addChat, loadChatForPlace } from "@/store/slices/chatSlice";
 
-export default function ChatbotD({chatbotRef,placeId}:{chatbotRef: React.RefObject<HTMLDivElement|null>,placeId:string}) {
+export default function ChatbotD({chatbotRef}:{chatbotRef: React.RefObject<HTMLDivElement|null>}) {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
 
@@ -13,12 +13,14 @@ export default function ChatbotD({chatbotRef,placeId}:{chatbotRef: React.RefObje
   //   setIsOpen(!isOpen);
   // };
 
+  const activePlaceId=useSelector((state:any)=>state.place.activePlaceId);
+
+
   const dispatch=useDispatch();
   const toggleChatbot=()=>{
    // load chat for the selected placeId from sessionStorage if it exists
-    if(!isOpen){
-      dispatch(loadChatForPlace(placeId));
-      dispatch(setSelectedPlaceId(placeId));
+    if(activePlaceId){
+      dispatch(loadChatForPlace(activePlaceId));
     }
     setIsOpen(!isOpen);
   }
@@ -30,7 +32,7 @@ export default function ChatbotD({chatbotRef,placeId}:{chatbotRef: React.RefObje
     if (!input.trim()) return;
   
     dispatch(addChat({
-      placeId,
+      placeId:activePlaceId,
       message: { type: "user", message: input }
     }));
     setInput("");
@@ -43,7 +45,7 @@ export default function ChatbotD({chatbotRef,placeId}:{chatbotRef: React.RefObje
         },
         body: JSON.stringify({
           query: input,
-          placeName: placeId,
+          placeName: activePlaceId,
           limit: 5,
         }),
       });
@@ -52,19 +54,19 @@ export default function ChatbotD({chatbotRef,placeId}:{chatbotRef: React.RefObje
   
       if (data?.result) {
         dispatch(addChat({
-          placeId,
+          activePlaceId,
           message: { type: "ai", message: data.result }
         }));
       } else {
         dispatch(addChat({
-          placeId,
+          activePlaceId,
           message: { type: "ai", message: "Sorry, I couldn't understand that." }
         }));
       }
   
     } catch (error) {
       dispatch(addChat({
-        placeId,
+        activePlaceId,
         message: { type: "ai", message: "Oops, something went wrong. Try again later." }
       }));
     }

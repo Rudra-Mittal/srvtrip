@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
     places: [],
+    activePlaceId:null
 };
 
 const placeSlice = createSlice({
@@ -15,7 +16,10 @@ const placeSlice = createSlice({
         addPlace: (state, action) => {
             state.places.push(action.payload);
             localStorage.setItem("places", JSON.stringify(state.places));
-        }
+        },
+        setActivePlaceId: (state, action) => {
+            state.activePlaceId = action.payload;
+        },
     },
 });
 export const { setPlaces, addPlace } = placeSlice.actions;
