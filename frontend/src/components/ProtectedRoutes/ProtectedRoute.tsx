@@ -21,8 +21,9 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       }
       else{
           const itineraries= localStorage.getItem("itineraries");
-          console.log(typeof(itineraries))
+          console.log(itineraries)
           if(!itineraries){
+            console.log("tyao")
             fetch("http://localhost:4000/api/itineraries", {
               method: "GET",
               headers: {
@@ -30,8 +31,8 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
               },
               credentials: "include",
           }).then(async (response) => {
-            console.log(await response.json())
-            // dispatch(setItineraries(response));
+            console.log("response")
+            dispatch(setItineraries(await response.json()));
           }).catch((err)=>{
             console.log(err)
           })

@@ -8,6 +8,7 @@ import LandingPage from './pages/LandingPage'
 import FormPage from './pages/FormPage'
 import { ItineraryPage } from './pages/ItineraryPage'
 import { ProtectedRoute } from './components/ProtectedRoutes/ProtectedRoute'
+import HistoryPage from './pages/historyPage'
 
 
 function App() {
@@ -21,21 +22,30 @@ function App() {
           <Route path="/features" element={<Features/>} />
           
           {/* Protected Routes */}
-          <Route path="/day/:daynumber" element={
+          <Route path="itinerary/:itineraryNum/day/:dayNum" element={
             <ProtectedRoute>
               <DayNumPage/>
              </ProtectedRoute>
           } />
           <Route path="/form" element={
-            // <ProtectedRoute>
+             <ProtectedRoute>
               <FormPage/>
-             /* </ProtectedRoute> */
+             </ProtectedRoute> 
           } />
           <Route path="/itinerary" element={
              <ProtectedRoute>
-              <ItineraryPage/>
+              <HistoryPage/>
              </ProtectedRoute>
           } />
+          <Route path='/itinerary/:itineraryNum' element={
+            <ProtectedRoute>
+              <ItineraryPage/>
+            </ProtectedRoute>
+          } >
+          </Route>
+        <Route path='*' element={<div>No page exists</div>}>
+
+        </Route>
         </Routes>
       </BrowserRouter>
     </>

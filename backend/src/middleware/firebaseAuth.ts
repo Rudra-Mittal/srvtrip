@@ -22,7 +22,7 @@ export const firebaseAuth = async (
   try {
     // const body = req.body;
     // console.log('Request Body:', body);
-    console.log('Request Headers:', req.headers);
+    // console.log('Request Headers:', req.headers);
   const googleauth = req.headers['google-auth'];
   console.log('Google Auth:', googleauth);
     if(googleauth!='true'){

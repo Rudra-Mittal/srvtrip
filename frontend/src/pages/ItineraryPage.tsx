@@ -5,7 +5,10 @@ import { DayCard } from "@/components/ItineraryDayCard";
 import { itineraryData } from "@/data/iteneraryData";
 import { useDebounce } from "use-debounce";
 import { useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
 export const ItineraryPage = () => {
+    const {itineraryNum}= useParams();
+    console.log("itineraryNumber",itineraryNum);
     const [activeCardIndex, setActiveCardIndex] = useState(0);
     const sliderRef = useRef<HTMLDivElement>(null);
     const cardRefs = useRef<(HTMLDivElement | null)[]>(Array(itineraryData.length).fill(null));

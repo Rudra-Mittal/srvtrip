@@ -4,14 +4,11 @@ import dotenv from 'dotenv';
 import { migrateData } from "./controllers/migrate";
 import { updateEnv } from "./utils/updateEnv";
 import { verifyServerApiKey } from "./middleware/serverAuthMiddleware";
-import { ScrapingQueue } from "./scrappingqueue/scrappingqueue";
+import { scrapingQueue } from "./scrappingqueue/scrappingqueue";
 // import { saveReview } from "./utils/saveReview";
 dotenv.config();
 const app= express();
 app.use(express.json())
-
-
-const scrapingQueue = new ScrapingQueue();
 
 // auth middleware pending
 app.post('/scraper',verifyServerApiKey, async (req,res)=>{

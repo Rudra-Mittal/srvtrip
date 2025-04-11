@@ -3,9 +3,7 @@ import { insertData } from "../controllers/insertReview";
 import { scrapeGoogleMapsReviews } from "../controllers/reviewsScrapper";
 import summarizeReview from "../controllers/summarizeReview";
 import { ScrapingTask } from "../types/types";
-import dotenv from 'dotenv';
-
-export class ScrapingQueue {
+class ScrapingQueue {
     private queue: ScrapingTask[] = [];
     private limit: number = 3;
     private inProgress: number = 0;
@@ -61,3 +59,5 @@ export class ScrapingQueue {
         }
     }
 }
+
+export const scrapingQueue = new ScrapingQueue();

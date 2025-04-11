@@ -4,8 +4,11 @@ import { useRef, useState, useEffect } from "react"
 import Weather from "@/components/ui/weather"
 import ChatbotD from "@/components/landingPage/features/Chatbotdaycard"
 import { Navbar } from "@/components/Navbar"
+import { useParams } from "react-router-dom"
 
 export const DayNumPage = () => {
+    const {itineraryNum,dayNum}= useParams()
+    console.log(itineraryNum,dayNum)
     const chatbotRef = useRef<HTMLDivElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
     const [leftWidth, setLeftWidth] = useState(60) // Initial width percentage for left column
