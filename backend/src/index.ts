@@ -32,25 +32,25 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 })
 
-app.post('/signup',signupRoute);
-  
-app.post('/signin', firebaseAuth ,signinRoute);
+app.post('/signup', signupRoute);
+
+app.post('/signin', firebaseAuth, signinRoute);
 
 app.post('/generate-otp', genOtpRoute);
 
-app.post('/verify-otp',verifyOtp);
+app.post('/verify-otp', verifyOtp);
 
 app.post('/api/auth/signout', signoutRoute)
 
-app.get("/api/auth/user",authMiddleware,userRoute)
+app.get("/api/auth/user", authMiddleware, userRoute)
 
-app.post('/api/summarize',serverAuthMiddleware, summarizeRoute)
+app.post('/api/summarize', serverAuthMiddleware, summarizeRoute)
 
 app.use(authMiddleware);//use auth middleware for all routes after this line 
 
 app.post('/api/itenary', itenaryRoute)
 app.get('/api/itineraries', itenarariesRoute)
-app.post('/query',queryRoute)
+app.post('/query', queryRoute)
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
