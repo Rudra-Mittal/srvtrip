@@ -2,7 +2,6 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState={
     chats: {},//key:placeId, value:array of chat msgs { [placeId]: [{ type: "user"|"ai", message: string }] }
-    selectedChat: null,//selected chat id
 }
 
 const chatSlice = createSlice({
@@ -21,12 +20,7 @@ const chatSlice = createSlice({
         }
       },
   
-    // Set selected placeId when chatbot opens
-    setSelectedPlaceId: (state, action) => {
-        state.selectedPlaceId = action.payload;
-    },
-  
-      // Add a new chat message (user or AI)
+    // Add a new chat message (user or AI)
     addChat: (state, action) => {
         const { placeId, message } = action.payload;
         if (!state.chats[placeId]) {
@@ -43,5 +37,5 @@ const chatSlice = createSlice({
     },
 });
 
-export const {loadChatForPlace,addChat,setSelectedPlaceId} = chatSlice.actions;
+export const {loadChatForPlace,addChat} = chatSlice.actions;
 export default chatSlice.reducer;

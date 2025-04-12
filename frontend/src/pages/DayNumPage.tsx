@@ -129,7 +129,7 @@ export const DayNumPage = () => {
                         
                         {/* Chatbot section */}
                         <div ref={chatbotRef} className="w-full min-w-0">
-                            <ChatbotD chatbotRef={chatbotRef} placeId="" />
+                            <ChatbotD chatbotRef={chatbotRef} />
                         </div>
                     </div>
                 </div>

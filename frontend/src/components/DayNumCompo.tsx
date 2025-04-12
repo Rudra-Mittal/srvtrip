@@ -1,8 +1,14 @@
 import { useState } from 'react';
 import { imageData, itineraryData } from '../sample_Images_itinerary';
+import { useDispatch } from 'react-redux';
+import { setActivePlaceId } from '@/store/slices/placeSlice';
 
 export const DayNumCompo = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  //testing
+  const dispatch = useDispatch();
+  dispatch(setActivePlaceId("wkhbvjfb"));
   
   let currentDay=0;
 

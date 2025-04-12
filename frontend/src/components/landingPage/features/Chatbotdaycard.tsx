@@ -3,34 +3,57 @@ import { HoverBorderGradient } from "../../ui/hover-border-gradient";
 import { motion, AnimatePresence } from "framer-motion";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addChat, loadChatForPlace, setSelectedPlaceId } from "@/store/slices/chatSlice";
+import { addChat, loadChatForPlace } from "@/store/slices/chatSlice";
+import { toggleChatbot } from "@/store/slices/placeSlice";
+import { setChatbotOpen } from "@/store/slices/placeSlice";
+import { useEffect,useRef } from "react";
 
-export default function ChatbotD({chatbotRef,placeId}:{chatbotRef: React.RefObject<HTMLDivElement|null>,placeId:string}) {
-  const [isOpen, setIsOpen] = useState(false);
+export default function ChatbotD({chatbotRef}:{chatbotRef: React.RefObject<HTMLDivElement|null>}) {
   const [input, setInput] = useState("");
 
   // const toggleChatbot = () => {
   //   setIsOpen(!isOpen);
   // };
 
-  const dispatch=useDispatch();
-  const toggleChatbot=()=>{
-   // load chat for the selected placeId from sessionStorage if it exists
-    if(!isOpen){
-      dispatch(loadChatForPlace(placeId));
-      dispatch(setSelectedPlaceId(placeId));
-    }
-    setIsOpen(!isOpen);
-  }
+  const activePlaceId=useSelector((state:any)=>state.place.activePlaceId);
+  const isChatBotOpen=useSelector((state:any)=>state.place.isChatBotOpen);
 
-  const {selectedPlaceId,chats}=useSelector((state:any)=>state.chat);
-  const messages=chats[selectedPlaceId] || [];
+  const dispatch=useDispatch();
+
+  // Auto open chatbot when activePlaceId is set
+  useEffect(() => {
+    if (activePlaceId) {
+      dispatch(setChatbotOpen(true)); 
+      dispatch(loadChatForPlace(activePlaceId)); 
+    }
+  }, [activePlaceId, dispatch]);
+
+  const toggleChatbotPanel = () => {
+    console.log("Toggling chatbot panel");
+    // dispatch(toggleChatbot());
+    dispatch(setChatbotOpen(!isChatBotOpen));
+  };
+
+  const {chats}=useSelector((state:any)=>state.chat);
+  const messages=chats[activePlaceId] || [];
+
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      const container = chatContainerRef.current;
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: "smooth", // smoother than scrollIntoView
+      });
+    }
+  }, [messages]);
 
   const handleSendQuery = async () => {
     if (!input.trim()) return;
   
     dispatch(addChat({
-      placeId,
+      placeId:activePlaceId,
       message: { type: "user", message: input }
     }));
     setInput("");
@@ -43,7 +66,7 @@ export default function ChatbotD({chatbotRef,placeId}:{chatbotRef: React.RefObje
         },
         body: JSON.stringify({
           query: input,
-          placeName: placeId,
+          placeName: activePlaceId,
           limit: 5,
         }),
       });
@@ -52,19 +75,19 @@ export default function ChatbotD({chatbotRef,placeId}:{chatbotRef: React.RefObje
   
       if (data?.result) {
         dispatch(addChat({
-          placeId,
+          placeId:activePlaceId,
           message: { type: "ai", message: data.result }
         }));
       } else {
         dispatch(addChat({
-          placeId,
+          placeId:activePlaceId,
           message: { type: "ai", message: "Sorry, I couldn't understand that." }
         }));
       }
   
     } catch (error) {
       dispatch(addChat({
-        placeId,
+        placeId:activePlaceId,
         message: { type: "ai", message: "Oops, something went wrong. Try again later." }
       }));
     }
@@ -73,16 +96,17 @@ export default function ChatbotD({chatbotRef,placeId}:{chatbotRef: React.RefObje
   return (
     <div className="relative" ref={chatbotRef}>
       {/* Fixed button at the bottom */}
+      {activePlaceId && (
       <div className="fixed bottom-6 right-6 z-50">
         <HoverBorderGradient className="w-full rounded-full cursor-pointer">
           <motion.button 
             type="button" 
-            onClick={toggleChatbot}
+            onClick={toggleChatbotPanel}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="relative p-3.5 sm:p-4 text-white font-medium rounded-full z-10 flex items-center justify-center cursor-pointer transition-colors duration-300 ease-in-out" 
             style={{
-              background: isOpen 
+              background: isChatBotOpen 
                 ? "linear-gradient(to right, #3b82f6, #8b5cf6)" 
                 : "rgba(0, 0, 0, 0.8)"
             }}
@@ -96,7 +120,7 @@ export default function ChatbotD({chatbotRef,placeId}:{chatbotRef: React.RefObje
         
         {/* Chat interface with smooth animations */}
         <AnimatePresence>
-          {isOpen && (
+          {isChatBotOpen && (
             <motion.div 
               initial={{ opacity: 0, y: 20, scale: 0.95 }}
               animate={{ opacity: 1, y: -10, scale: 1 }}
@@ -116,7 +140,7 @@ export default function ChatbotD({chatbotRef,placeId}:{chatbotRef: React.RefObje
                     <p className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-medium">AI Travel Assistant</p>
                   </div>
                   <button 
-                    onClick={toggleChatbot}
+                    onClick={toggleChatbotPanel}
                     className="text-gray-400 hover:text-white transition-colors"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -126,7 +150,7 @@ export default function ChatbotD({chatbotRef,placeId}:{chatbotRef: React.RefObje
                 </div>
                 
                 {/* Chat area with sample message */}
-                <div className="h-80 p-4 overflow-y-auto chat-scroll bg-gray-900/90">
+                <div className="h-80 p-4 overflow-y-auto chat-scroll bg-gray-900/90" ref={chatContainerRef}>
                   <style>
                     {`
                       .chat-scroll::-webkit-scrollbar {
@@ -153,6 +177,7 @@ export default function ChatbotD({chatbotRef,placeId}:{chatbotRef: React.RefObje
                         </div>
                       </motion.div>
                     ))}
+                    
                   </div>
                 </div>
                 
@@ -186,6 +211,7 @@ export default function ChatbotD({chatbotRef,placeId}:{chatbotRef: React.RefObje
           )}
         </AnimatePresence>
       </div>
+      )}
     </div>
   );
 }
