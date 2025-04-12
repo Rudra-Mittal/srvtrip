@@ -9,12 +9,13 @@ import FormPage from './pages/FormPage'
 import { ItineraryPage } from './pages/ItineraryPage'
 import { ProtectedRoute } from './components/ProtectedRoutes/ProtectedRoute'
 import HistoryPage from './pages/historyPage'
-
+import { Navbar } from "@/components/Navbar"
 
 function App() {
   return (
     <>
       <BrowserRouter>
+          <Navbar />
         <Routes>
           <Route path="/" element={<LandingPage />} /> 
           <Route path="/signup" element={<SignupPage />} />

@@ -19,7 +19,7 @@ export const verifyOtp=async (req : any, res : any) => {
       const dbUser = await createUser(email, password, name);
 
       // Generate token with the database user ID
-      const token = jwt.sign({ userId: dbUser.id }, process.env.JWT_SECRET as string);
+      const token = jwt.sign({ userId: dbUser.id,name,email}, process.env.JWT_SECRET as string);
 
       
       // Remove the OTP after successful verification

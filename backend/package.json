@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "docker":"sudo systemctl start docker",
     "db": "sudo docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres && npx prisma migrate dev"
   },
   "keywords": [],
