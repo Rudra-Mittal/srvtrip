@@ -2,7 +2,8 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
     places: [],
-    activePlaceId:null
+    activePlaceId:null,
+    isChatBotOpen: false,
 };
 
 const placeSlice = createSlice({
@@ -20,7 +21,10 @@ const placeSlice = createSlice({
         setActivePlaceId: (state, action) => {
             state.activePlaceId = action.payload;
         },
+        setChatbotOpen: (state, action) => {
+            state.isChatBotOpen = action.payload;
+        },
     },
 });
-export const { setPlaces, addPlace } = placeSlice.actions;
+export const { setPlaces, addPlace,setActivePlaceId,toggleChatbot,setChatbotOpen } = placeSlice.actions;
 export default placeSlice.reducer;
