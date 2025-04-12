@@ -1,17 +1,21 @@
 import { useState } from 'react';
 import { imageData, itineraryData } from '../sample_Images_itinerary';
+import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 import { setActivePlaceId } from '@/store/slices/placeSlice';
 
-export const DayNumCompo = () => {
+export const DayNumCompo = ({ dayNum, itineraryNum }: { dayNum: string, itineraryNum: string }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   //testing
   const dispatch = useDispatch();
   dispatch(setActivePlaceId("wkhbvjfb"));
+  const itinerary = useSelector((state: any) => state.itinerary.itineraries);
+  // console.log("sdhjkskh",itinerary);
   
-  let currentDay=0;
-
+  // let currentDay=0;
+  const currentDay = dayNum ? parseInt(dayNum) - 1 : 0;
+  const itineraryId = itineraryNum ? parseInt(itineraryNum) - 1 : 0;
   // Function to navigate slides
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev === imageData.length - 1 ? 0 : prev + 1));
@@ -21,12 +25,87 @@ export const DayNumCompo = () => {
     setCurrentSlide((prev) => (prev === 0 ? imageData.length - 1 : prev - 1));
   };
   
-  // Function to render the section content
+  const placesData = useSelector((state: any) => state.place.places);
+  // console.log("placesData", placesData);  
+  
+  // Create a flat map of place IDs to display names for easy lookup
+  const createPlaceMap = () => {
+    const placeMap: Record<string, string> = {};
+    
+    if (placesData && placesData.length > 0) {
+      // Iterate through all days
+      placesData.forEach((dayPlaces: any[]) => {
+        // console.log("dayPlaces", dayPlaces);
+        if (Array.isArray(dayPlaces)) {
+          // Iterate through all places in a day
+          dayPlaces.forEach((placeArray: any[]) => {
+            // console.log("placeArray", placeArray);
+            placeArray.forEach((place) => {
+              if (place && place.id && place.displayName) {
+                placeMap[place.id] = place.displayName;
+                // console.log("placeMap[place.id]", "place id",place.id, placeMap[place.id]);
+              }
+            });
+          });          
+        }
+      });
+    }
+    
+    return placeMap;
+  };
+  const placeMap = createPlaceMap();
+  // Replace place IDs with their display names
+ // Replace place IDs with their display names as buttons
+const replacePlaceIds = (text: string) => {
+  if (!text) return text;
+  
+  // Replace IDs in format #ChIJ...# with buttons containing place names
+  return text.replace(/#([a-zA-Z0-9_-]+)#/g, (match, placeId) => {
+    const placeName = placeMap[placeId];
+    if (!placeName) return match;
+    
+    // Return a button with the place name
+    return `<button class="inline-flex items-center px-2 py-0.5 mx-0.5 bg-blue-900/30 text-blue-300 rounded border border-blue-500/20 hover:bg-blue-800/40 transition-all text-xs font-medium">${placeName}</button>`;
+  });
+};
+  
+  // // Process the data section to replace place IDs with names
+  const processSection = (data: any) => {
+    if (!data) return data;
+      // console.log("data", data);
+    const processed = {...data};
+    
+    if (typeof processed.activities === 'string') {
+      processed.activities = replacePlaceIds(processed.activities);
+    }
+    
+    if (typeof processed.food === 'string') {
+      processed.food = replacePlaceIds(processed.food);
+    }
+    
+    if (typeof processed.transport === 'string') {
+      processed.transport = replacePlaceIds(processed.transport);
+    }
+    
+    return processed;
+  };
+  
   const renderSectionContent = (section: string, data: { activities: any; food: any; transport: any; cost: any; }) => {
+    // Process the data to replace place IDs with names
+    const processedData = processSection(data);
+    
     // All sections will now use the dark theme with a subtle icon background
     const sectionTheme = { 
       iconBg: 'bg-gray-900/60'
     };
+  // console.log("processedData", processSection(itinerary[currentDay].itinerary.days[currentDay].morning));
+  // console.log("processedData", processedData);
+  // const renderSectionContent = (section: string, data: { activities: any; food: any; transport: any; cost: any; }) => {
+  //   // Process the data to replace place IDs with names
+  //   // All sections will now use the dark theme with a subtle icon background
+  //   const sectionTheme = { 
+  //     iconBg: 'bg-gray-900/60'
+  //   };
     
     return (
       <div className="space-y-4 md:space-y-3">
@@ -47,8 +126,8 @@ export const DayNumCompo = () => {
             </span>
           </div>
           <div className="bg-gray-900/40 p-3">
-            <p className="text-sm text-gray-300">{data.activities}</p>
-          </div>
+          <p className="text-sm text-gray-300" dangerouslySetInnerHTML={{ __html: processedData.activities }}></p>
+        </div>
         </div>
         
         {/* Food & Transport - Side by side */}
@@ -64,8 +143,8 @@ export const DayNumCompo = () => {
               <h5 className="font-semibold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Food & Dining</h5>
             </div>
             <div className="bg-gray-900/40 p-3">
-              <p className="text-sm text-gray-300">{data.food}</p>
-            </div>
+            <p className="text-sm text-gray-300" dangerouslySetInnerHTML={{ __html: processedData.food }}></p>
+          </div>
           </div>
           
           {/* Transport */}
@@ -79,8 +158,8 @@ export const DayNumCompo = () => {
               <h5 className="font-semibold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Transportation</h5>
             </div>
             <div className="bg-gray-900/40 p-3">
-              <p className="text-sm text-gray-300">{data.transport}</p>
-            </div>
+            <p className="text-sm text-gray-300" dangerouslySetInnerHTML={{ __html: processedData.transport }}></p>
+          </div>
           </div>
         </div>
       </div>
@@ -231,11 +310,11 @@ export const DayNumCompo = () => {
                     Morning
                   </h3>
                   <div className="bg-blue-900/20 text-blue-300 rounded-full px-3 py-0.5 text-sm font-semibold border border-blue-500/20">
-                    {itineraryData.days[currentDay].morning.cost}
+                    {itinerary[itineraryId].itinerary.days[currentDay].morning.cost}
                   </div>
                 </div>
                 <div className="p-3 bg-black/30 text-gray-300">
-                  {renderSectionContent('morning', itineraryData.days[currentDay].morning)}
+                  {renderSectionContent('morning',processSection( itinerary[itineraryId].itinerary.days[currentDay].morning))}
                 </div>
               </div>
 
@@ -249,11 +328,11 @@ export const DayNumCompo = () => {
                     Afternoon
                   </h3>
                   <div className="bg-blue-900/20 text-blue-300 rounded-full px-3 py-0.5 text-sm font-semibold border border-blue-500/20">
-                    {itineraryData.days[currentDay].afternoon.cost}
+                    {itinerary[itineraryId].itinerary.days[currentDay].afternoon.cost}
                   </div>
                 </div>
                 <div className="p-3 bg-black/30 text-gray-300">
-                  {renderSectionContent('afternoon', itineraryData.days[currentDay].afternoon)}
+                  {renderSectionContent('afternoon', processSection(itinerary[itineraryId].itinerary.days[currentDay].afternoon))}
                 </div>
               </div>
 
@@ -267,11 +346,11 @@ export const DayNumCompo = () => {
                     Evening
                   </h3>
                   <div className="bg-blue-900/20 text-blue-300 rounded-full px-3 py-0.5 text-sm font-semibold border border-blue-500/20">
-                    {itineraryData.days[currentDay].evening?.cost || itineraryData.days[currentDay].afternoon.cost}
+                    {itinerary[itineraryId].itinerary.days[currentDay].evening?.cost || itinerary[itineraryId].itinerary.days[currentDay].afternoon.cost}
                   </div>
                 </div>
                 <div className="p-3 bg-black/30 text-gray-300">
-                  {renderSectionContent('evening', itineraryData.days[currentDay].evening || itineraryData.days[currentDay].afternoon)}
+                  {renderSectionContent('evening', processSection(itinerary[itineraryId].itinerary.days[currentDay].evening) || processSection(itinerary[itineraryId].itinerary.days[currentDay].afternoon))}
                 </div>
               </div>
             </div>

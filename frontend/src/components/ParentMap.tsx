@@ -1,21 +1,59 @@
 import { APIProvider } from "@vis.gl/react-google-maps";
-import { useState } from "react";
+import { useEffect, useState} from "react";
 import MapComponent from "./Map";
-
-function ParentMap() {
+import { useSelector } from "react-redux";
+function ParentMap({ dayNum, itineraryNum }: { dayNum: string, itineraryNum: string }) {
+  // Convert string params to numbers (subtract 1 for zero-based array index)
+  const currentDay = dayNum ? parseInt(dayNum) - 1 : 0;
+  const itineraryId = itineraryNum ? parseInt(itineraryNum) - 1 : 0;
   // Predefined markers with names
-  const predefinedMarkers = [
-    { lat: 48.858093, lng: 2.294694, name: "Eiffel Tower" },
-    { lat: 48.854179, lng: 2.332503, name: "Café de Flore" },
-    { lat: 48.8606,   lng: 2.3376, name: "Louvre Museum" },
-    { lat: 48.8566, lng:  2.3522, name: "Seine River" },
-  ];
+  const placesData = useSelector((state: any) => state.place.places);
+  console.log("places for day:", currentDay, placesData[itineraryId][currentDay]);
   
+  const [predefinedMarkers, setPredefinedMarkers] = useState([
+   
+  ]);
+  console.log("Predefined markers:", placesData[currentDay]);
+  useEffect(() => {
+    // if (placesData && placesData.length > currentDay && placesData[itineraryId][currentDay]) {
+      const markers: Array<{ lat: number; lng: number; name: string }> = [];
+      console.log("reached")
+      // Only process places for the current day
+      const dayPlaces = placesData[itineraryId][currentDay];
+      console.log("Day places:", dayPlaces); 
+      if (Array.isArray(dayPlaces)) {
+        // Changed from dayPlaces[currentDay] to dayPlaces[0]
+        // We're already at the current day, so just process the first group of places
+        dayPlaces.forEach((place) => {
+          // console.log("Processing place for day", currentDay, place);
+          if (place && place.location && place.displayName) {
+            // console.log("Adding marker:", place.displayName);
+            markers.push({
+              lat: place.location.latitude,
+              lng: place.location.longitude,
+              name: place.displayName
+            });
+          }
+        });
+      // }
+      
+      // Update predefinedMarkers if we found any valid locations for the current day
+      if (markers.length > 0) {
+        setPredefinedMarkers(markers);
+        console.log("Updated markers for day", currentDay, ":", markers);
+      } else {
+        console.log("No valid locations found for day", currentDay);
+      }
+    } else {
+      console.log("No places data available for day", currentDay);
+    }
+  }, [placesData, currentDay]);
+
   const [hoveredMarker, setHoveredMarker] = useState<Marker | null>(null);
   const [selectedMarker, setSelectedMarker] = useState<Marker | null>(null);
-  const [infoOpen, setInfoOpen] = useState<boolean  | null>(null);
+  const [infoOpen, setInfoOpen] = useState<boolean | null>(null);
   const apiKey = "AIzaSyBZbm53yrsueed4OWNR4hv_ZCg6aUrzoP0";
- 
+  
   
   if (!apiKey) {
     return <div>Error: Missing Google API Key</div>;
