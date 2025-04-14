@@ -7,6 +7,31 @@ import { setActivePlaceId } from '@/store/slices/placeSlice';
 export const DayNumCompo = ({ dayNum, itineraryNum }: { dayNum: string, itineraryNum: string }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  const CURRENCY_API_KEY=import.meta.env.VITE_CURRENCY_API_KEY;
+
+  const base = "USD"; // Base currency
+  const target = "INR"; // Target currency
+
+  const [exchangeRate, setExchangeRate] = useState<number | null>(null);
+
+  const fetchExchangeRates=async()=>{
+    try{
+      const response=await fetch(`https://v6.exchangerate-api.com/v6/YOUR-API-KEY/pair/${base}/${target}`);
+      const data=await response.json();
+      if(data.result==="success"){
+        console.log("Exchange rate fetched successfully:", data.conversion_rate);
+        return data.conversion_rate;
+      }
+      else{
+        console.error("Error fetching exchange rates:", data);
+       throw new Error("Error fetching exchange rates");
+      }
+    }catch(err){
+      console.error("Error fetching exchange rates:", err);
+      throw err;
+    }
+  }
+  
   //testing
   const dispatch = useDispatch();
   dispatch(setActivePlaceId("wkhbvjfb"));
