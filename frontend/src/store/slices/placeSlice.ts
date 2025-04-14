@@ -28,5 +28,5 @@ const placeSlice = createSlice({
         },
     },
 });
-export const { setPlaces, addPlace,setActivePlaceId,toggleChatbot,setChatbotOpen } = placeSlice.actions;
+export const { setPlaces, addPlace,setActivePlaceId,setChatbotOpen } = placeSlice.actions;
 export default placeSlice.reducer;

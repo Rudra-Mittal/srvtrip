@@ -328,3 +328,11 @@
   transition: transform 300ms ease, box-shadow 300ms ease;
   transform-origin: center center;
 }
+
+.carousel-arrow {
+  opacity: var(--visible-opacity);
+  pointer-events: var(--interaction);
+  transition: opacity 0.3s ease;
+  will-change: opacity;
+  transform: translateZ(0);
+}

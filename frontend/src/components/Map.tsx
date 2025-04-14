@@ -17,13 +17,22 @@ interface AnimateZoomParams {
   duration: number;
 }
 
+// Add this outside the component to persist between renders
+const directionsGlobalCache = {
+  directions: [] as any[],
+  rendered: false
+};
+
+
 // Component to render directions between markers
-const DirectionsRenderer = ({predefinedMarkers, triggerDirections }: { predefinedMarkers: any[], triggerDirections: boolean }) => {
+const DirectionsRenderer = ({predefinedMarkers, triggerDirections}: { predefinedMarkers: any[], triggerDirections: boolean }) => {
   const routesLibrary = useMapsLibrary("routes");
   const map = useMap();
-  // console.log("map",map)
+  const directionsCache = useRef<any[]>([]); // Local cache reference
+  
   useEffect(() => {
-    if (!routesLibrary || !map || !triggerDirections) return;
+    // Use global cache to prevent re-rendering directions
+    if (!routesLibrary || !map || !triggerDirections || directionsGlobalCache.rendered) return;
 
     // Create directions for each pair of consecutive markers
     predefinedMarkers.forEach((_, index) => {
@@ -34,11 +43,15 @@ const DirectionsRenderer = ({predefinedMarkers, triggerDirections }: { predefine
             map,
             suppressMarkers: true,
             polylineOptions: {
-              strokeColor: "#FF5733",
+              strokeColor: "#FF5733", 
               strokeWeight: 4,
             },
             preserveViewport: true,
           });
+          
+          // Store in both caches
+          directionsCache.current.push(directionsRenderer);
+          directionsGlobalCache.directions.push(directionsRenderer);
 
           directionsService.route(
             {
@@ -49,6 +62,7 @@ const DirectionsRenderer = ({predefinedMarkers, triggerDirections }: { predefine
             (response, status) => {
               if (status === google.maps.DirectionsStatus.OK && response) {
                 directionsRenderer.setDirections(response);
+                directionsGlobalCache.rendered = true;
               } else {
                 console.error("Directions request failed due to " + status);
               }
@@ -69,7 +83,8 @@ const MapComponent = ({
   selectedMarker,
   setSelectedMarker,
   infoOpen,
-  setInfoOpen
+  setInfoOpen,
+  
 }: { 
   predefinedMarkers: { lat: number; lng: number; name?: string }[];
   hoveredMarker: { lat: number; lng: number; name?: string } | null;
@@ -176,7 +191,7 @@ const MarkerManager = ({
   // console.log("selected",selectedMarker)
   const [visibleMarkerIndices, setVisibleMarkerIndices] = useState<number[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isInfoWindowHovered, setIsInfoWindowHovered] = useState(false);
+  const isInfoWindowHoveredRef = useRef(false);
   const map = useMap();
   const animationFrameRef = useRef<number | null>(null);
   const mouseTrackingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -189,8 +204,9 @@ const MarkerManager = ({
   const zoomDuration = 300; // ms for zoom animation
   const mouseTrackingDelay = 1500; // 1.5 sec delay before tracking mouse position
   const currentZoomRef = useRef(defaultZoom);
-  
+  const infoWindowCloseIntentionalRef = useRef(false);
   // Images for carousel
+  
   const carouselImages = [
   "michael-fousert-3G1e6AxFcMA-unsplash.jpg"
     // Add more images as needed
@@ -211,9 +227,9 @@ const MarkerManager = ({
       // Smooth zoom animation to the hovered marker
       map.panTo(hoveredMarker);
       animateZoom(currentZoomRef.current, clickZoom, hoveredMarker, zoomDuration);
-    } else if (!hoveredMarker && !selectedMarker && map) {
-      // Zoom out if no marker is hovered or selected
-      animateZoom(currentZoomRef.current, defaultZoom, predefinedMarkers[0], zoomDuration);
+    } else if (!hoveredMarker && !selectedMarker && map && isTrackingMouseRef.current && !infoWindowCloseIntentionalRef.current) {
+      // Only zoom out if tracking mouse AND not an intentional InfoWindow close
+      map.setZoom(defaultZoom);
     }
   }, [hoveredMarker, map, selectedMarker]);
   
@@ -363,9 +379,13 @@ const MarkerManager = ({
     isMouseOverMarkerRef.current = false;
     setSelectedMarker(null);
     setInfoOpen(null); 
-    // Smoothly zoom out to default view
+    
+    // Just reset zoom level but don't change position
     if (map) {
-      animateZoom(currentZoomRef.current, defaultZoom, predefinedMarkers[0], zoomDuration);
+      // Don't pan to first marker, just change zoom
+      map.setZoom(defaultZoom);
+      // Remove this line
+      // animateZoom(currentZoomRef.current, defaultZoom, predefinedMarkers[0], zoomDuration);
     }
   };
 
@@ -384,23 +404,36 @@ const MarkerManager = ({
     }
   };
 
-  // Handle popup mouse enter
-  const handlePopupMouseEnter = () => {
-    isMouseOverPopupRef.current = true;
-    isTrackingMouseRef.current = false; // Stop tracking when mouse enters popup
-    setIsInfoWindowHovered(true);
-  };
-
-  // Handle popup mouse leave
-  const handlePopupMouseLeave = () => {
-    isMouseOverPopupRef.current = false;
-    setIsInfoWindowHovered(false);
-    // If we've passed the 1.5 second delay, start tracking mouse
-    // This ensures we don't zoom out immediately, but wait for actual mouse movement
-    if (mouseTrackingTimeoutRef.current === null) { // Timer has completed
-      isTrackingMouseRef.current = true;
+// Handle popup mouse enter
+const handlePopupMouseEnter = () => {
+  isMouseOverPopupRef.current = true;
+  isTrackingMouseRef.current = false; // Stop tracking when mouse enters popup
+  setTimeout(() => {
+    if (isMouseOverPopupRef.current) {
+      isInfoWindowHoveredRef.current = true;
     }
-  };
+  }, 100); // Add a small delay to prevent flickering
+};
+
+// Handle popup mouse leave
+const handlePopupMouseLeave = () => {
+  isMouseOverPopupRef.current = false;
+
+  // Set a timeout to close the InfoWindow after 1.5 seconds
+  setTimeout(() => {
+    if (!isMouseOverPopupRef.current) {
+      // Set flag to indicate this is not a user-initiated close
+      infoWindowCloseIntentionalRef.current = true;
+      setInfoOpen(null); // Close the InfoWindow
+      setSelectedMarker(null); // Deselect the marker
+      // Reset the flag after a short delay
+      setTimeout(() => {
+        infoWindowCloseIntentionalRef.current = false; 
+      }, 100);
+    }
+  }, 1500); // 1.5 seconds delay
+};
+
 
   // Handle next image in carousel
   const handleNextImage = (e: React.MouseEvent) => {
@@ -464,7 +497,7 @@ const MarkerManager = ({
       {infoOpen && (
         <InfoWindow 
           position={getInfoWindowPosition(infoOpen)}
-          pixelOffset={[0, 100]} // Increase vertical offset to position higher above marker
+          pixelOffset={[0, 150]} // Increase vertical offset to position higher above marker
           onCloseClick={handleZoomOut}
           disableAutoPan={true} // Prevent automatic panning
           className={isDarkTheme ? "bg-gray-700" : "bg-white"}
@@ -498,51 +531,56 @@ const MarkerManager = ({
               
               {/* Left arrow */}
               <div
-                onClick={handlePrevImage}
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "10px",
-                  transform: "translateY(-50%)",
-                  backgroundColor: "rgba(255, 255, 255, 0.7)",
-                  borderRadius: "50%",
-                  width: "30px",
-                  height: "30px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  opacity: isInfoWindowHovered ? 1 : 0,
-                  transition: "opacity 0.3s ease",
-                  zIndex: 10
-                }}
-              >
-                <span style={{ fontSize: "18px", fontWeight: "bold" }}>←</span>
-              </div>
+  onClick={handlePrevImage}
+  style={{
+    position: "absolute",
+    top: "50%",
+    left: "10px",
+    transform: "translateY(-50%)",
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
+    borderRadius: "50%",
+    width: "30px",
+    height: "30px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    opacity: isMouseOverPopupRef.current ? 1 : 0,
+    transition: "opacity 0.3s ease",
+    zIndex: 10,
+    willChange: "opacity",
+    pointerEvents: isMouseOverPopupRef.current ? "auto" : "none",
+  }}
+>
+  <span style={{ fontSize: "18px", fontWeight: "bold" }}>←</span>
+</div>
               
               {/* Right arrow */}
-              <div
-                onClick={handleNextImage}
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  right: "10px",
-                  transform: "translateY(-50%)",
-                  backgroundColor: "rgba(255, 255, 255, 0.7)",
-                  borderRadius: "50%",
-                  width: "30px",
-                  height: "30px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  opacity: isInfoWindowHovered ? 1 : 0,
-                  transition: "opacity 0.3s ease",
-                  zIndex: 10
-                }}
-              >
-                <span style={{ fontSize: "18px", fontWeight: "bold" }}>→</span>
-              </div>
+             {/* Right arrow */}
+<div
+  onClick={handleNextImage}
+  style={{
+    position: "absolute",
+    top: "50%",
+    right: "10px",
+    transform: "translateY(-50%)",
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
+    borderRadius: "50%",
+    width: "30px",
+    height: "30px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    opacity: isMouseOverPopupRef.current ? 1 : 0,  // CHANGED: use same ref as left arrow
+    transition: "opacity 0.3s ease",
+    zIndex: 10,
+    willChange: "opacity",
+    pointerEvents: isMouseOverPopupRef.current ? "auto" : "none"  // ADDED: same as left arrow
+  }}
+>
+  <span style={{ fontSize: "18px", fontWeight: "bold" }}>→</span>
+</div>
             </div>
             
             <div style={{ padding: "8px", marginTop: "0" }}>

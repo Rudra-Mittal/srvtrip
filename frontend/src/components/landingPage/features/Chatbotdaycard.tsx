@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addChat, loadChatForPlace } from "@/store/slices/chatSlice";
-import { toggleChatbot } from "@/store/slices/placeSlice";
+// import { toggleChatbot } from "@/store/slices/placeSlice";
 import { setChatbotOpen } from "@/store/slices/placeSlice";
 import { useEffect,useRef } from "react";
 

@@ -1,26 +1,29 @@
 import { APIProvider } from "@vis.gl/react-google-maps";
-import { useEffect, useState} from "react";
+import { useEffect, useRef, useState} from "react";
 import MapComponent from "./Map";
 import { useSelector } from "react-redux";
 function ParentMap({ dayNum, itineraryNum }: { dayNum: string, itineraryNum: string }) {
   // Convert string params to numbers (subtract 1 for zero-based array index)
+  const activePlaceId = useSelector((state: any) => state.place.activePlaceId);
+  console.log("Active place ID from Redux:", activePlaceId);
+  const [mapInstance, setMapInstance] = useState<any>(null); // Store the map instance
+
   const currentDay = dayNum ? parseInt(dayNum) - 1 : 0;
   const itineraryId = itineraryNum ? parseInt(itineraryNum) - 1 : 0;
   // Predefined markers with names
   const placesData = useSelector((state: any) => state.place.places);
   console.log("places for day:", currentDay, placesData[itineraryId][currentDay]);
   
-  const [predefinedMarkers, setPredefinedMarkers] = useState([
-   
-  ]);
-  console.log("Predefined markers:", placesData[currentDay]);
+  const [predefinedMarkers, setPredefinedMarkers] = useState<Array<{ lat: number; lng: number; name: string; placeId: string }>>([]);
+
+  // console.log("Predefined markers:", placesData[currentDay]);
   useEffect(() => {
     // if (placesData && placesData.length > currentDay && placesData[itineraryId][currentDay]) {
-      const markers: Array<{ lat: number; lng: number; name: string }> = [];
-      console.log("reached")
+      const markers: Array<{ lat: number; lng: number; name: string; placeId: string}> = [];
+      // console.log("reached")
       // Only process places for the current day
       const dayPlaces = placesData[itineraryId][currentDay];
-      console.log("Day places:", dayPlaces); 
+      // console.log("Day places:", dayPlaces); 
       if (Array.isArray(dayPlaces)) {
         // Changed from dayPlaces[currentDay] to dayPlaces[0]
         // We're already at the current day, so just process the first group of places
@@ -31,7 +34,8 @@ function ParentMap({ dayNum, itineraryNum }: { dayNum: string, itineraryNum: str
             markers.push({
               lat: place.location.latitude,
               lng: place.location.longitude,
-              name: place.displayName
+              name: place.displayName,
+              placeId: place.id, // Add placeId here
             });
           }
         });
@@ -47,11 +51,78 @@ function ParentMap({ dayNum, itineraryNum }: { dayNum: string, itineraryNum: str
     } else {
       console.log("No places data available for day", currentDay);
     }
-  }, [placesData, currentDay]);
+  }, []);
+
+  useEffect(() => {
+    if (activePlaceId ) {
+      console.log("predefibed markers:", predefinedMarkers);
+      console.log("Active place ID:", activePlaceId);
+      const activeMarker = predefinedMarkers.find(marker => marker.placeId === activePlaceId);
+      console.log("Active marker:", activeMarker);
+      if (activeMarker) {
+        console.log(`Zooming in on: ${activeMarker.name}`);
+        console.log(`Coordinates: ${activeMarker.lat}, ${activeMarker.lng}`);
+        setSelectedMarker(activeMarker === selectedMarker ? null : activeMarker);
+        setInfoOpen(activeMarker);
+        // mapInstance.panTo({ lat: activeMarker.lat, lng: activeMarker.lng }); // Center the map on the marker
+        // mapInstance.setZoom(14); // Zoom in on the marker
+      }
+      
+    }
+  }, [activePlaceId, predefinedMarkers, mapInstance]);
 
   const [hoveredMarker, setHoveredMarker] = useState<Marker | null>(null);
   const [selectedMarker, setSelectedMarker] = useState<Marker | null>(null);
   const [infoOpen, setInfoOpen] = useState<boolean | null>(null);
+  const closeInfoWindow = () => {
+    console.log("Closing info window manually");
+    setSelectedMarker(null);
+    setInfoOpen(null);
+    setHoveredMarker(null);
+  };
+
+  useEffect(() => {
+    // Function to handle clicks outside
+    const handleOutsideClick = (e: MouseEvent) => {
+      // Only proceed if a marker is selected
+      if (!selectedMarker) return;
+      
+      // Check if the click was on a place button (these have data-place-id attribute)
+      const target = e.target as HTMLElement;
+      const clickedOnPlaceButton = target.closest('[data-place-id]') !== null;
+      
+      // Check if clicked on map component
+      const clickedOnMap = target.closest('.info-win') !== null;
+      
+      // If not clicking on a place button or the map, close the info window
+      if (!clickedOnPlaceButton && !clickedOnMap) {
+        closeInfoWindow();
+      }
+    };
+    
+    // Add event listener
+    document.addEventListener('mousedown', handleOutsideClick);
+    
+    // Clean up
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, [selectedMarker]); 
+
+  // useEffect(() => {
+  //   // Only set the timer if a marker is selected
+  //   if (selectedMarker && infoOpen) {
+  //     const timer = setTimeout(() => {
+  //       console.log("Auto-closing info window for:", selectedMarker.name);
+  //       setSelectedMarker(null);
+  //       setInfoOpen(null);
+  //       setHoveredMarker(null);
+  //     }, 5000); // 10 seconds (adjust as needed)
+  
+  //     // Clear the timer when component unmounts or when selection changes
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, [selectedMarker, infoOpen]);
   const apiKey = "AIzaSyBZbm53yrsueed4OWNR4hv_ZCg6aUrzoP0";
   
   
@@ -66,21 +137,21 @@ function ParentMap({ dayNum, itineraryNum }: { dayNum: string, itineraryNum: str
     name: string;
   }
 
-  const handleListingHover = (marker: any): void => {
-    setHoveredMarker(marker);
-    setInfoOpen(marker);
-  };
+  // const handleListingHover = (marker: any): void => {
+  //   setHoveredMarker(marker);
+  //   setInfoOpen(marker);
+  // };
 
-  // Handle click on text listing
-  const handleListingClick = (marker : Marker): void => {
-    setSelectedMarker(marker === selectedMarker ? null : marker);
-  };
+  // // Handle click on text listing
+  // const handleListingClick = (marker : Marker): void => {
+  //   setSelectedMarker(marker === selectedMarker ? null : marker);
+  // };
 
-  // Handle mouse leave from text listing
-  const handleListingLeave = () => {
-    setHoveredMarker(null);
-    setInfoOpen(null);
-  };
+  // // Handle mouse leave from text listing
+  // const handleListingLeave = () => {
+  //   setHoveredMarker(null);
+  //   setInfoOpen(null);
+  // };
 
   return (
     <div className="flex w-full absolute inset-0">
@@ -128,6 +199,7 @@ function ParentMap({ dayNum, itineraryNum }: { dayNum: string, itineraryNum: str
             setSelectedMarker={setSelectedMarker}
             infoOpen={infoOpen}
             setInfoOpen={setInfoOpen}
+            
           />
         </APIProvider>
       </div>
