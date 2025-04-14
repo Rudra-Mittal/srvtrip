@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useSelector, useDispatch } from "react-redux";
+import { logoutUser } from "@/store/slices/userSlice"; // Make sure this path is correct
 
 interface NavLinkProps {
   href: string;
@@ -31,14 +33,29 @@ export const Navbar = () => {
   const [visible, setVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  // Add a state to track if user is logged in (you would typically get this from auth context)
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Set to true for testing
-
-  // You can replace this with your actual auth check logic
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const {isLoggedIn, name, email} = useSelector((state:any)=>state.user);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Handle logout functionality
+  const handleLogout = () => {
+    dispatch(logoutUser());
+    setDropdownOpen(false);
+    navigate('/');
+  };
+  
+  // Close dropdown when clicking outside
   useEffect(() => {
-    // Example: Check local storage, cookie, or auth context
-    const token = localStorage.getItem('authToken');
-    setIsLoggedIn(!!token);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   useMotionValueEvent(scrollY, "change", (current) => {
@@ -112,20 +129,72 @@ export const Navbar = () => {
               )}
             </div>
 
-            {/* Desktop Auth Buttons */}
+            {/* Desktop Auth Buttons - Conditional based on login status */}
             <div className="hidden md:flex items-center space-x-3">
-              <Link 
-                to="/signin" 
-                className="text-white/90 hover:text-white text-sm font-medium px-3 py-1.5 transition-colors"
-              >
-                Login
-              </Link>
-              <Link 
-                to="/signup" 
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-sm font-medium px-5 py-2 rounded-full transition-all shadow-md"
-              >
-                Sign Up
-              </Link>
+              {isLoggedIn ? (
+                <div className="relative" ref={dropdownRef}>
+                  <button 
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                    className="flex items-center space-x-2 text-white/90 hover:text-white text-sm font-medium px-3 py-1.5 transition-colors"
+                  >
+                    <span>{name || 'User'}</span>
+                    <motion.svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      width="16" 
+                      height="16" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                      animate={{ rotate: dropdownOpen ? 180 : 0 }}
+                      className="ml-1"
+                    >
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </motion.svg>
+                  </button>
+                  
+                  {/* User Dropdown */}
+                  <AnimatePresence>
+                    {dropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute right-0 mt-2 w-48 py-2 bg-gray-900 border border-white/10 rounded-lg shadow-lg z-20"
+                      >
+                        <div className="px-4 py-2 border-b border-gray-700">
+                          <p className="text-white font-medium truncate">{name}</p>
+                          <p className="text-gray-400 text-xs truncate">{email}</p>
+                        </div>
+                        <button 
+                          onClick={handleLogout}
+                          className="w-full text-left px-4 py-2 text-sm text-white/80 hover:text-white hover:bg-gray-800 transition-colors"
+                        >
+                          Logout
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ) : (
+                <>
+                  <Link 
+                    to="/signin" 
+                    className="text-white/90 hover:text-white text-sm font-medium px-3 py-1.5 transition-colors"
+                  >
+                    Login
+                  </Link>
+                  <Link 
+                    to="/signup" 
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-sm font-medium px-5 py-2 rounded-full transition-all shadow-md"
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Mobile Menu Toggle Button */}
@@ -191,23 +260,43 @@ export const Navbar = () => {
                   )}
                 </div>
 
-                {/* Mobile Auth */}
+                {/* Mobile Auth - Conditional based on login status */}
                 <div className="flex flex-col space-y-3 mt-6">
                   <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Account</h3>
-                  <Link 
-                    to="/signin" 
-                    onClick={handleMobileNavClick}
-                    className="py-2 text-white/90 hover:text-white text-sm font-medium transition-colors"
-                  >
-                    Login
-                  </Link>
-                  <Link 
-                    to="/signup" 
-                    onClick={handleMobileNavClick}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-sm font-medium px-5 py-3 rounded-lg transition-all shadow-md text-center"
-                  >
-                    Sign Up
-                  </Link>
+                  {isLoggedIn ? (
+                    <>
+                      <div className="py-3 px-4 bg-gray-800/50 rounded-lg border border-white/5">
+                        <p className="text-white font-medium">{name}</p>
+                        <p className="text-gray-400 text-xs truncate">{email}</p>
+                      </div>
+                      <button 
+                        onClick={() => {
+                          handleLogout();
+                          handleMobileNavClick();
+                        }}
+                        className="bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-medium px-5 py-3 rounded-lg transition-all shadow-md text-center"
+                      >
+                        Logout
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link 
+                        to="/signin" 
+                        onClick={handleMobileNavClick}
+                        className="py-2 text-white/90 hover:text-white text-sm font-medium transition-colors"
+                      >
+                        Login
+                      </Link>
+                      <Link 
+                        to="/signup" 
+                        onClick={handleMobileNavClick}
+                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-sm font-medium px-5 py-3 rounded-lg transition-all shadow-md text-center"
+                      >
+                        Sign Up
+                      </Link>
+                    </>
+                  )}
                 </div>
                 
                 {/* Mobile Footer */}
