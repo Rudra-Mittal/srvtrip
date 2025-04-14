@@ -1,7 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
-
+const places = localStorage.getItem("places")
+    ? JSON.parse(localStorage.getItem("places") || "")
+    : [];
 const initialState = {
-    places: [],
+    places: places,
     activePlaceId:null,
     isChatBotOpen: false,
 };

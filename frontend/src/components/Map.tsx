@@ -173,7 +173,7 @@ const MarkerManager = ({
   predefinedMarkers: any[];
   isDarkTheme: boolean;
 }) => {
-  console.log("selected",selectedMarker)
+  // console.log("selected",selectedMarker)
   const [visibleMarkerIndices, setVisibleMarkerIndices] = useState<number[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isInfoWindowHovered, setIsInfoWindowHovered] = useState(false);
@@ -314,7 +314,7 @@ const MarkerManager = ({
 
   // Handle marker click
   const handleMarkerClick = (position: any) => {
-    console.log("ssss",selectedMarker)
+    // console.log("ssss",selectedMarker)
     if (selectedMarker === position) {
       // If already selected, deselect it
       handleZoomOut();
@@ -330,10 +330,10 @@ const MarkerManager = ({
       }
       isTrackingMouseRef.current = false;
       // Select new marker
-      console.log("selectedMarker",selectedMarker)
+      // console.log("selectedMarker",selectedMarker)
       setSelectedMarker(position);
-      console.log("selectedMarkersdsdr",selectedMarker)
-      console.log("position",position)
+      // console.log("selectedMarkersdsdr",selectedMarker)
+      // console.log("position",position)
       setInfoOpen(position);
       // Smooth zoom animation to the selected marker
       if (map) {
@@ -429,8 +429,8 @@ const MarkerManager = ({
     <div className="info-win">
       {/* Render visible markers */}
       {predefinedMarkers.map((position, index) => {
-        console.log("positionnn",position)
-        console.log("sdsdsd",selectedMarker)
+        // console.log("positionnn",position)
+        // console.log("sdsdsd",selectedMarker)
         return (
           visibleMarkerIndices.includes(index) && (
             <div className=""
