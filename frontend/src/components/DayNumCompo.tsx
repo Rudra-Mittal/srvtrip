@@ -1,4 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
+// Extend the Window interface to include handlePlaceClick
+
 import { imageData, itineraryData } from '../sample_Images_itinerary';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
@@ -6,10 +9,36 @@ import { setActivePlaceId } from '@/store/slices/placeSlice';
 
 export const DayNumCompo = ({ dayNum, itineraryNum }: { dayNum: string, itineraryNum: string }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
-
+  const placesData = useSelector((state: any) => state.place.places);
   //testing
   const dispatch = useDispatch();
-  dispatch(setActivePlaceId("wkhbvjfb"));
+
+  useEffect(() => {
+    const handleButtonClick = (event: Event) => {
+      const target = event.target as HTMLElement;
+
+      // Check if the clicked element is a button with a data-place-id attribute
+      if (target.tagName === 'BUTTON' && target.dataset.placeId) {
+        const placeId = target.dataset.placeId;
+        console.log(`Button clicked for place ID: ${placeId}`);
+
+        // Dispatch an action or perform any other logic
+        dispatch(setActivePlaceId(placeId));
+      }
+    };
+
+    // Add event listener to the document
+    document.addEventListener('click', handleButtonClick);
+
+    // Cleanup the event listener on component unmount
+    return () => {
+      document.removeEventListener('click', handleButtonClick);
+    };
+
+  }, [dispatch]);
+
+  
+  
   const itinerary = useSelector((state: any) => state.itinerary.itineraries);
   // console.log("sdhjkskh",itinerary);
   
@@ -24,8 +53,7 @@ export const DayNumCompo = ({ dayNum, itineraryNum }: { dayNum: string, itinerar
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev === 0 ? imageData.length - 1 : prev - 1));
   };
-  
-  const placesData = useSelector((state: any) => state.place.places);
+
   // console.log("placesData", placesData);  
   
   // Create a flat map of place IDs to display names for easy lookup
@@ -65,9 +93,15 @@ const replacePlaceIds = (text: string) => {
     if (!placeName) return match;
     
     // Return a button with the place name
-    return `<button class="inline-flex items-center px-2 py-0.5 mx-0.5 bg-blue-900/30 text-blue-300 rounded border border-blue-500/20 hover:bg-blue-800/40 transition-all text-xs font-medium">${placeName}</button>`;
+    return `<button 
+    class="inline-flex items-center px-2 py-0.5 mx-0.5 bg-blue-900/30 text-blue-300 rounded border border-blue-500/20 hover:bg-blue-800/40 transition-all text-xs font-medium" 
+    data-place-id="${placeId}"
+  >
+    ${placeName}
+  </button>`;
   });
 };
+
   
   // // Process the data section to replace place IDs with names
   const processSection = (data: any) => {
