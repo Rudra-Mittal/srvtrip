@@ -27,8 +27,8 @@ interface FormData {
   budget: number;
   number_of_persons: number;
   number_of_days: number;
-  interests: string[];
-  startDate: Date | undefined;
+  interests: string[] | string;
+  startdate: Date | undefined;
   customRequests: string;
   currency: string;
 }
@@ -41,7 +41,7 @@ export default function Form() {
     number_of_persons: 2,
     number_of_days: 7,
     interests: [],
-    startDate: undefined,
+    startdate: undefined,
     customRequests: "",
     currency: "INR"
   });
@@ -103,7 +103,12 @@ export default function Form() {
   const toggleInterest = (interest: string) => {
     setFormData(prev => {
       if (prev.interests.includes(interest)) {
-        return { ...prev, interests: prev.interests.filter(i => i !== interest) };
+        return {
+          ...prev,
+          interests: Array.isArray(prev.interests)
+            ? prev.interests.filter(i => i !== interest)
+            : prev.interests
+        };
       } else {
         return { ...prev, interests: [...prev.interests, interest] };
       }
@@ -121,7 +126,7 @@ export default function Form() {
     // Step 1: Start merging animation
     setIsAggregating(true);
     setTimeout(() => {
-      console.log("Star should be visible now");
+      console.log("Star should be visible now");s
 
       // Animate the star
       setTimeout(() => {
@@ -154,16 +159,34 @@ export default function Form() {
     }
   };
   const navigate=useNavigate()
-   const handleGenerateItinerary = async (formData: FormData) => {
-    setFormVisible(false);
-    setShowSummary(true);
-    genitinerary(formData).then(async (res)=>{
-      console.log("newitinerary",JSON.parse(res.newItenary))
-      dispatch(addItinerary( await JSON.parse(res.newItenary)))
-      dispatch(addPlace( await JSON.parse(res.placesData)))
-      navigate("/itinerary");
-    })
-   }
+  // Update the handleGenerateItinerary function to combine interests and customRequests
+const handleGenerateItinerary = async (formData: FormData) => {
+  setFormVisible(false);
+  setShowSummary(true);
+  
+  // Create a copy of the form data to modify
+  const submissionData = { ...formData };
+  
+  // Combine interests array and custom requests into a single string
+  const interestsArray = [...submissionData.interests];
+  
+  // Add custom requests to interests if it exists
+  if (submissionData.customRequests && submissionData.customRequests.trim() !== '') {
+    interestsArray.push(submissionData.customRequests.trim());
+  }
+  
+  // Convert the combined array to a comma-separated string
+  submissionData.interests = interestsArray.join(', ');
+  
+  console.log("Form data:", submissionData);
+  
+  genitinerary(submissionData).then(async (res)=>{
+    console.log("newitinerary",JSON.parse(res.newItenary))
+    dispatch(addItinerary(await JSON.parse(res.newItenary)))
+    dispatch(addPlace(await JSON.parse(res.placesData)))
+    navigate("/itinerary");
+  })
+}
   // Particles for background animation
   const particles = Array.from({ length: 20 }, (_, i) => ({
     id: i,
@@ -318,8 +341,8 @@ export default function Form() {
                               className="w-full justify-start text-left font-normal bg-black/60 border border-blue-500/20 focus:border-purple-500/50 h-12 sm:h-12 hover:bg-black/70 text-sm sm:text-base lg:text-lg "
                             >
                               <CalendarIcon className="mr-2 h-4 w-4 text-blue-400" />
-                              {formData.startDate ? (
-                                format(formData.startDate, "PPP")
+                              {formData.startdate ? (
+                                format(formData.startdate, "PPP")
                               ) : (
                                 <span className="text-gray-400">Select your start date</span>
                               )}
@@ -328,8 +351,8 @@ export default function Form() {
                           <PopoverContent className="w-auto p-0 bg-black/90 border border-blue-500/30">
                             <Calendar
                               mode="single"
-                              selected={formData.startDate}
-                              onSelect={(date) => handleChange("startDate", date)}
+                              selected={formData.startdate}
+                              onSelect={(date) => handleChange("startdate", date)}
                               initialFocus
                               className="bg-black text-white scale-90 sm:scale-100 max-w-[280px] sm:max-w-none"
                             />
@@ -627,7 +650,7 @@ export default function Form() {
                           <div>
                             <p className="text-gray-400 text-sm md:text-base">Start Date</p>
                             <p className="text-white text-base md:text-lg font-medium">
-                              {formData.startDate ? format(formData.startDate, "PPP") : "Not specified"}
+                              {formData.startdate ? format(formData.startdate, "PPP") : "Not specified"}
                             </p>
                           </div>
                           <div>
@@ -644,7 +667,7 @@ export default function Form() {
                             <p className="text-gray-400 text-sm">Interests</p>
                             <p className="text-white">
                               {formData.interests.length > 0
-                                ? formData.interests.join(", ")
+                                ? Array.isArray(formData.interests) ? formData.interests.join(", ") : formData.interests
                                 : "None specified"}
                             </p>
                           </div>
