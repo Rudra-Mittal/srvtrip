@@ -14,7 +14,7 @@ import callWebScrapper from "./callWebScrapper";
 export const itenaryRoute = async (req: AuthRequest, res:Response) => {
   try{
     const { prompt } = req.body;
-  console.log(prompt);
+  console.log("prompt",prompt);
 
   const userId = req.user?.userId;//get userId from token
   console.log(userId)
@@ -61,7 +61,7 @@ export const itenaryRoute = async (req: AuthRequest, res:Response) => {
         if (!placeD) {
           console.log("Error creating place")
         }
-        else  callWebScrapper(place.displayName, 5, place.id,place.formattedAddress)
+        // else  callWebScrapper(place.displayName, 5, place.id,place.formattedAddress)
       }
     }
     dayNum++;

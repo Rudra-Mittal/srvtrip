@@ -21,6 +21,7 @@ model Itinerary {
   destination       String
   duration          Int
   budget            Float
+  startdate         DateTime  @default(now())
   description       String?
   numberOfPersons   Int
   interests         String[]

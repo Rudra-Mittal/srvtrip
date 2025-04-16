@@ -10,7 +10,7 @@ app.use(express.json());
 interface ReqBody {
   destination: string;
   number_of_days: number;
-  start_date: string;
+  startdate: Date;
   currency: string;
   budget: number;
   number_of_persons: number;
@@ -19,12 +19,12 @@ interface ReqBody {
 
 export async function generate2(req:ReqBody){
   try {
-    const { destination, number_of_days,start_date,currency, budget, number_of_persons, interests } = req;
-    if (!destination || !number_of_days || !budget || !number_of_persons) {
+    const { destination, number_of_days,startdate,currency, budget, number_of_persons, interests } = req;
+    if (!destination || !number_of_days || !budget || !number_of_persons || !startdate) {
       return JSON.stringify({ error: "Missing required fields: destination, number_of_days, budget, number_of_persons" });
     }
-
-    const itinerary = await generateItinerary(destination, number_of_days,start_date,currency, budget, number_of_persons, interests);
+    
+    const itinerary = await generateItinerary(destination, number_of_days,startdate,currency, budget, number_of_persons, interests);
     
     console.log("Generated itinerary:", itinerary.itinerary);
     return JSON.stringify(itinerary);
