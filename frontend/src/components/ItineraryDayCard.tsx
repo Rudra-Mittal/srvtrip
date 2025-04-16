@@ -2,34 +2,74 @@ import {motion} from "framer-motion";
 import {cn} from "@/lib/utils";
 import {useState, useEffect, useRef} from "react";
 import {AnimatePresence} from "framer-motion";
+import { useSelector } from "react-redux";
 
-interface DayCardProps {
-    day: number;
-    date: string;
-    title: string;
-    description: string;
-    images: string[];
-    placesVisited: string[];
-}
+// interface DayCardProps {
+//     day: number;
+//     date: string;
+//     title: string;
+//     description: string;
+//     images: string[];
+//     placesVisited: string[];
+// }
 
-export const DayCard = ({ day, date, title, description, images, placesVisited }: DayCardProps) => {
+export const DayCard = ({itineraryIdx,dayIdx}: any) => {
     const [isHovered, setIsHovered] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [currentPlaceIndex, setCurrentPlaceIndex] = useState(0);
     const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    const itineraries=useSelector((state: any) => state.itinerary.itineraries);
+    const places=useSelector((state: any) => state.place.places);
+
+    console.log("itineraries in daycard",itineraries);
+    console.log("places in daycard",places);
+
+    const itinerary = itineraries[itineraryIdx];
+    const placesforeachday = places[itineraryIdx][dayIdx];
+    console.log("placeforeachday",placesforeachday);
+    
+    // Collect all images from all places for this day into a single flat array
+    // Now also track which place each image belongs to
+    const allDayImages: {url: string, placeIndex: number}[] = [];
+    placesforeachday.forEach((place: any, placeIdx: number) => {
+        if (place.images && Array.isArray(place.images)) {
+            place.images.forEach((image: any) => {
+                if (image.imageUrl) {
+                    allDayImages.push({
+                        url: image.imageUrl,
+                        placeIndex: placeIdx
+                    });
+                }
+            });
+        }
+    });
+    
+    console.log("All day images:", allDayImages);
+    console.log("Total images for day:", allDayImages.length);
+
+    // Update the place index when the image changes
+    useEffect(() => {
+        if (allDayImages.length > 0) {
+            setCurrentPlaceIndex(allDayImages[currentImageIndex].placeIndex);
+        }
+    }, [currentImageIndex, allDayImages]);
+
     // Auto-rotate images when card is expanded
     useEffect(() => {
         let interval: NodeJS.Timeout;
         
-        if (isHovered && images.length > 1) {
+        if (isHovered && allDayImages.length > 1) {
             interval = setInterval(() => {
-                setCurrentImageIndex(prev => (prev + 1) % images.length);
+                setCurrentImageIndex(prev => (prev + 1) % allDayImages.length);
             }, 3000);
         }
         
         return () => {
             if (interval) clearInterval(interval);
         };
-    }, [isHovered, images.length]);
+    }, [isHovered, allDayImages.length]);
+    
     const handleHoverStart = () => {
         // Set a timeout for 1 second before expanding
         hoverTimeoutRef.current = setTimeout(() => {
@@ -37,6 +77,7 @@ export const DayCard = ({ day, date, title, description, images, placesVisited }
             hoverTimeoutRef.current = null;
         }, 1000);
     };
+    
     const handleHoverEnd = () => {
         // Clear the timeout if it exists
         if (hoverTimeoutRef.current) {
@@ -46,6 +87,7 @@ export const DayCard = ({ day, date, title, description, images, placesVisited }
         // Reset hover state
         setIsHovered(false);
     };
+    
     // Fixed height for both collapsed and expanded states
     const cardHeight = 360; // Increased height to show more of the image
 
@@ -69,55 +111,67 @@ export const DayCard = ({ day, date, title, description, images, placesVisited }
             onHoverEnd={handleHoverEnd}
             style={{
                 boxShadow: isHovered 
-                    ? "0 0 60px rgba(79, 70, 229, 0.3)" 
-                    : "0 0 30px rgba(79, 70, 229, 0.15)"
+                    ? "0 0 60px rgba(121, 113, 234, 0.3)" 
+                    : "0 0 30px rgba(121, 113, 234, 0.15)"
             }}
         >
-            {/* Glass-like border for better blending */}
-            <div className="absolute inset-0 rounded-xl border border-white/10 z-50 pointer-events-none"></div>
+            {/* Enhanced glass-like border with subtle glow */}
+            <div className="absolute inset-0 rounded-xl border border-white/10 z-50 pointer-events-none">
+                <div className="absolute inset-0 rounded-xl opacity-50 blur-sm" 
+                    style={{
+                        background: "radial-gradient(circle at top right, rgba(121, 113, 234, 0.15), transparent 70%)"
+                    }}
+                />
+            </div>
             
-            {/* Background glow and gradient effect */}
+            {/* Background glow and gradient effect with enhanced animation */}
             <motion.div 
                 className="absolute inset-0 z-10"
                 animate={{ 
                     background: isHovered 
-                        ? "linear-gradient(to right, rgba(30, 64, 175, 0.2), rgba(109, 40, 217, 0.2))"
-                        : "linear-gradient(to right, rgba(30, 64, 175, 0.1), rgba(109, 40, 217, 0.1))"
+                        ? "linear-gradient(to right, rgba(85, 91, 255, 0.2), rgba(177, 156, 217, 0.2))"
+                        : "linear-gradient(to right, rgba(85, 91, 255, 0.1), rgba(177, 156, 217, 0.1))"
                 }}
                 transition={{ duration: 0.8 }}
             />
             
             {/* Base image or slider with overlay */}
-            <div className="absolute inset-0 w-full h-full z-0">
-                {/* Reduced opacity overlay for better image visibility */}
-                <div className="absolute inset-0 bg-black/20 z-10"></div> {/* Reduced opacity further */}
+            <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
+                {/* Enhanced gradient overlay for better image visibility */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-black/10 z-10"></div>
                 <AnimatePresence>
-                    {images.map((src, idx) => (
-                        <motion.div 
-                            key={src}
-                            className="absolute inset-0 w-full h-full"
-                            initial={{ opacity: 0 }}
-                            animate={{ 
-                                opacity: currentImageIndex === idx ? 1 : 0,
-                                scale: currentImageIndex === idx ? 1 : 1.1
-                            }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 1.2 }}
-                        >
-                            <img 
-                                src={src} 
-                                alt={`Day ${day} - ${placesVisited[idx] || title}`}
-                                className="w-full h-full object-cover"
-                                // Removed objectPosition to show the full image
-                            />
-                        </motion.div>
-                    ))}
+                    {allDayImages.length > 0 ? (
+                        allDayImages.map((image, idx) => (
+                            <motion.div 
+                                key={`img-${idx}`}
+                                className="absolute inset-0 w-full h-full"
+                                initial={{ opacity: 0, scale: 1.1 }}
+                                animate={{ 
+                                    opacity: currentImageIndex === idx ? 1 : 0,
+                                    scale: currentImageIndex === idx ? 1 : 1.1
+                                }}
+                                exit={{ opacity: 0, scale: 1.1 }}
+                                transition={{ duration: 1.2, ease: "easeInOut" }}
+                            >
+                                <img 
+                                    src={image.url} 
+                                    alt={`Day ${dayIdx}`}
+                                    className="w-full h-full object-cover"
+                                    style={{ objectPosition: "center" }}
+                                />
+                            </motion.div>
+                        ))
+                    ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+                            <p className="text-white/50">No images available</p>
+                        </div>
+                    )}
                 </AnimatePresence>
             </div>
             
             {/* Content container */}
             <div className="relative z-20 h-full w-full flex">
-                {/* Small card content (always visible) */}
+                {/* Small card content (always visible) with enhanced styling */}
                 <motion.div 
                     className={cn(
                         "flex-shrink-0 p-6 flex flex-col justify-between h-full",
@@ -135,39 +189,42 @@ export const DayCard = ({ day, date, title, description, images, placesVisited }
                     <div>
                         <div className="flex justify-between items-center mb-4">
                             <motion.div 
-                                className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-full px-4 py-1.5 text-sm font-bold text-white flex items-center gap-1.5 shadow-lg shadow-blue-900/20"
-                                whileHover={{ scale: 1.05 }}
+                                className="bg-gradient-to-r from-indigo-500 to-purple-400 rounded-full px-4 py-1.5 text-sm font-bold text-white flex items-center gap-1.5 shadow-lg shadow-indigo-900/20"
+                                whileHover={{ scale: 1.05, boxShadow: "0 0 15px rgba(121, 113, 234, 0.5)" }}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                     <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" />
                                 </svg>
-                                DAY {day}
+                                DAY {dayIdx+1}
                             </motion.div>
                             <motion.span 
-                                className="text-blue-100 text-sm font-medium px-3 py-1 rounded-full bg-blue-900/30 border border-blue-800/40 shadow-inner shadow-blue-500/10"
-                                whileHover={{ y: -2 }}
+                                className="text-blue-100 text-sm font-medium px-3 py-1 rounded-full bg-indigo-900/30 border border-indigo-800/40 shadow-inner shadow-indigo-500/10"
+                                whileHover={{ y: -2, boxShadow: "0 4px 10px rgba(121, 113, 234, 0.3)" }}
                             >
-                                {date}
+                                {itinerary?.date || `Day ${dayIdx+1}`}
                             </motion.span>
                         </div>
                         
                         <motion.h2
-                            className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300 text-2xl font-bold mb-3"
+                            className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-purple-300 text-2xl font-bold mb-3"
+                            initial={{ opacity: 0.9 }}
+                            whileHover={{ opacity: 1, scale: 1.01 }}
+                            transition={{ duration: 0.2 }}
                         >
-                            {title}
+                            {itinerary?.title || `Day ${dayIdx+1} Adventure`}
                         </motion.h2>
                         
                         <p className="text-gray-100 text-sm leading-relaxed mb-4 line-clamp-3 max-w-[370px]">
-                            {description}
+                            {itinerary?.description || "Explore amazing places and create unforgettable memories on this wonderful journey."}
                         </p>
                     </div>
                     
                     <div className="flex flex-col gap-2">
-                        <div className="flex items-center text-sm text-blue-200">
+                        <div className="flex items-center text-sm text-indigo-200">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                             </svg>
-                            <span className="font-medium">{placesVisited.length} Iconic Locations</span>
+                            <span className="font-medium">{placesforeachday.length} Iconic Locations</span>
                         </div>
                         
                         <div className="flex items-center text-sm text-purple-200">
@@ -179,41 +236,81 @@ export const DayCard = ({ day, date, title, description, images, placesVisited }
                     </div>
                 </motion.div>
                 
-                {/* Expanded content (visible on hover) */}
+                {/* Expanded content (visible on hover) with enhanced styling */}
                 <motion.div 
                     className="flex-grow p-7 text-white flex flex-col bg-gradient-to-l from-black/80 via-black/50 to-transparent"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ 
                         opacity: isHovered ? 1 : 0,
                         x: isHovered ? 0 : -20,
-                        pointerEvents: isHovered ? "auto" : "none"
+                        pointerEvents: isHovered ? "auto" : "none",
+                        display: isHovered ? "flex" : "none" // Prevents layout issues
                     }}
                     transition={{ delay: isHovered ? 0.2 : 0, duration: 0.5 }}
                     style={{ backdropFilter: "none" }}
                 >
                     <div>
-                        <h3 className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300 text-xl font-semibold mb-3">
+                        <h3 className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-purple-300 text-xl font-semibold mb-3 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
                             Today's Journey
                         </h3>
-                        <ul className="space-y-2 max-h-[240px] overflow-y-auto pr-2 custom-scrollbar">
-                            {placesVisited.map((place, idx) => (
+                        
+                        {/* Enhanced scrollbar styling */}
+                        <style>
+                            {`
+                                .custom-scrollbar::-webkit-scrollbar {
+                                    width: 4px;
+                                }
+                                .custom-scrollbar::-webkit-scrollbar-track {
+                                    background: rgba(255, 255, 255, 0.05);
+                                    border-radius: 10px;
+                                }
+                                .custom-scrollbar::-webkit-scrollbar-thumb {
+                                    background: linear-gradient(to bottom, #8b5cf6, #6366f1);
+                                    border-radius: 10px;
+                                }
+                            `}
+                        </style>
+                        
+                        <ul className="space-y-2 max-h-[240px] overflow-y-auto pr-3 custom-scrollbar">
+                            {placesforeachday.map((place, idx) => (
                                 <motion.li 
-                                    key={place}
+                                    key={place.id || idx}
                                     initial={{ opacity: 0, x: -10 }}
                                     animate={{ 
                                         opacity: isHovered ? 1 : 0, 
-                                        x: isHovered ? 0 : -10 
+                                        x: isHovered ? 0 : -10,
+                                        scale: currentPlaceIndex === idx ? 1.03 : 1,
+                                        backgroundColor: currentPlaceIndex === idx ? "rgba(121, 113, 234, 0.1)" : "transparent"
                                     }}
-                                    transition={{ delay: isHovered ? 0.3 + (idx * 0.08) : 0 }}
-                                    className="flex items-center gap-3"
+                                    transition={{ 
+                                        delay: isHovered ? 0.3 + (idx * 0.08) : 0,
+                                        scale: { duration: 0.3 },
+                                        backgroundColor: { duration: 0.3 }
+                                    }}
+                                    className={`flex items-start gap-3 group mb-2 pl-2 py-1 pr-1 rounded-md ${
+                                        currentPlaceIndex === idx ? "bg-indigo-900/10 ring-1 ring-indigo-400/20" : ""
+                                    }`}
+                                    whileHover={{ x: 3 }}
                                 >
-                                    <div className={`flex items-center justify-center h-7 w-7 rounded-full shadow-md ${
-                                        idx % 4 === 0 ? "bg-gradient-to-br from-blue-500 to-blue-700" : 
-                                        idx % 4 === 1 ? "bg-gradient-to-br from-purple-500 to-purple-700" : 
-                                        idx % 4 === 2 ? "bg-gradient-to-br from-indigo-500 to-indigo-700" :
-                                        "bg-gradient-to-br from-violet-500 to-violet-700"
-                                    } text-white font-medium text-sm`}>{idx + 1}</div>
-                                    <span className="font-medium text-lg">{place}</span>
+                                    <div className="flex-shrink-0 mt-0.5">
+                                        <div className={`flex items-center justify-center h-7 w-7 rounded-full shadow-md flex-shrink-0 ${
+                                            currentPlaceIndex === idx 
+                                                ? "bg-gradient-to-br from-indigo-400 to-purple-500" 
+                                                : "bg-gradient-to-br from-indigo-500/80 to-purple-600/80"
+                                        } text-white font-medium text-sm transition-all duration-300 group-hover:scale-110`}>{idx + 1}</div>
+                                    </div>
+                                    <span 
+                                        className={`font-medium text-lg transition-all duration-200 pt-0.5 leading-tight ${
+                                            currentPlaceIndex === idx 
+                                                ? "text-transparent bg-clip-text bg-gradient-to-r from-indigo-200 to-purple-200" 
+                                                : "text-white group-hover:text-indigo-300"
+                                        }`}
+                                    >
+                                        {place.name}
+                                    </span>
                                 </motion.li>
                             ))}
                         </ul>
@@ -221,8 +318,8 @@ export const DayCard = ({ day, date, title, description, images, placesVisited }
                     
                     <div className="mt-auto flex justify-between items-center">
                         <motion.button 
-                            className="py-2.5 px-5 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg text-sm font-medium flex items-center gap-2 shadow-lg shadow-blue-900/20"
-                            whileHover={{ scale: 1.03, boxShadow: "0 0 15px rgba(79, 70, 229, 0.5)" }}
+                            className="py-2.5 px-5 bg-gradient-to-r from-indigo-600 to-purple-500 rounded-lg text-sm font-medium flex items-center gap-2 shadow-lg shadow-indigo-900/20"
+                            whileHover={{ scale: 1.03, boxShadow: "0 0 15px rgba(121, 113, 234, 0.5)" }}
                             whileTap={{ scale: 0.98 }}
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -232,47 +329,51 @@ export const DayCard = ({ day, date, title, description, images, placesVisited }
                         </motion.button>
                         
                         <motion.div 
-                            className="flex items-center gap-1"
+                            className="flex items-center gap-1 px-3 py-1.5 bg-black/30 backdrop-blur-sm rounded-full border border-white/5"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: isHovered ? 1 : 0 }}
                             transition={{ delay: 0.6 }}
                         >
                             <span className="text-xs text-gray-300">Image</span>
-                            <span className="text-xs font-medium text-white">{currentImageIndex + 1}/{images.length}</span>
+                            <span className="text-xs font-medium text-white">{currentImageIndex + 1}/{allDayImages.length}</span>
                         </motion.div>
                     </div>
                 </motion.div>
             </div>
             
-            {/* Image navigation controls */}
-            {isHovered && images.length > 1 && (
+            {/* Enhanced Image navigation controls */}
+            {isHovered && allDayImages.length > 1 && (
                 <>
-                    {/* Previous button */}
+                    {/* Previous button with improved styling */}
                     <motion.button
-                        className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-black/30 backdrop-blur-sm p-2 text-white z-30"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-black/40 backdrop-blur-sm p-2 text-white z-40 hover:bg-black/60 border border-white/10 shadow-lg"
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.3 }}
                         onClick={(e) => {
                             e.stopPropagation();
-                            setCurrentImageIndex(prev => (prev - 1 + images.length) % images.length);
+                            setCurrentImageIndex(prev => (prev - 1 + allDayImages.length) % allDayImages.length);
                         }}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
                     </motion.button>
                     
-                    {/* Next button */}
+                    {/* Next button with improved styling */}
                     <motion.button
-                        className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-black/30 backdrop-blur-sm p-2 text-white z-30"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
+                        className="cursor-pointer absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-black/40 backdrop-blur-sm p-2 text-white z-40 hover:bg-black/60 border border-white/10 shadow-lg"
+                        initial={{ opacity: 0, x: 10 }}
+                        animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.3 }}
                         onClick={(e) => {
                             e.stopPropagation();
-                            setCurrentImageIndex(prev => (prev + 1) % images.length);
+                            setCurrentImageIndex(prev => (prev + 1) % allDayImages.length);
                         }}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
@@ -281,24 +382,66 @@ export const DayCard = ({ day, date, title, description, images, placesVisited }
                 </>
             )}
             
-            {/* Image indicator dots with increased size for better visibility */}
-            {isHovered && images.length > 1 && (
-                <div className="absolute bottom-4 right-4 z-30 flex space-x-2">
-                    {images.map((_, idx) => (
-                        <motion.button
-                            key={`dot-${idx}`}
-                            onClick={() => setCurrentImageIndex(idx)}
-                            className={`h-3 w-3 rounded-full shadow-md ${
-                                currentImageIndex === idx 
-                                    ? "bg-gradient-to-r from-blue-400 to-purple-400" 
-                                    : "bg-white/50"
-                            }`}
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            whileHover={{ scale: 1.3 }}
-                            transition={{ delay: 0.4 + (idx * 0.05) }}
-                        />
-                    ))}
+            {/* Redesigned image indicator dots with proper spacing */}
+            {isHovered && allDayImages.length > 1 && (
+                <div className="absolute bottom-4 right-4 z-40">
+                    {allDayImages.length <= 8 ? (
+                        // Show dots for 8 or fewer images
+                        <div className="flex space-x-1.5 px-3 py-2 bg-black/40 backdrop-blur-sm rounded-full border border-white/10">
+                            {allDayImages.map((_, idx) => (
+                                <motion.button
+                                    key={`dot-${idx}`}
+                                    onClick={() => setCurrentImageIndex(idx)}
+                                    className={`h-2 w-2 rounded-full ${
+                                        currentImageIndex === idx 
+                                            ? "bg-gradient-to-r from-indigo-400 to-purple-400" 
+                                            : "bg-white/30 hover:bg-white/50"
+                                    }`}
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    whileHover={{ scale: 1.5 }}
+                                    transition={{ delay: 0.4 + (idx * 0.05) }}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        // Show compact numbered indicator for more than 8 images
+                        <motion.div 
+                            className="px-3 py-1.5 bg-black/40 backdrop-blur-sm rounded-full border border-white/10 flex items-center gap-2"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4 }}
+                        >
+                            {/* Mini pagination dots for visual context */}
+                            <div className="flex space-x-1">
+                                {[...Array(5)].map((_, idx) => {
+                                    // Calculate position for mini dots
+                                    const position = Math.min(
+                                        Math.max(0, currentImageIndex - 2 + idx),
+                                        allDayImages.length - 1
+                                    );
+                                    const isActive = position === currentImageIndex;
+                                    
+                                    return (
+                                        <motion.button
+                                            key={`minidot-${idx}`}
+                                            onClick={() => setCurrentImageIndex(position)}
+                                            className={`h-1.5 w-1.5 rounded-full ${
+                                                isActive 
+                                                    ? "bg-gradient-to-r from-indigo-400 to-purple-400" 
+                                                    : "bg-white/30"
+                                            }`}
+                                            whileHover={{ scale: 1.3 }}
+                                        />
+                                    );
+                                })}
+                            </div>
+                            
+                            <span className="text-xs font-medium text-white">
+                                {currentImageIndex + 1}/{allDayImages.length}
+                            </span>
+                        </motion.div>
+                    )}
                 </div>
             )}
         </motion.div>

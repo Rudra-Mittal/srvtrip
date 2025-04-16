@@ -9,18 +9,28 @@ import { useParams } from "react-router-dom";
 export const ItineraryPage = () => {
     const {itineraryNum}= useParams();
     console.log("itineraryNumber",itineraryNum);
+    const itineraryIdx= Number(itineraryNum)-1;
     const [activeCardIndex, setActiveCardIndex] = useState(0);
     const sliderRef = useRef<HTMLDivElement>(null);
-    const cardRefs = useRef<(HTMLDivElement | null)[]>(Array(itineraryData.length).fill(null));
+
+    const itineraries= useSelector((state) => state.itinerary.itineraries);
+    const places= useSelector((state) => state.place.places);
+    const itineraryD=itineraries[itineraryIdx];  
+    console.log("itineraries ",itineraries);
+    console.log(`itinerary ${itineraryNum}`,itineraryD)
+    console.log("places ",places);
+    console.log("itindays",itineraryD.itinerary.days)
+
+    const cardRefs = useRef<(HTMLDivElement | null)[]>(Array(itineraryD.itinerary.days.length).fill(null));
     const [scrollPosition] = useDebounce(useScrollPosition(sliderRef), 50);
-    const hoverTimeouts = useRef<(NodeJS.Timeout | null)[]>(Array(itineraryData.length).fill(null));
+    const hoverTimeouts = useRef<(NodeJS.Timeout | null)[]>(Array(itineraryD.itinerary.days.length).fill(null));
     const navigateSlider = useCallback((direction: 'prev' | 'next') => {
         if (!sliderRef.current) return;
         let newIndex;
         if (direction === 'prev') {
             newIndex = Math.max(0, activeCardIndex - 1);
         } else {
-            newIndex = Math.min(itineraryData.length - 1, activeCardIndex + 1);
+            newIndex = Math.min(itineraryD.itinerary.days.length - 1, activeCardIndex + 1);
         }
         
         setActiveCardIndex(newIndex);
@@ -147,10 +157,7 @@ export const ItineraryPage = () => {
             }, 300);
         }
     }, []);
-    const itinerary= useSelector((state) => state.itinerary.itineraries);
-    const places= useSelector((state) => state.place.places);
-    console.log("itinerary ",itinerary);
-    console.log("places ",places);
+    
 
     return (
         <div className="bg-black max-h-screen max-w-screen overflow-hidden  ">
@@ -165,13 +172,13 @@ export const ItineraryPage = () => {
                     transition={{ duration: 0.8 }}
                     className="text-center mb-12 pointer-events-auto"
                 >
-                    <div>
+                    <div className="mt-12">
                         <h1 className="text-4xl sm:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-3">
-                            Your Paris Adventure
+                            Your {itineraryD.itinerary.destination[0].toUpperCase()+itineraryD.itinerary.destination.slice(1)} Adventure
                         </h1>
                     </div>
                     <p className="text-gray-300 max-w-2xl mx-auto">
-                        Experience the best of Paris with our carefully crafted 7-day itinerary, designed to showcase the city's iconic landmarks and hidden gems.
+                        Experience the best of {itineraryD.itinerary.destination} with our carefully crafted {itineraryD.itinerary.days.length}-day itinerary, designed to showcase the city's iconic landmarks and hidden gems.
                     </p>
                 </motion.div>
 
@@ -186,7 +193,7 @@ export const ItineraryPage = () => {
                         <motion.span className="text-xl sm:text-2xl font-medium text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
                             Day {activeCardIndex + 1}
                         </motion.span>
-                        <span className="text-gray-400">of 7</span>
+                        <span className="text-gray-400">of {itineraryD.itinerary.days.length}</span>
                     </motion.div>
 
                     <div className="flex gap-3">
@@ -209,14 +216,14 @@ export const ItineraryPage = () => {
                         </motion.button>
 
                         <motion.button
-                            className={`p-2 rounded-full ${activeCardIndex < itineraryData.length - 1
+                            className={`p-2 rounded-full ${activeCardIndex < itineraryD.itinerary.days.length - 1
                                     ? "bg-blue-600/20 text-blue-400 hover:bg-blue-600/30"
                                     : "bg-gray-800/30 text-gray-600"
                                 } transition-colors`}
                             onClick={() => navigateSlider('next')}
-                            disabled={activeCardIndex === itineraryData.length - 1}
-                            whileHover={activeCardIndex < itineraryData.length - 1 ? { scale: 1.05 } : {}}
-                            whileTap={activeCardIndex < itineraryData.length - 1 ? { scale: 0.95 } : {}}
+                            disabled={activeCardIndex === itineraryD.itinerary.days.length - 1}
+                            whileHover={activeCardIndex < itineraryD.itinerary.days.length - 1 ? { scale: 1.05 } : {}}
+                            whileTap={activeCardIndex < itineraryD.itinerary.days.length - 1 ? { scale: 0.95 } : {}}
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.7 }}
@@ -248,8 +255,8 @@ export const ItineraryPage = () => {
                         ref={sliderRef}
                         style={{ scrollbarWidth: 'none', position: 'relative' }}
                     >
-                        <div className="flex gap-5 px-4 py-4"> {/* Added py-4 to give room for expansion */}
-                            {itineraryData.map((day, index) => (
+                         <div className="flex gap-5 px-4 py-4"> 
+                            {itineraryD.itinerary.days.map((day, index) => (
                                 <motion.div
                                 key={day.day}
                                 className="snap-center flex-shrink-0 pointer-events-auto"
@@ -272,12 +279,8 @@ export const ItineraryPage = () => {
                                 }}
                             >
                                     <DayCard
-                                        day={day.day}
-                                        date={day.date}
-                                        title={day.title}
-                                        description={day.description}
-                                        images={day.images}
-                                        placesVisited={day.placesVisited}
+                                        itineraryIdx={itineraryIdx} 
+                                        dayIdx={day.day-1}  
                                     />
                                 </motion.div>
                             ))}
@@ -286,7 +289,7 @@ export const ItineraryPage = () => {
 
                     {/* Day indicators */}
                     <div className="flex justify-center mt-6 gap-2">
-                        {itineraryData.map((_, index) => (
+                        {itineraryD.itinerary.days.map((_, index) => (
                             <motion.button
                                 key={`indicator-${index}`}
                                 className={`w-8 h-1.5 rounded-full transition-all ${activeCardIndex === index
