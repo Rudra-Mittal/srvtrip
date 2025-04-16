@@ -9,8 +9,18 @@ export default async function createItenary(itenary:string,userId:string):Promis
         }
     })
     if(!user) return null;
-    console.log(itenaryJ);
-    const itenaryD=await  prisma.itinerary.create({
+    const startdate = itenaryJ.start_date || itenaryJ.startdate || new Date().toISOString().split('T')[0];
+    
+    console.log("Creating itinerary with data:", {
+        destination: itenaryJ.destination,
+        duration: itenaryJ.number_of_days,
+        budget: parseFloat(itenaryJ.budget),
+        numberOfPersons: itenaryJ.number_of_persons,
+        interests: itenaryJ.interests || [],
+        startdate
+    });
+    // console.log(itenaryJ);
+    const itenaryD=await prisma.itinerary.create({
     data:{
             userId:userId,
             destination:itenaryJ.destination,
@@ -18,6 +28,7 @@ export default async function createItenary(itenary:string,userId:string):Promis
             budget:parseFloat(itenaryJ.budget),
             numberOfPersons:itenaryJ.number_of_persons,
             interests:itenaryJ.interests||[],
+            startdate:itenaryJ.startdate,
         }
     })
     return itenaryD.id;

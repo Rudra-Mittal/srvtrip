@@ -5,6 +5,7 @@ import Weather from "@/components/ui/weather"
 import ChatbotD from "@/components/landingPage/features/Chatbotdaycard"
 import { Navbar } from "@/components/Navbar"
 import { useParams } from "react-router-dom"
+import { useSelector } from "react-redux"
 
 export const DayNumPage = () => {
     const {itineraryNum,dayNum}= useParams()
@@ -13,7 +14,10 @@ export const DayNumPage = () => {
     const containerRef = useRef<HTMLDivElement>(null)
     const [leftWidth, setLeftWidth] = useState(60) // Initial width percentage for left column
     const [isDragging, setIsDragging] = useState(false)
-    
+    const itinerary = useSelector((state: any) => state.itinerary.itineraries);
+
+    const days = itinerary[parseInt(itineraryNum || "0", 10) - 1]?.itinerary?.days?.length || 0;
+    console.log("days",days)
     // Handle mouse events for resizing
     const handleMouseDown = (e: React.MouseEvent) => {
         e.preventDefault()
@@ -126,6 +130,49 @@ export const DayNumPage = () => {
                                 </span>
                             </p>
                         </div>
+
+                        {/* Day Navigation Buttons */}
+<div className="flex justify-center gap-4 mt-4">
+    <button
+        onClick={() => {
+            if (parseInt(dayNum!) > 1) {
+                window.location.href = `/itinerary/${itineraryNum}/day/${parseInt(dayNum!) - 1}`;
+            }
+        }}
+        disabled={parseInt(dayNum!) <= 1}
+        className={`px-5 py-2.5 rounded-lg flex items-center gap-2 text-white font-medium transition-all ${
+            parseInt(dayNum!) <= 1
+                ? "bg-gray-800/50 text-gray-500 cursor-not-allowed border border-gray-700/30"
+                : "bg-gradient-to-r from-blue-600 to-purple-600 shadow-md hover:shadow-lg hover:scale-105 active:scale-95 border border-blue-500/20"
+        }`}
+    >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+        </svg>
+        Previous Day
+    </button>
+    
+    <button
+        onClick={() => {
+            // Assuming 7-day itinerary (adjust the number based on your actual data)
+            const maxDays = days;
+            if (parseInt(dayNum!) < maxDays) {
+                window.location.href = `/itinerary/${itineraryNum}/day/${parseInt(dayNum!) + 1}`;
+            }
+        }}
+        disabled={parseInt(dayNum!) >= days} // Change 7 to your actual max days
+        className={`px-5 py-2.5 rounded-lg flex items-center gap-2 text-white font-medium transition-all ${
+            parseInt(dayNum!) >= days // Change 7 to your actual max days
+                ? "bg-gray-800/50 text-gray-500 cursor-not-allowed border border-gray-700/30"
+                : "bg-gradient-to-r from-blue-600 to-purple-600 shadow-md hover:shadow-lg hover:scale-105 active:scale-95 border border-blue-500/20"
+        }`}
+    >
+        Next Day
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+        </svg>
+    </button>
+</div>
                         
                         {/* Chatbot section */}
                         <div ref={chatbotRef} className="w-full min-w-0">

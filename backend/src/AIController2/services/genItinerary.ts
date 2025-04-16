@@ -8,7 +8,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 export const generateItinerary = async (
   destination: string,
   number_of_days: number,
-  start_date: string,
+  startdate: Date,
   currency: string,
   budget: number,
   number_of_persons: number,
@@ -18,7 +18,7 @@ export const generateItinerary = async (
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt =`
-    Generate a detailed, optimized travel itinerary for a trip to **${destination}** spanning **${number_of_days}** days, starting from **${start_date}**.
+    Generate a detailed, optimized travel itinerary for a trip to **${destination}** spanning **${number_of_days}** days, starting from **${startdate}**.
     The total budget for this trip is **${currency} ${budget}**, and it is planned for **${number_of_persons}** people.
     ${interests ? `Interests to consider: ${interests}. Take it as a priority.` : ""}
 
@@ -44,7 +44,7 @@ export const generateItinerary = async (
       "itinerary": {
         "destination": "${destination}",
         "number_of_days": ${number_of_days},
-        "start_date": "${start_date}",
+        "start_date": "${startdate}",
         "budget": "${budget}",
         "currency": "${currency}",
         "number_of_persons": ${number_of_persons},

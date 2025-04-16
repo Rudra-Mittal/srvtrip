@@ -53,7 +53,9 @@ export async function itenarariesRoute(req:AuthRequest,res:Response){
                 destination:itinerary.destination,
                 number_of_days:itinerary.duration,
                 number_of_persons:itinerary.numberOfPersons,
-                days:modifiedDays
+                days:modifiedDays,
+                start_date:itinerary.startdate,
+                interests:itinerary.interests,
             }
         })
     }

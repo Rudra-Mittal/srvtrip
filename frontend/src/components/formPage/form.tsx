@@ -28,7 +28,7 @@ interface FormData {
   number_of_persons: number;
   number_of_days: number;
   interests: string[];
-  startDate: Date | undefined;
+  startdate: Date | undefined;
   customRequests: string;
   currency: string;
 }
@@ -41,7 +41,7 @@ export default function Form() {
     number_of_persons: 2,
     number_of_days: 7,
     interests: [],
-    startDate: undefined,
+    startdate: undefined,
     customRequests: "",
     currency: "INR"
   });
@@ -157,6 +157,7 @@ export default function Form() {
    const handleGenerateItinerary = async (formData: FormData) => {
     setFormVisible(false);
     setShowSummary(true);
+    console.log("Form data:", formData);
     genitinerary(formData).then(async (res)=>{
       console.log("newitinerary",JSON.parse(res.newItenary))
       dispatch(addItinerary( await JSON.parse(res.newItenary)))
@@ -318,8 +319,8 @@ export default function Form() {
                               className="w-full justify-start text-left font-normal bg-black/60 border border-blue-500/20 focus:border-purple-500/50 h-12 sm:h-12 hover:bg-black/70 text-sm sm:text-base lg:text-lg "
                             >
                               <CalendarIcon className="mr-2 h-4 w-4 text-blue-400" />
-                              {formData.startDate ? (
-                                format(formData.startDate, "PPP")
+                              {formData.startdate ? (
+                                format(formData.startdate, "PPP")
                               ) : (
                                 <span className="text-gray-400">Select your start date</span>
                               )}
@@ -328,8 +329,8 @@ export default function Form() {
                           <PopoverContent className="w-auto p-0 bg-black/90 border border-blue-500/30">
                             <Calendar
                               mode="single"
-                              selected={formData.startDate}
-                              onSelect={(date) => handleChange("startDate", date)}
+                              selected={formData.startdate}
+                              onSelect={(date) => handleChange("startdate", date)}
                               initialFocus
                               className="bg-black text-white scale-90 sm:scale-100 max-w-[280px] sm:max-w-none"
                             />
