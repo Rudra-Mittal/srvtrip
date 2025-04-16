@@ -12,7 +12,7 @@ export const generateItinerary = async (
   currency: string,
   budget: number,
   number_of_persons: number,
-  interests?: string
+  interests?: string | string[]
 ) => {
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
@@ -48,6 +48,7 @@ export const generateItinerary = async (
         "budget": "${budget}",
         "currency": "${currency}",
         "number_of_persons": ${number_of_persons},
+        "interests": ${interests},
         "days": [
           {
             "day": 1,

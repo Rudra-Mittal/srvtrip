@@ -14,7 +14,7 @@ interface ReqBody {
   currency: string;
   budget: number;
   number_of_persons: number;
-  interests?: string;
+  interests?: string | string[];
 }
 
 export async function generate2(req:ReqBody){
