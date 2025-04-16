@@ -24,6 +24,64 @@ export default function HistoryPage() {
     
     const selectedItinerary = itineraries[selectedItineraryIndex]?.itinerary;
     
+    // Map interest keywords to icons and categories
+    const interestIcons: Record<string, { icon: string; category: string }> = {
+        "beach": { icon: "🏖️", category: "Nature" },
+        "mountains": { icon: "🏔️", category: "Nature" },
+        "hiking": { icon: "🥾", category: "Activities" },
+        "city": { icon: "🏙️", category: "Urban" },
+        "history": { icon: "🏛️", category: "Culture" },
+        "food": { icon: "🍴", category: "Lifestyle" },
+        "adventure": { icon: "🧗‍♂️", category: "Activities" },
+        "relaxation": { icon: "🧘‍♀️", category: "Lifestyle" },
+        "shopping": { icon: "🛍️", category: "Urban" },
+        "nature": { icon: "🌿", category: "Nature" },
+        "culture": { icon: "🎭", category: "Culture" },
+        "nightlife": { icon: "🌃", category: "Lifestyle" },
+        "architecture": { icon: "🏰", category: "Culture" },
+        "art": { icon: "🎨", category: "Culture" },
+        "music": { icon: "🎵", category: "Culture" },
+        "local experiences": { icon: "👨‍👩‍👧‍👦", category: "Lifestyle" }
+    };
+    
+    // Get interest categories if interests exist
+    // Update the getInterestCategories function
+const getInterestCategories = () => {
+    if (!selectedItinerary?.interests) return {};
+    
+    const categories: Record<string, { icon: string; interests: string[] }> = {};
+    
+    // Handle both string and array types
+    const interestsArray = Array.isArray(selectedItinerary.interests)
+        ? selectedItinerary.interests
+        : typeof selectedItinerary.interests === 'string'
+            ? selectedItinerary.interests.split(',')
+            : [];
+    
+    interestsArray.forEach(interest => {
+        if (typeof interest !== 'string') return;
+        
+        const trimmed = interest.trim().toLowerCase();
+        
+        // Find a matching interest or use default
+        const key = Object.keys(interestIcons).find(k => 
+            trimmed.includes(k) || k.includes(trimmed)
+        ) || trimmed;
+        
+        const { icon, category } = interestIcons[key] || { icon: "✨", category: "Other" };
+        
+        if (!categories[category]) {
+            categories[category] = { icon: icon, interests: [] };
+        }
+        
+        categories[category].interests.push(interest.trim());
+    });
+    
+    return categories;
+};
+    
+    const interestCategories = getInterestCategories();
+    
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white p-4">
             <motion.div 
@@ -221,6 +279,7 @@ export default function HistoryPage() {
                                         </div>
                                     </motion.div>
                                     
+                                    {/* Simple interests section (still visible in the card) */}
                                     {selectedItinerary?.interests && (
                                         <motion.div
                                             initial={{ opacity: 0, y: 20 }}
@@ -231,17 +290,42 @@ export default function HistoryPage() {
                                                 Interests
                                             </h3>
                                             <div className="flex flex-wrap gap-2">
-                                                {selectedItinerary.interests.split(',').map((interest, index) => (
+                                                {(Array.isArray(selectedItinerary.interests) 
+                                                    ? selectedItinerary.interests 
+                                                    : typeof selectedItinerary.interests === 'string'
+                                                        ? selectedItinerary.interests.split(',')
+                                                        : []
+                                                ).slice(0, 5).map((interest, index) => (
                                                     <motion.span 
-                                                        key={interest}
+                                                        key={typeof interest === 'string' ? interest : index}
                                                         initial={{ opacity: 0, scale: 0.8 }}
                                                         animate={{ opacity: 1, scale: 1 }}
                                                         transition={{ delay: 0.8 + (index * 0.1) }}
                                                         className="px-3 py-1 bg-blue-900/30 text-blue-300 rounded-full text-sm border border-blue-500/30"
                                                     >
-                                                        {interest.trim()}
+                                                        {typeof interest === 'string' ? interest.trim() : String(interest)}
                                                     </motion.span>
                                                 ))}
+                                                {(Array.isArray(selectedItinerary.interests) 
+                                                    ? selectedItinerary.interests.length 
+                                                    : typeof selectedItinerary.interests === 'string'
+                                                        ? selectedItinerary.interests.split(',').length
+                                                        : 0
+                                                ) > 5 && (
+                                                    <motion.span 
+                                                        initial={{ opacity: 0, scale: 0.8 }}
+                                                        animate={{ opacity: 1, scale: 1 }}
+                                                        transition={{ delay: 1.3 }}
+                                                        className="px-3 py-1 bg-blue-900/30 text-blue-300 rounded-full text-sm border border-blue-500/30"
+                                                    >
+                                                        + {(Array.isArray(selectedItinerary.interests) 
+                                                            ? selectedItinerary.interests.length 
+                                                            : typeof selectedItinerary.interests === 'string'
+                                                                ? selectedItinerary.interests.split(',').length
+                                                                : 0
+                                                        ) - 5} more
+                                                    </motion.span>
+                                                )}
                                             </div>
                                         </motion.div>
                                     )}
@@ -265,6 +349,89 @@ export default function HistoryPage() {
                             </motion.div>
                         </div>
                     </motion.div>
+                    
+                    {/* NEW: Enhanced Interests Section below the card */}
+                    {selectedItinerary?.interests && Object.keys(interestCategories).length > 0 && (
+                        <motion.div 
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 1.2, duration: 0.8 }}
+                            className="mt-8 relative overflow-hidden rounded-2xl border border-blue-500/20 backdrop-blur-md shadow-xl"
+                        >
+                            {/* Background gradient */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-gray-900/90 to-gray-800/70 z-0"></div>
+                            
+                            {/* Animated glow effects */}
+                            <motion.div 
+                                className="absolute bottom-0 -left-20 w-60 h-60 bg-blue-500 rounded-full opacity-10 blur-3xl z-0"
+                                animate={{ 
+                                    x: [0, 20, 0], 
+                                    y: [0, 10, 0],
+                                }}
+                                transition={{ 
+                                    repeat: Infinity, 
+                                    duration: 12, 
+                                    ease: "easeInOut" 
+                                }}
+                            />
+                            
+                            <div className="relative z-10 p-6 md:p-8">
+                                <div className="flex items-center justify-center mb-6">
+                                    <div className="h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent flex-grow"></div>
+                                    <h3 className="text-xl font-bold mx-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300">
+                                        Travel Interests
+                                    </h3>
+                                    <div className="h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent flex-grow"></div>
+                                </div>
+                                
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+                                    {Object.entries(interestCategories).map(([category, { icon, interests }], catIndex) => (
+                                        <motion.div
+                                            key={category}
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: 1.4 + (catIndex * 0.1) }}
+                                            className="bg-gradient-to-br from-gray-900/60 to-black/60 rounded-lg border border-blue-500/20 overflow-hidden"
+                                        >
+                                            <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 px-4 py-3 flex items-center">
+                                                <span className="text-xl mr-2">{icon}</span>
+                                                <h4 className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300">
+                                                    {category}
+                                                </h4>
+                                            </div>
+                                            <div className="p-4">
+                                                <div className="flex flex-wrap gap-2">
+                                                    {interests.map((interest, index) => (
+                                                        <motion.div
+                                                            key={interest}
+                                                            initial={{ opacity: 0, scale: 0.8 }}
+                                                            animate={{ opacity: 1, scale: 1 }}
+                                                            transition={{ delay: 1.6 + (catIndex * 0.1) + (index * 0.05) }}
+                                                            whileHover={{ scale: 1.05, y: -2 }}
+                                                            className="px-3 py-1.5 bg-blue-900/20 hover:bg-blue-800/30 text-blue-300 rounded-full text-sm border border-blue-500/20 transition-all duration-300 shadow-sm hover:shadow-md hover:shadow-blue-500/10"
+                                                        >
+                                                            {interest}
+                                                        </motion.div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                                
+                                <motion.div 
+                                    className="mt-6 flex justify-center"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 2 }}
+                                >
+                                    <div className="text-gray-400 text-sm border-t border-gray-700/50 pt-4 text-center max-w-md">
+                                        Your travel interests help us generate personalized recommendations for your future trips
+                                    </div>
+                                </motion.div>
+                            </div>
+                        </motion.div>
+                    )}
                 </div>
             </motion.div>
         </div>
