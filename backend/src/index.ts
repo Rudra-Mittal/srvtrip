@@ -15,6 +15,7 @@ import { summarizeRoute } from './controllers/summarizeRoute';
 import { queryRoute } from './controllers/queryRoute';
 import { itenarariesRoute } from './controllers/itenarariesRoute';
 import { serverAuthMiddleware } from './middleware/serverAuthMiddleware';
+import { summaryRoute } from './utils/summaryRoute';
 dotenv.config();
 const app = express();
 const PORT = 4000;
@@ -51,6 +52,7 @@ app.use(authMiddleware);//use auth middleware for all routes after this line
 app.post('/api/itenary', itenaryRoute)
 app.get('/api/itineraries', itenarariesRoute)
 app.post('/query', queryRoute)
+app.get('/api/summarize', summaryRoute)
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
