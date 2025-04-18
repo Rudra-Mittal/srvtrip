@@ -7,10 +7,13 @@ import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 import { setActivePlaceId } from '@/store/slices/placeSlice';
 
-export const DayNumCompo = ({ dayNum, itineraryNum }: { dayNum: string, itineraryNum: string }) => {
+export const DayNumCompo = ({ dayNum, itineraryNum }: { dayNum: number, itineraryNum: number }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const placesData = useSelector((state: any) => state.place.places);
   const CURRENCY_API_KEY=import.meta.env.VITE_CURRENCY_API_KEY;
+
+  const currentDay = dayNum-1
+  const itineraryId = itineraryNum-1 
 
   const base = "USD"; // Base currency
   const target = "INR"; // Target currency
@@ -37,6 +40,45 @@ export const DayNumCompo = ({ dayNum, itineraryNum }: { dayNum: string, itinerar
   
   //testing
   const dispatch = useDispatch();
+  let placesforeachday = [];
+  // Safely access nested properties with proper validation
+  try {
+    if (placesData && 
+        placesData[ itineraryId] && 
+        placesData[ itineraryId][currentDay] &&
+        Array.isArray(placesData[ itineraryId][currentDay])) {
+      placesforeachday = placesData[ itineraryId][currentDay];
+    } else {
+      console.warn("Places data structure is not as expected:", 
+        placesData && placesData[ itineraryId] ? 
+        `Data exists but [${ itineraryId}][${currentDay}] is invalid` : 
+        "Places data is missing or incomplete");
+    }
+  } catch (err) {
+    console.error("Error accessing places data:", err);
+  }
+
+  console.log("placeforeachday",placesforeachday);
+  
+  // Collect all images from all places for this day into a single flat array
+  // Now also track which place each image belongs to
+const allDayImages: {url: string, placeIndex: number}[] = [];
+placesforeachday.forEach((place: any, placeIdx: number) => {
+    // Check for images array (original structure)
+if (place.photos && Array.isArray(place.photos)) {
+        place.photos.forEach((photoUrl: string) => {
+            allDayImages.push({
+                url: photoUrl,
+                placeIndex: placeIdx
+            });
+        });
+    }
+});
+
+  console.log("allDayImages", allDayImages);
+  // console.log("photo",allDayImages[0].url);
+  // console.log("idx",allDayImages[0].placeIndex);
+  // console.log("allimages", allDayImages.map((image , index) => image.url));
 
   useEffect(() => {
     const handleButtonClick = (event: Event) => {
@@ -65,18 +107,18 @@ export const DayNumCompo = ({ dayNum, itineraryNum }: { dayNum: string, itinerar
   
   
   const itinerary = useSelector((state: any) => state.itinerary.itineraries);
+  console.log("itinerary", itinerary);
   // console.log("sdhjkskh",itinerary);
   
   // let currentDay=0;
-  const currentDay = dayNum ? parseInt(dayNum) - 1 : 0;
-  const itineraryId = itineraryNum ? parseInt(itineraryNum) - 1 : 0;
+
   // Function to navigate slides
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev === imageData.length - 1 ? 0 : prev + 1));
+    setCurrentSlide((prev) => (prev === allDayImages.length - 1 ? 0 : prev + 1));
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev === 0 ? imageData.length - 1 : prev - 1));
+    setCurrentSlide((prev) => (prev === 0 ? allDayImages.length - 1 : prev - 1));
   };
 
   // console.log("placesData", placesData);  
@@ -152,7 +194,7 @@ const replacePlaceIds = (text: string) => {
   const renderSectionContent = (section: string, data: { activities: any; food: any; transport: any; cost: any; }) => {
     // Process the data to replace place IDs with names
     const processedData = processSection(data);
-    
+
     // All sections will now use the dark theme with a subtle icon background
     const sectionTheme = { 
       iconBg: 'bg-gray-900/60'
@@ -291,7 +333,7 @@ const replacePlaceIds = (text: string) => {
       {/* Image Slider - Centered with better image display */}
       <div className="flex justify-center w-full mb-5">
         <div className="relative w-4/5 sm:w-3/4 md:w-3/5 aspect-[5/3] overflow-hidden rounded-lg shadow-lg border border-blue-500/20">
-          {imageData.map((image, index) => (
+          {allDayImages.map((image, index) => (
             <div 
               key={index}
               className={`absolute top-0 left-0 w-full h-full transition-opacity duration-500 ease-in-out ${
@@ -300,11 +342,11 @@ const replacePlaceIds = (text: string) => {
             >
               <img 
                 src={image.url} 
-                alt={image.title}
+                // alt={image.title}
                 className="object-cover w-full h-full bg-gray-900"
               />
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent pb-8 pt-6 px-3 md:px-4 text-white">
-                <h4 className="text-sm md:text-base font-bold bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent">{image.title}</h4>
+                {/* <h4 className="text-sm md:text-base font-bold bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent">{image.title}</h4> */}
               </div>
             </div>
           ))}
@@ -329,10 +371,10 @@ const replacePlaceIds = (text: string) => {
           
           {/* Indicators - Now placed at the very bottom with enough spacing */}
           <div className="absolute bottom-0 left-0 right-0 flex justify-center space-x-2 py-1.5 bg-opacity-40">
-            {imageData.map((_, index) => (
+            {allDayImages.map((_, index) => (
               <button
                 key={index}
-                onClick={() => setCurrentSlide(index)}
+                onClick={() => setCurrentSlide(index+1)}
                 className={`h-1 rounded-full transition-all duration-300 ${
                   index === currentSlide ? 'bg-gradient-to-r from-blue-400 to-purple-400 w-5' : 'bg-white/40 w-1'
                 }`}

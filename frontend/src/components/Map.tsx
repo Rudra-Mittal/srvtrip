@@ -206,7 +206,7 @@ const MarkerManager = ({
   const currentZoomRef = useRef(defaultZoom);
   const infoWindowCloseIntentionalRef = useRef(false);
   // Images for carousel
-  
+  const popupLeaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const carouselImages = [
   "michael-fousert-3G1e6AxFcMA-unsplash.jpg"
     // Add more images as needed
@@ -405,9 +405,17 @@ const MarkerManager = ({
   };
 
 // Handle popup mouse enter
+// Handle popup mouse enter
 const handlePopupMouseEnter = () => {
   isMouseOverPopupRef.current = true;
   isTrackingMouseRef.current = false; // Stop tracking when mouse enters popup
+  
+  // Clear any existing timeout for popup closing
+  if (popupLeaveTimeoutRef.current) {
+    clearTimeout(popupLeaveTimeoutRef.current);
+    popupLeaveTimeoutRef.current = null;
+  }
+  
   setTimeout(() => {
     if (isMouseOverPopupRef.current) {
       isInfoWindowHoveredRef.current = true;
@@ -419,33 +427,61 @@ const handlePopupMouseEnter = () => {
 const handlePopupMouseLeave = () => {
   isMouseOverPopupRef.current = false;
 
-  // Set a timeout to close the InfoWindow after 1.5 seconds
-  setTimeout(() => {
-    if (!isMouseOverPopupRef.current) {
+  // Clear any existing timeout
+  if (popupLeaveTimeoutRef.current) {
+    clearTimeout(popupLeaveTimeoutRef.current);
+  }
+
+  // Set a timeout to close the InfoWindow after 4.5 seconds (instead of 1.5)
+  popupLeaveTimeoutRef.current = setTimeout(() => {
+    if (!isMouseOverPopupRef.current && !isMouseOverMarkerRef.current) {
       // Set flag to indicate this is not a user-initiated close
       infoWindowCloseIntentionalRef.current = true;
       setInfoOpen(null); // Close the InfoWindow
       setSelectedMarker(null); // Deselect the marker
       // Reset the flag after a short delay
       setTimeout(() => {
-        infoWindowCloseIntentionalRef.current = false; 
+        infoWindowCloseIntentionalRef.current = false;
+        popupLeaveTimeoutRef.current = null;
       }, 100);
     }
-  }, 1500); // 1.5 seconds delay
+  }, 4500); // 4.5 seconds delay (changed from 1500)
 };
 
 
-  // Handle next image in carousel
-  const handleNextImage = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % carouselImages.length);
-  };
+// Handle next image in carousel
+const handleNextImage = (e: React.MouseEvent) => {
+  e.stopPropagation();
+  e.preventDefault(); // Prevent any default behavior
+  setCurrentImageIndex((prevIndex) => (prevIndex + 1) % carouselImages.length);
+  
+  // Force maintain hover state
+  isMouseOverPopupRef.current = true;
+  isInfoWindowHoveredRef.current = true;
+  
+  // Clear any pending close timeouts
+  if (popupLeaveTimeoutRef.current) {
+    clearTimeout(popupLeaveTimeoutRef.current);
+    popupLeaveTimeoutRef.current = null;
+  }
+};
 
-  // Handle previous image in carousel
-  const handlePrevImage = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setCurrentImageIndex((prevIndex) => (prevIndex - 1 + carouselImages.length) % carouselImages.length);
-  };
+// Handle previous image in carousel
+const handlePrevImage = (e: React.MouseEvent) => {
+  e.stopPropagation();
+  e.preventDefault(); // Prevent any default behavior
+  setCurrentImageIndex((prevIndex) => (prevIndex - 1 + carouselImages.length) % carouselImages.length);
+  
+  // Force maintain hover state
+  isMouseOverPopupRef.current = true;
+  isInfoWindowHoveredRef.current = true;
+  
+  // Clear any pending close timeouts
+  if (popupLeaveTimeoutRef.current) {
+    clearTimeout(popupLeaveTimeoutRef.current);
+    popupLeaveTimeoutRef.current = null;
+  }
+};
 
   // Calculate adjusted position for InfoWindow (directly above marker)
   const getInfoWindowPosition = (position: any) => {
@@ -498,15 +534,15 @@ const handlePopupMouseLeave = () => {
         <InfoWindow 
           position={getInfoWindowPosition(infoOpen)}
           pixelOffset={[0, 150]} // Increase vertical offset to position higher above marker
-          onCloseClick={handleZoomOut}
+          // onCloseClick={handleZoomOut}
           disableAutoPan={true} // Prevent automatic panning
           className={isDarkTheme ? "bg-gray-700" : "bg-white"}
         >
-          <div 
-            // className="custom-infowindow"
-            onMouseEnter={handlePopupMouseEnter}
-            onMouseLeave={handlePopupMouseLeave}
-          >
+         <div 
+  className="google-maps-info-window"
+  onMouseEnter={handlePopupMouseEnter}
+  onMouseLeave={handlePopupMouseLeave}
+>
             <div style={{ position: "relative", overflow: "hidden", height: "100px"}}>
               {/* Carousel container */}
               {carouselImages.map((image, index) => (
@@ -528,58 +564,62 @@ const handlePopupMouseLeave = () => {
                   }}
                 />
               ))}
-              
-              {/* Left arrow */}
-              <div
-  onClick={handlePrevImage}
-  style={{
-    position: "absolute",
-    top: "50%",
-    left: "10px",
-    transform: "translateY(-50%)",
-    backgroundColor: "rgba(255, 255, 255, 0.7)",
-    borderRadius: "50%",
-    width: "30px",
-    height: "30px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
-    opacity: isMouseOverPopupRef.current ? 1 : 0,
-    transition: "opacity 0.3s ease",
-    zIndex: 10,
-    willChange: "opacity",
-    pointerEvents: isMouseOverPopupRef.current ? "auto" : "none",
-  }}
->
-  <span style={{ fontSize: "18px", fontWeight: "bold" }}>←</span>
-</div>
-              
-              {/* Right arrow */}
-             {/* Right arrow */}
-<div
-  onClick={handleNextImage}
-  style={{
-    position: "absolute",
-    top: "50%",
-    right: "10px",
-    transform: "translateY(-50%)",
-    backgroundColor: "rgba(255, 255, 255, 0.7)",
-    borderRadius: "50%",
-    width: "30px",
-    height: "30px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
-    opacity: isMouseOverPopupRef.current ? 1 : 0,  // CHANGED: use same ref as left arrow
-    transition: "opacity 0.3s ease",
-    zIndex: 10,
-    willChange: "opacity",
-    pointerEvents: isMouseOverPopupRef.current ? "auto" : "none"  // ADDED: same as left arrow
-  }}
->
-  <span style={{ fontSize: "18px", fontWeight: "bold" }}>→</span>
+
+{/* Enhanced Carousel Arrows */}
+<div className="absolute inset-0 flex items-center justify-between px-2 z-20 pointer-events-none">
+  {/* Left Arrow - Enhanced */}
+  <button 
+    onClick={(e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      handlePrevImage(e);
+      // Force maintain hover state
+      isMouseOverPopupRef.current = true;
+      isInfoWindowHoveredRef.current = true;
+      
+      // Clear any pending close timeouts
+      if (popupLeaveTimeoutRef.current) {
+        clearTimeout(popupLeaveTimeoutRef.current);
+        popupLeaveTimeoutRef.current = null;
+      }
+    }}
+    className="w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center cursor-pointer transform transition-all duration-300 hover:bg-black/60 hover:scale-110 pointer-events-auto"
+    style={{
+      opacity: isMouseOverPopupRef.current ? 0.9 : 0.4,
+      backdropFilter: 'blur(2px)',
+    }}
+  >
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
+    </svg>
+  </button>
+
+  {/* Right Arrow - Enhanced */}
+  <button 
+    onClick={(e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      handleNextImage(e); // This was calling handlePrevImage incorrectly - fixed to call handleNextImage
+      // Force maintain hover state
+      isMouseOverPopupRef.current = true;
+      isInfoWindowHoveredRef.current = true;
+      
+      // Clear any pending close timeouts
+      if (popupLeaveTimeoutRef.current) {
+        clearTimeout(popupLeaveTimeoutRef.current);
+        popupLeaveTimeoutRef.current = null;
+      }
+    }}
+    className="w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center cursor-pointer transform transition-all duration-300 hover:bg-black/60 hover:scale-110 pointer-events-auto"
+    style={{
+      opacity: isMouseOverPopupRef.current ? 0.9 : 0.4,
+      backdropFilter: 'blur(2px)',
+    }}
+  >
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+    </svg>
+  </button>
 </div>
             </div>
             

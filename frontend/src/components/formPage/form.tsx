@@ -126,7 +126,7 @@ export default function Form() {
     // Step 1: Start merging animation
     setIsAggregating(true);
     setTimeout(() => {
-      console.log("Star should be visible now");s
+      console.log("Star should be visible now");
 
       // Animate the star
       setTimeout(() => {
