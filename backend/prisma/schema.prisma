@@ -10,7 +10,7 @@ datasource db {
 
 model User {
   id          String        @id @default(uuid())
-  email       String     @unique
+  email       String        @unique
   password    String
   name        String    
   itineraries Itinerary[]
@@ -25,6 +25,7 @@ model Itinerary {
   description       String?
   numberOfPersons   Int
   interests         String[]
+  remainingBudget   String     
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
   userId            String

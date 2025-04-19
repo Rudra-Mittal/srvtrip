@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { AuthRequest } from "../utils/types";
+import { AuthRequest, place, placesData } from "../utils/types";
 import { Response } from "express";
 
 export async function itenarariesRoute(req:AuthRequest,res:Response){
@@ -45,7 +45,23 @@ export async function itenarariesRoute(req:AuthRequest,res:Response){
                 tips:day.proTip,                
             })
             const places=day.places;
-            placesData[i].push(places)
+            placesData[i].push(
+                places.map((place:any)=>{
+                    return{
+                        placename:place.placeName,
+                        id:place.placeId,
+                        formattedAddress:place.address,
+                        displayName:place.name,
+                        location:{
+                            lat:place.latitude,
+                            lng:place.longitude
+                        },
+                        photos:place.images.map((image:any)=>{
+                            return image.imageUrl
+                        }),
+                    }
+                })
+            )
         }
         itineraries.push({
             itinerary:{
@@ -56,6 +72,7 @@ export async function itenarariesRoute(req:AuthRequest,res:Response){
                 days:modifiedDays,
                 start_date:itinerary.startdate,
                 interests:itinerary.interests,
+                remainingBudget:itinerary.remainingBudget,
             }
         })
     }
