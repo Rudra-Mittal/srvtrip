@@ -72,7 +72,8 @@ export async function itenarariesRoute(req:AuthRequest,res:Response){
                 days:modifiedDays,
                 start_date:itinerary.startdate,
                 interests:itinerary.interests,
-                remainingBudget:itinerary.remainingBudget,
+                total_budget_used:itinerary.totalBudgetUsed,
+                remaining_budget:itinerary.remainingBudget,
             }
         })
     }

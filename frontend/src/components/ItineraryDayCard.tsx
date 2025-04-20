@@ -33,14 +33,13 @@ export const DayCard = ({itineraryIdx,dayIdx}: any) => {
     // Now also track which place each image belongs to
     const allDayImages: {url: string, placeIndex: number}[] = [];
     placesforeachday.forEach((place: any, placeIdx: number) => {
-        if (place.images && Array.isArray(place.images)) {
-            place.images.forEach((image: any) => {
-                if (image.imageUrl) {
-                    allDayImages.push({
-                        url: image.imageUrl,
-                        placeIndex: placeIdx
-                    });
-                }
+        if (place.photos && Array.isArray(place.photos)) {
+            place.photos.forEach((photo: any) => {
+                //now am getting only photos array of each place
+                allDayImages.push({
+                    url: photo,
+                    placeIndex: placeIdx // Store the index of the place
+                });
             });
         }
     });
@@ -168,6 +167,8 @@ export const DayCard = ({itineraryIdx,dayIdx}: any) => {
                     )}
                 </AnimatePresence>
             </div>
+
+            
             
             {/* Content container */}
             <div className="relative z-20 h-full w-full flex">
@@ -309,7 +310,7 @@ export const DayCard = ({itineraryIdx,dayIdx}: any) => {
                                                 : "text-white group-hover:text-indigo-300"
                                         }`}
                                     >
-                                        {place.name}
+                                        {place.displayName} 
                                     </span>
                                 </motion.li>
                             ))}
