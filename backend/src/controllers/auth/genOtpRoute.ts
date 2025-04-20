@@ -1,11 +1,22 @@
 import nodemailer from 'nodemailer';
 import { otps } from './otpMap';
 import { Request, Response } from 'express';
+import { PrismaClient } from "@prisma/client";
 
-export const genOtpRoute=async (req:Request, res:Response) => {
+const prisma = new PrismaClient();
 
+export const genOtpRoute = async (req:any, res:any) => {
   try {
     const { email } = req.body;
+
+    // Check if user with this email already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ error: 'User with this email already exists' });
+    }
 
     // Generate a 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -16,11 +27,10 @@ export const genOtpRoute=async (req:Request, res:Response) => {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: process.env.EMAIL_USER, // Your email
-        pass: process.env.EMAIL_PASS, // Your email password or app password
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
     });
-    // console.log('Generated OTP:', otp, 'for email:', email,transporter);
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,

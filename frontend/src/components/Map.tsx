@@ -208,7 +208,7 @@ const MarkerManager = ({
   // Images for carousel
   const popupLeaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const carouselImages = [
-  "michael-fousert-3G1e6AxFcMA-unsplash.jpg"
+  "https://www.google.com/imgres?q=images&imgurl=https%3A%2F%2Fimages.pexels.com%2Fphotos%2F674010%2Fpexels-photo-674010.jpeg%3Fcs%3Dsrgb%26dl%3Dpexels-anjana-c-169994-674010.jpg%26fm%3Djpg&imgrefurl=https%3A%2F%2Fwww.pexels.com%2Fsearch%2Fbeautiful%2F&docid=B51x0PBR9KNzvM&tbnid=sKMM4eBjWSQEBM&vet=12ahUKEwi2wNaC3eGMAxUyxzgGHfz8HMQQM3oECGQQAA..i&w=2976&h=3968&hcb=2&ved=2ahUKEwi2wNaC3eGMAxUyxzgGHfz8HMQQM3oECGQQAA"
     // Add more images as needed
   ];
   
