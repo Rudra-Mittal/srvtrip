@@ -86,17 +86,15 @@ function ParentMap({ dayNum, itineraryNum }: { dayNum: string, itineraryNum: str
     const handleOutsideClick = (e: MouseEvent) => {
       // Only proceed if a marker is selected
       if (!selectedMarker) return;
-      
-      // Check if the click was on a place button (these have data-place-id attribute)
-      const target = e.target as HTMLElement;
-      const clickedOnPlaceButton = target.closest('[data-place-id]') !== null;
-      
-      // Check if clicked on map component
-      const clickedOnMap = target.closest('.info-win') !== null;
-      
-      // If not clicking on a place button or the map, close the info window
-      if (!clickedOnPlaceButton && !clickedOnMap) {
-        closeInfoWindow();
+  
+  const target = e.target as HTMLElement;
+  const clickedOnPlaceButton = target.closest('[data-place-id]') !== null;
+  const clickedOnMap = target.closest('.info-win') !== null;
+  const clickedOnInfoWindow = target.closest('.google-maps-info-window') !== null || 
+                              target.closest('.gm-style-iw') !== null;  // Google Maps InfoWindow class
+  
+  if (!clickedOnPlaceButton && !clickedOnMap && !clickedOnInfoWindow) {
+    closeInfoWindow();
       }
     };
     
@@ -109,20 +107,20 @@ function ParentMap({ dayNum, itineraryNum }: { dayNum: string, itineraryNum: str
     };
   }, [selectedMarker]); 
 
-  // useEffect(() => {
-  //   // Only set the timer if a marker is selected
-  //   if (selectedMarker && infoOpen) {
-  //     const timer = setTimeout(() => {
-  //       console.log("Auto-closing info window for:", selectedMarker.name);
-  //       setSelectedMarker(null);
-  //       setInfoOpen(null);
-  //       setHoveredMarker(null);
-  //     }, 5000); // 10 seconds (adjust as needed)
+  useEffect(() => {
+    // Only set the timer if a marker is selected
+    if (selectedMarker && infoOpen) {
+      const timer = setTimeout(() => {
+        console.log("Auto-closing info window for:", selectedMarker.name);
+        setSelectedMarker(null);
+        setInfoOpen(null);
+        setHoveredMarker(null);
+      }, 5000); // 10 seconds (adjust as needed)
   
-  //     // Clear the timer when component unmounts or when selection changes
-  //     return () => clearTimeout(timer);
-  //   }
-  // }, [selectedMarker, infoOpen]);
+      // Clear the timer when component unmounts or when selection changes
+      return () => clearTimeout(timer);
+    }
+  }, [selectedMarker, infoOpen]);
   const apiKey = "AIzaSyBZbm53yrsueed4OWNR4hv_ZCg6aUrzoP0";
   
   

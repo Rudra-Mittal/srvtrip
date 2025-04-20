@@ -9,6 +9,8 @@ import { useSelector } from "react-redux"
 
 export const DayNumPage = () => {
     const {itineraryNum,dayNum}= useParams()
+    const itinerarynumber = parseInt(itineraryNum || "0", 10)
+    const daynumber = parseInt(dayNum || "0", 10)
     console.log(itineraryNum,dayNum)
     const chatbotRef = useRef<HTMLDivElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
@@ -71,7 +73,7 @@ export const DayNumPage = () => {
                         className="w-full lg:w-auto" 
                         style={{ flex: `0 0 ${leftWidth}%` }}
                     >
-                        <DayNumCompo dayNum={dayNum} itineraryNum={itineraryNum} />
+                        <DayNumCompo dayNum={daynumber} itineraryNum={itinerarynumber} />
                     </div>
                     
                     {/* Resizer handle */}
