@@ -5,7 +5,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 
 export default function HistoryPage() {
     const itineraries = useSelector((state: any) => state.itinerary.itineraries);
-    
+
     // Default to showing the most recent itinerary if available
     const [selectedItineraryIndex, setSelectedItineraryIndex] = useState(0);
     

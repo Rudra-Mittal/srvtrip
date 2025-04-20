@@ -66,6 +66,8 @@ export const itenaryRoute = async (req: AuthRequest, res:Response) => {
     }
     dayNum++;
   }
+  
+  console.log("Places Data in backend iti route:", placesData)
   res.json({newItenary,placesData:JSON.stringify(placesData)});
   return
   }catch(err){
