@@ -1,48 +1,22 @@
 import { Request, Response } from "express";
-import signup from "./signup";
 import { findByEmail } from "./usercontroller";
-import jwt from 'jsonwebtoken';
 
-export const signupRoute=async (req:Request, res:Response) => {
+export const signupRoute = async (req:any, res:any) => {
   try {
-    const { email, password, name } = req.body;
+    const { email } = req.body;
     
-    // Check if user with this Firebase ID already exists
+    // Check if user with this email already exists
     const existingUser = await findByEmail(email);
     if (existingUser) {
-      // Just return a token for the existing user
-      const token = jwt.sign({ userId: existingUser.id,name,email }, process.env.JWT_SECRET as string); 
-      res.cookie('token', token, {
-        httpOnly: true,
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      });
-      
-      res.status(200).json({ token });
-      return;
+      return res.status(400).json({ error: 'User with this email already exists' });
     }
     
-    // Create user in your database using the createUser function directly
-    try {
-      const token = await signup(email, password, name);
-      
-      // Generate token with the database user ID
-      console.log("Generated token:", token);
-      res.cookie('token', token, {
-        httpOnly: true,
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      });
-      
-      res.status(200).json({ token });
-      return
-    } catch (dbErr) {
-      console.error('Database user creation error:', dbErr);
-      res.status(500).json({ error: 'Failed to create user in database' });
-      return
-    }
+    // Redirect to OTP generation flow
+    // No user creation happening at this point
+    return res.status(200).json({ message: 'Please proceed with OTP verification' });
+    
   } catch (err: any) {
     console.error('Signup error:', err);
-    res.clearCookie('token');
-    res.status(403).json({ error: err.message });
-    return
+    return res.status(500).json({ error: err.message || 'Internal server error' });
   }
 }

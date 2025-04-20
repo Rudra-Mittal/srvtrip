@@ -5,20 +5,13 @@ const prisma = new PrismaClient();
 
 export async function createUser(email: string, password: string, name: string) {
   try {
-    // console.log(`Creating user with email: ${email}, firebaseUserId: ${firebaseUserId}`);
-    
-    // Hash the password before storing it (even for Firebase users)
-    // For Firebase users with placeholder password, still hash it
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
-    
+    // Hash the password before storing it
     const hashedPassword = await bcrypt.hash(password, 10);
     
     const user = await prisma.user.create({
       data: {
         email,
-        password: hashedPassword, // Store hashed password
+        password: hashedPassword,
         name,
       },
     });
@@ -30,10 +23,7 @@ export async function createUser(email: string, password: string, name: string) 
     // Better error handling for debugging
     if ((err as any).code === 'P2002') {
       // This is the Prisma error code for unique constraint violation
-      if (typeof err === 'object' && err !== null && 'meta' in err) {
-        throw new Error(`User already exists with this ${(err as any).meta?.target || 'property'}`);
-      }
-      throw new Error('User already exists with an unknown property');
+      throw new Error('User already exists with this email');
     }
     if (err instanceof Error) {
       throw new Error(`Failed to create user in database: ${err.message}`);
