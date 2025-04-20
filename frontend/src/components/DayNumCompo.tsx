@@ -39,7 +39,8 @@ export const DayNumCompo = ({ dayNum, itineraryNum }: { dayNum: string, itinerar
   }
   const getPlaceReview= async(placeId:string)=>{
     const MAX_ATTEMPTS = 10;
-  let attempts = 0;
+    
+    let attempts = 0;
 
   const poll = async () => {
     try {

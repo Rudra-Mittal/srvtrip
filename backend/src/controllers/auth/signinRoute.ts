@@ -2,10 +2,12 @@ import { Request, Response } from "express";
 import { signin } from "./signin";
 import { createUser, findByEmail } from "./usercontroller";
 import jwt from 'jsonwebtoken';
+import { signinSchema } from "../../zod/auth";
 
-export const signinRoute=async (req:Request, res:Response) => {
+export const signinRoute=async (req, res) => {
   try {
-    const { email, password, googleAuth, name } = req.body;
+    const validatedData = signinSchema.parse(req.body);
+    const { email, password, googleAuth, name } = validatedData;
     console.log("Received signin request with:", { email, googleAuth, name });
     // console.log("Received signin request with:", { email, googleAuth, firebaseUserId, name });
     // For Google Auth, check if user exists or create them
@@ -89,6 +91,9 @@ export const signinRoute=async (req:Request, res:Response) => {
       return
     }
   } catch (err: any) {
+    if (err.name === "ZodError") {
+      return res.status(400).json({ error: err.errors });
+    }
     console.error('Signin error:', err);
     res.clearCookie('token');
     res.status(403).json({ error: err.message });
