@@ -3,7 +3,7 @@ import { findByEmail } from "./usercontroller";
 import jwt from 'jsonwebtoken';
 import { signupSchema } from "../../zod/auth";
 
-export const signupRoute=async (req, res) => {
+export const signupRoute=async (req:any, res:any) => {
   try {
     const validatedData = signupSchema.parse(req.body);
     const { email, password, name } = validatedData;

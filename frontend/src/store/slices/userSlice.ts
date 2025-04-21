@@ -18,6 +18,8 @@ const userSlice = createSlice({
         },
         logoutUser: (state) => {
             //remove the user data from the state by fetch the backend
+            localStorage.removeItem("itineraries");
+            localStorage.removeItem("places");
             state.isLoggedIn = false;
             state.name = "";
             state.email = "";
