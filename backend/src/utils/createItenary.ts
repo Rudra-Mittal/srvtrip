@@ -9,7 +9,11 @@ export default async function createItenary(itenary:string,userId:string):Promis
             id:userId
         }
     })
-    if(!user) return null;
+    if(!user)
+        {
+            console.log("User not found");
+            return null;
+        } 
     const startdate = itenaryJ.start_date || itenaryJ.startdate || new Date().toISOString().split('T')[0];
     
     console.log("Creating itinerary with data:", {
@@ -18,7 +22,9 @@ export default async function createItenary(itenary:string,userId:string):Promis
         budget: parseFloat(itenaryJ.budget),
         numberOfPersons: itenaryJ.number_of_persons,
         interests: itenaryJ.interests || [],
-        startdate
+        startdate,
+        totalBudgetUsed: itenaryJ.total_budget_used,
+        remainingBudget: itenaryJ.remaining_budget,
     });
     // console.log(itenaryJ);
     const itenaryD=await prisma.itinerary.create({

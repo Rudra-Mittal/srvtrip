@@ -53,8 +53,8 @@ export async function itenarariesRoute(req:AuthRequest,res:Response){
                         formattedAddress:place.address,
                         displayName:place.name,
                         location:{
-                            lat:place.latitude,
-                            lng:place.longitude
+                            latitude:place.latitude,
+                            longitude:place.longitude
                         },
                         photos:place.images.map((image:any)=>{
                             return image.imageUrl
@@ -63,6 +63,30 @@ export async function itenarariesRoute(req:AuthRequest,res:Response){
                 })
             )
         }
+        modifiedDays.forEach(day => {
+            if (typeof day.morning === 'string') {
+                try {
+                    day.morning = JSON.parse(day.morning);
+                } catch (err) {
+                    console.error("Error parsing morning JSON:", err);
+                }
+            }
+            if (typeof day.afternoon === 'string') {
+                try {
+                    day.afternoon = JSON.parse(day.afternoon);
+                } catch (err) {
+                    console.error("Error parsing afternoon JSON:", err);
+                }
+            }
+            if (typeof day.evening === 'string') {
+                try {
+                    day.evening = JSON.parse(day.evening);
+                } catch (err) {
+                    console.error("Error parsing evening JSON:", err);
+                }
+            }
+        });
+        
         itineraries.push({
             itinerary:{
                 budget:itinerary.budget,
@@ -76,8 +100,10 @@ export async function itenarariesRoute(req:AuthRequest,res:Response){
                 remaining_budget:itinerary.remainingBudget,
             }
         })
+        // console.log("modifiedDays",modifiedDays)
     }
-    console.log(itineraries,placesData)
+   
+    console.log("day",itineraries[0].itinerary)
     res.status(200).json({itineraries:itineraries,placesData:placesData})
     return 
 }
