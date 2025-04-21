@@ -8,7 +8,7 @@ export const signupSchema = z.object({
 
 export const signinSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6),
+  password: z.string().min(6).optional(),
   googleAuth: z.boolean().optional(),
   name: z.string().optional(),
 });

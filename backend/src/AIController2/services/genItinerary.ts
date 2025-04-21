@@ -18,6 +18,7 @@ export const generateItinerary = async (
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt =`
+    Before generating the itinerary, if the destination name appears to be misspelled, vague, or invalid, intelligently correct it to the most likely valid city or country name (e.g., "indiad" should be "India", "parisss" should be "Paris", etc.). Use the corrected name in the response.
     Generate a detailed, optimized travel itinerary for a trip to **${destination}** spanning **${number_of_days}** days, starting from **${startdate}**.
     The total budget for this trip is **${currency} ${budget}**, and it is planned for **${number_of_persons}** people.
     ${interests ? `Interests to consider: ${interests}. Take it as a priority.` : ""}

@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { searchQuery } from "../utils/getSimilar";
 import { querySchema } from "../zod/itinerary";
 
-export const queryRoute = (req, res) => {
+export const queryRoute = (req:any, res:any) => {
   try {
     const validatedData = querySchema.parse(req.body);
     const { query, placeName, limit } = validatedData;

@@ -4,7 +4,7 @@ import { createUser, findByEmail } from "./usercontroller";
 import jwt from 'jsonwebtoken';
 import { signinSchema } from "../../zod/auth";
 
-export const signinRoute=async (req, res) => {
+export const signinRoute=async (req:any, res:any) => {
   try {
     const validatedData = signinSchema.parse(req.body);
     const { email, password, googleAuth, name } = validatedData;
