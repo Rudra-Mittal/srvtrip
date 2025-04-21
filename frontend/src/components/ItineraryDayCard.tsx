@@ -18,6 +18,11 @@ export const DayCard = ({itineraryIdx,dayIdx}: any) => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [currentPlaceIndex, setCurrentPlaceIndex] = useState(0);
     const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
+    const [loadingImage, setLoadingImage] = useState<number | null>(null);
+    const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const [limitedImages, setLimitedImages] = useState<{url: string, placeIndex: number}[]>([]);
 
     const itineraries=useSelector((state: any) => state.itinerary.itineraries);
     const places=useSelector((state: any) => state.place.places);
@@ -31,43 +36,71 @@ export const DayCard = ({itineraryIdx,dayIdx}: any) => {
     
     // Collect all images from all places for this day into a single flat array
     // Now also track which place each image belongs to
-    const allDayImages: {url: string, placeIndex: number}[] = [];
-    placesforeachday.forEach((place: any, placeIdx: number) => {
-        if (place.photos && Array.isArray(place.photos)) {
-            place.photos.forEach((photo: any) => {
-                //now am getting only photos array of each place
-                allDayImages.push({
-                    url: photo,
-                    placeIndex: placeIdx // Store the index of the place
-                });
-            });
+    const resizeGoogleImage = (url: string): string => {
+        // Check if it's a Google image URL
+        if (url.includes('googleusercontent.com') && !url.includes('=s')) {
+            // Append a small size parameter (s400 = 400px width)
+            return `${url}=s400-c`;  // s400-c means 400px with cropping
         }
-    });
-    
-    console.log("All day images:", allDayImages);
-    console.log("Total images for day:", allDayImages.length);
+        return url;
+    };
+
+    // Improved Google image resizing with fallback size options
+    ;
+
+    // Collect all images from all places (without limiting)
+    useEffect(() => {
+        const newAllImages: {url: string, placeIndex: number}[] = [];
+        
+        // Process all photos from all places
+        placesforeachday.forEach((place: any, placeIdx: number) => {
+            if (place.photos && Array.isArray(place.photos)) {
+                place.photos.forEach((photo: any) => {
+                    newAllImages.push({
+                        url: resizeGoogleImage(photo), // Still resize for better performance
+                        placeIndex: placeIdx
+                    });
+                });
+            }
+        });
+        
+        // Set all images without limiting
+        setLimitedImages(newAllImages);
+        
+        // Reset loaded image states when images change
+        setLoadedImages(new Set());
+        setImageErrors(new Set());
+        setLoadingImage(null);
+    }, [placesforeachday]);
+
+    // Ensure currentImageIndex stays within limits
+    useEffect(() => {
+        if (limitedImages.length > 0 && currentImageIndex >= limitedImages.length) {
+            setCurrentImageIndex(0);
+        }
+    }, [limitedImages, currentImageIndex]);
 
     // Update the place index when the image changes
     useEffect(() => {
-        if (allDayImages.length > 0) {
-            setCurrentPlaceIndex(allDayImages[currentImageIndex].placeIndex);
+        if (limitedImages.length > 0 && currentImageIndex < limitedImages.length) {
+            setCurrentPlaceIndex(limitedImages[currentImageIndex].placeIndex);
         }
-    }, [currentImageIndex, allDayImages]);
+    }, [currentImageIndex, limitedImages]);
 
-    // Auto-rotate images when card is expanded
+    // Auto-rotate images when card is expanded - with longer delay
     useEffect(() => {
         let interval: NodeJS.Timeout;
         
-        if (isHovered && allDayImages.length > 1) {
+        if (isHovered && limitedImages.length > 1) {
             interval = setInterval(() => {
-                setCurrentImageIndex(prev => (prev + 1) % allDayImages.length);
-            }, 3000);
+                setCurrentImageIndex(prev => (prev + 1) % limitedImages.length);
+            }, 5000); // Increased to 5 seconds between rotations
         }
         
         return () => {
             if (interval) clearInterval(interval);
         };
-    }, [isHovered, allDayImages.length]);
+    }, [isHovered, limitedImages.length]);
     
     const handleHoverStart = () => {
         // Set a timeout for 1 second before expanding
@@ -89,6 +122,68 @@ export const DayCard = ({itineraryIdx,dayIdx}: any) => {
     
     // Fixed height for both collapsed and expanded states
     const cardHeight = 360; // Increased height to show more of the image
+
+    // Load the current image if it's not loaded yet
+    useEffect(() => {
+        // Don't try to load if we're already loading an image
+        if (loadingImage !== null) return;
+        
+        // Don't try to load if there are no images
+        if (limitedImages.length === 0) return;
+        
+        // Don't try to load if the current image is already loaded
+        if (loadedImages.has(currentImageIndex)) return;
+        
+        // Don't try to load if the current image had an error recently
+        if (imageErrors.has(currentImageIndex)) return;
+        
+        // Add a significant delay before starting to load to avoid rate limiting
+        const loadTimer = setTimeout(() => {
+            setLoadingImage(currentImageIndex);
+        }, 1000); // 1 second delay before starting to load
+        
+        return () => clearTimeout(loadTimer);
+    }, [currentImageIndex, loadedImages, loadingImage, limitedImages.length, imageErrors]);
+
+    // Handle image load success
+    const handleImageLoaded = (idx: number) => {
+        setLoadedImages(prev => new Set(prev).add(idx));
+        setLoadingImage(null);
+    };
+
+    // Improved error handling with longer backoff
+    const handleImageError = (idx: number) => {
+        console.log(`Error loading image at index ${idx}`);
+        setImageErrors(prev => new Set(prev).add(idx));
+        setLoadingImage(null);
+        
+        // Try again with a much longer delay if it's the current image
+        if (idx === currentImageIndex && !intervalRef.current) {
+            intervalRef.current = setTimeout(() => {
+                setImageErrors(prev => {
+                    const newErrors = new Set(prev);
+                    newErrors.delete(idx);
+                    return newErrors;
+                });
+                setLoadedImages(prev => {
+                    const newLoaded = new Set(prev);
+                    newLoaded.delete(idx);
+                    return newLoaded;
+                });
+                intervalRef.current = null;
+            }, 15000); // 15 seconds before retrying - much longer to avoid rate limits
+        }
+    };
+
+    // Clean up retry timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (intervalRef.current) {
+                clearTimeout(intervalRef.current);
+                intervalRef.current = null;
+            }
+        };
+    }, []);
 
     return (
         <motion.div
@@ -139,8 +234,8 @@ export const DayCard = ({itineraryIdx,dayIdx}: any) => {
                 {/* Enhanced gradient overlay for better image visibility */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-black/10 z-10"></div>
                 <AnimatePresence>
-                    {allDayImages.length > 0 ? (
-                        allDayImages.map((image, idx) => (
+                    {limitedImages.length > 0 ? (
+                        limitedImages.map((image, idx) => (
                             <motion.div 
                                 key={`img-${idx}`}
                                 className="absolute inset-0 w-full h-full"
@@ -152,12 +247,44 @@ export const DayCard = ({itineraryIdx,dayIdx}: any) => {
                                 exit={{ opacity: 0, scale: 1.1 }}
                                 transition={{ duration: 1.2, ease: "easeInOut" }}
                             >
-                                <img 
-                                    src={image.url} 
-                                    alt={`Day ${dayIdx}`}
-                                    className="w-full h-full object-cover"
-                                    style={{ objectPosition: "center" }}
-                                />
+                                {/* Only render the current image to avoid loading all at once */}
+                                {currentImageIndex === idx ? (
+                                    <>
+                                        {/* Show a loading or error placeholder */}
+                                        {(!loadedImages.has(idx) || imageErrors.has(idx)) && (
+                                            <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+                                                {imageErrors.has(idx) ? (
+                                                    <div className="text-white/70 flex flex-col items-center">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                        </svg>
+                                                        <p className="text-sm">Image temporarily unavailable</p>
+                                                        <p className="text-xs text-indigo-300 mt-1">Limiting requests to avoid rate limiting</p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="h-8 w-8 border-2 border-indigo-300 border-t-transparent rounded-full animate-spin" />
+                                                )}
+                                            </div>
+                                        )}
+                                        
+                                        {/* The actual image that gets loaded */}
+                                        <img 
+                                            src={image.url} 
+                                            alt={`Day ${dayIdx} - Place ${image.placeIndex + 1}`}
+                                            className="w-full h-full object-cover"
+                                            style={{ 
+                                                objectPosition: "center",
+                                                display: imageErrors.has(idx) ? 'none' : 'block'
+                                            }}
+                                            loading="lazy"
+                                            onLoad={() => handleImageLoaded(idx)}
+                                            onError={() => handleImageError(idx)}
+                                        />
+                                    </>
+                                ) : (
+                                    // Do not render anything for non-visible images
+                                    null
+                                )}
                             </motion.div>
                         ))
                     ) : (
@@ -336,14 +463,14 @@ export const DayCard = ({itineraryIdx,dayIdx}: any) => {
                             transition={{ delay: 0.6 }}
                         >
                             <span className="text-xs text-gray-300">Image</span>
-                            <span className="text-xs font-medium text-white">{currentImageIndex + 1}/{allDayImages.length}</span>
+                            <span className="text-xs font-medium text-white">{currentImageIndex + 1}/{limitedImages.length}</span>
                         </motion.div>
                     </div>
                 </motion.div>
             </div>
             
             {/* Enhanced Image navigation controls */}
-            {isHovered && allDayImages.length > 1 && (
+            {isHovered && limitedImages.length > 1 && (
                 <>
                     {/* Previous button with improved styling */}
                     <motion.button
@@ -353,7 +480,7 @@ export const DayCard = ({itineraryIdx,dayIdx}: any) => {
                         transition={{ delay: 0.3 }}
                         onClick={(e) => {
                             e.stopPropagation();
-                            setCurrentImageIndex(prev => (prev - 1 + allDayImages.length) % allDayImages.length);
+                            setCurrentImageIndex(prev => (prev - 1 + limitedImages.length) % limitedImages.length);
                         }}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
@@ -371,25 +498,25 @@ export const DayCard = ({itineraryIdx,dayIdx}: any) => {
                         transition={{ delay: 0.3 }}
                         onClick={(e) => {
                             e.stopPropagation();
-                            setCurrentImageIndex(prev => (prev + 1) % allDayImages.length);
+                            setCurrentImageIndex(prev => (prev + 1) % limitedImages.length);
                         }}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10l-3.293-3.293a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                         </svg>
                     </motion.button>
                 </>
             )}
             
             {/* Redesigned image indicator dots with proper spacing */}
-            {isHovered && allDayImages.length > 1 && (
+            {isHovered && limitedImages.length > 1 && (
                 <div className="absolute bottom-4 right-4 z-40">
-                    {allDayImages.length <= 8 ? (
+                    {limitedImages.length <= 8 ? (
                         // Show dots for 8 or fewer images
                         <div className="flex space-x-1.5 px-3 py-2 bg-black/40 backdrop-blur-sm rounded-full border border-white/10">
-                            {allDayImages.map((_, idx) => (
+                            {limitedImages.map((_, idx) => (
                                 <motion.button
                                     key={`dot-${idx}`}
                                     onClick={() => setCurrentImageIndex(idx)}
@@ -419,7 +546,7 @@ export const DayCard = ({itineraryIdx,dayIdx}: any) => {
                                     // Calculate position for mini dots
                                     const position = Math.min(
                                         Math.max(0, currentImageIndex - 2 + idx),
-                                        allDayImages.length - 1
+                                        limitedImages.length - 1
                                     );
                                     const isActive = position === currentImageIndex;
                                     
@@ -439,10 +566,27 @@ export const DayCard = ({itineraryIdx,dayIdx}: any) => {
                             </div>
                             
                             <span className="text-xs font-medium text-white">
-                                {currentImageIndex + 1}/{allDayImages.length}
+                                {currentImageIndex + 1}/{limitedImages.length}
                             </span>
                         </motion.div>
                     )}
+                </div>
+            )}
+            
+            {/* Add more informative loading status */}
+            {isHovered && (
+                <div className="absolute top-4 left-4 z-40 bg-black/50 backdrop-blur-sm rounded-lg py-1.5 px-3 text-xs text-white border border-white/10 flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${imageErrors.has(currentImageIndex) ? "bg-red-400" : loadedImages.has(currentImageIndex) ? "bg-green-400" : "bg-yellow-400 animate-pulse"}`}></div>
+                    {loadedImages.size} of {limitedImages.length} loaded
+                    {loadingImage !== null && " • Loading..."}
+                    {imageErrors.size > 0 && ` • ${imageErrors.size} error(s)`}
+                </div>
+            )}
+            
+            {/* Add rate-limiting information */}
+            {imageErrors.size > 0 && (
+                <div className="absolute bottom-4 left-4 z-40 bg-black/80 backdrop-blur-sm rounded-lg py-1.5 px-3 text-xs text-red-300 border border-red-900/30">
+                    <p>Rate limited by Google - showing limited images</p>
                 </div>
             )}
         </motion.div>

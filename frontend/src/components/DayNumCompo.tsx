@@ -37,43 +37,7 @@ export const DayNumCompo = ({ dayNum, itineraryNum }: { dayNum: string, itinerar
       throw err;
     }
   }
-  const getPlaceReview= async(placeId:string)=>{
-    const MAX_ATTEMPTS = 10;
-    
-    let attempts = 0;
-
-  const poll = async () => {
-    try {
-      const res = await fetch(`${BACKEND_URL}api/summarize?placeid=${placeId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        credentials: 'include'
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        console.log("Successful response received.");
-        return data;
-      }
-
-    } catch (err) {
-      console.error("Error fetching place review:", err);
-    }
-
-    attempts++;
-    if (attempts < MAX_ATTEMPTS) {
-      setTimeout(poll, 10 * 1000);
-    } else {
-      console.log("Max attempts reached. Stopping polling.");
-    }
-  };
-
-  poll();
-  }
+  
   
   //testing
   const dispatch = useDispatch();
@@ -550,7 +514,7 @@ const replacePlaceIds = (text: string) => {
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"></path>
                   </svg>
                   Travel Tips
-                  <button className='text-white' onClick={()=>getPlaceReview('ChIJTRyL8MTR5zsRXqmzdxFVHvI')}>Get reveiws</button>
+                 
                 </h4>
                 <div className=" p-3 bg-black/50 rounded-lg border border-blue-500/10 transform transition-all duration-300 hover:shadow-blue-900/30 hover:shadow-lg">
                   <div className="flex items-start">

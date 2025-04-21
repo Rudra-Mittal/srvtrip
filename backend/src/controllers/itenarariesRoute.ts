@@ -103,7 +103,6 @@ export async function itenarariesRoute(req:AuthRequest,res:Response){
         // console.log("modifiedDays",modifiedDays)
     }
    
-    console.log("day",itineraries[0].itinerary)
     res.status(200).json({itineraries:itineraries,placesData:placesData})
     return 
 }
