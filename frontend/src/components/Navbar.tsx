@@ -38,12 +38,42 @@ export const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
   
   // Handle logout functionality
   const handleLogout = () => {
-    dispatch(logoutUser());
-    setDropdownOpen(false);
-    navigate('/');
+    // Get the backend URL from environment variable or use default
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+    
+    // Show loading state if needed
+    setIsLoading(true);
+    
+    // Call the backend route to signout the user - Remove double slash
+    fetch(`${backendUrl}api/auth/signout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    })
+    .then((response) => {
+      if (response.ok) {
+        // Only log out on successful response
+        dispatch(logoutUser());
+        setDropdownOpen(false);
+        navigate("/", { replace: true });
+      } else {
+        console.error("Logout failed:", response.statusText);
+        // You might want to show an error notification here
+      }
+    })
+    .catch((error) => {
+      console.error("Error during logout:", error);
+      // You might want to show an error notification here
+    })
+    .finally(() => {
+      setIsLoading(false);
+    });
   };
   
   // Close dropdown when clicking outside
