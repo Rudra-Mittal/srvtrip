@@ -508,10 +508,13 @@ const handlePrevImage = (e: React.MouseEvent) => {
             onMouseLeave={handleMarkerMouseLeave}
             >
             <AdvancedMarker
-              position={position}
-              className="drop-bounce-animation cursor-pointer"
-              onClick={() => handleMarkerClick(position)}
-              >
+  position={{
+    lat: parseFloat(position.lat) || 0,
+    lng: parseFloat(position.lng) || 0
+  }}
+  className="drop-bounce-animation cursor-pointer"
+  onClick={() => handleMarkerClick(position)}
+>
               <div
                 className={`drop-bounce-animation transition-transform duration-300`}
                   >
