@@ -61,7 +61,7 @@ export const itenaryRoute = async (req: AuthRequest, res:Response) => {
         if (!placeD) {
           console.log("Error creating place")
         }
-        // else  callWebScrapper(place.displayName, 5, place.id,place.formattedAddress)
+        else  callWebScrapper(place.displayName, 5, place.id,place.formattedAddress)
       }
     }
     dayNum++;

@@ -59,11 +59,12 @@ export default function ChatbotD({chatbotRef}:{chatbotRef: React.RefObject<HTMLD
     setInput("");
   
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/query`, {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}query`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           query: input,
           placeName: activePlaceId,
@@ -73,10 +74,11 @@ export default function ChatbotD({chatbotRef}:{chatbotRef: React.RefObject<HTMLD
   
       const data = await res.json();
   
-      if (data?.result) {
+      if (data) {
+        console.log("Response from server:",data)
         dispatch(addChat({
           placeId:activePlaceId,
-          message: { type: "ai", message: data.result }
+          message: { type: "ai", message: data }
         }));
       } else {
         dispatch(addChat({

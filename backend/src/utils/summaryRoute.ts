@@ -19,7 +19,7 @@ export function summaryRoute(req: any, res: any) {
             summarizedReview:true,
         }
      }).then((data)=>{
-        console.log("Data fetched from DB:", data);
+        // console.log("Data fetched from DB:", data);
         if(data?.summarizedReview){
             res.status(200).json({summary:data.summarizedReview})
         }else{
@@ -28,12 +28,12 @@ export function summaryRoute(req: any, res: any) {
         return ;
         
      }).catch((error)=>{
-        console.error("Error fetching summary:", error);
+        // console.error("Error fetching summary:", error);
         res.status(500).json({error:"DB Error"})
         return
      })
    }catch(error){
-        console.error("Error in summaryRoute:", error);
+        // console.error("Error in summaryRoute:", error);
         res.status(500).json({error:"Internal Server Error"})
         return
    }
