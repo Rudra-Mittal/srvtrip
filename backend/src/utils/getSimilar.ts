@@ -5,13 +5,15 @@ const weaviateURL = process.env.WEAVIATE_URL as string
 const weaviateApiKey = process.env.WEAVIATE_API_KEY as string
 const jinaaiApiKey = process.env.JINAAI_API_KEY as string
 const mistralapikey= process.env.MISTRAL_API_KEY as string
+const studioapikey= process.env.GOOGLE_API_KEY as string
+console.log("Weaviate URL",weaviateURL," Weaviate API Key",weaviateApiKey," Jina AI API Key",jinaaiApiKey," Mistral API Key",mistralapikey," Studio API Key",studioapikey)
 export async function searchQuery(query:string,placeId:string, limit:number):Promise<String>{
   const client = await weaviate.connectToWeaviateCloud(
     weaviateURL,
     { authCredentials: new weaviate.ApiKey(weaviateApiKey),
       headers:{
         'X-JinaAI-Api-Key': jinaaiApiKey,
-        'X-Mistral-Api-Key': mistralapikey
+        'X-Goog-Studio-Api-Key': studioapikey 
       }
      }
   );
@@ -24,5 +26,5 @@ export async function searchQuery(query:string,placeId:string, limit:number):Pro
       limit
     })
     console.log("\nReposne\n",resGen.generated);
-    return JSON.stringify([resGen.objects,resGen.generated], null, 5);
+    return JSON.stringify(resGen.generated, null, 5);
 }
