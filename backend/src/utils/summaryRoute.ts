@@ -21,7 +21,7 @@ export function summaryRoute(req: any, res: any) {
      }).then((data)=>{
         // console.log("Data fetched from DB:", data);
         if(data?.summarizedReview){
-            res.status(200).json({summary:data.summarizedReview})
+            res.status(200).json({summarizedReview:data.summarizedReview})
         }else{
             res.status(404).json({error:"No summary found"})
         }

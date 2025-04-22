@@ -63,6 +63,7 @@ export const itenaryRoute = async (req: AuthRequest, res:Response) => {
         }
         else  callWebScrapper(place.displayName, 5, place.id,place.formattedAddress)
       }
+      place.summarizedReview=null;
     }
     dayNum++;
   }

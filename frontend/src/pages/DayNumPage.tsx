@@ -18,8 +18,7 @@ export const DayNumPage = () => {
     const [leftWidth, setLeftWidth] = useState(60) // Initial width percentage for left column
     const [isDragging, setIsDragging] = useState(false)
     const itinerary = useSelector((state: any) => state.itinerary.itineraries);
-
-    const days = itinerary[parseInt(itineraryNum || "0", 10) - 1]?.itinerary?.days?.length || 0;
+    const days = (itinerary)?itinerary[parseInt(itineraryNum || "0", 10) - 1]?.itinerary?.days?.length || 0:0;
     console.log("days", days)
     // Handle mouse events for resizing
     const handleMouseDown = (e: React.MouseEvent) => {
@@ -59,7 +58,13 @@ export const DayNumPage = () => {
 
     // Calculate right width as complement to 100%
     const rightWidth = 100 - leftWidth
-
+    if(!itinerary){
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="text-white">Loading...</div>
+            </div>
+        )
+    }
     return (
         <div className="flex flex-col min-h-screen bg-black">
             {/* Navbar*/}

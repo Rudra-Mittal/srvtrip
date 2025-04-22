@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 const places = localStorage.getItem("places")
     ? JSON.parse(localStorage.getItem("places") || "")
-    : [];
+    : null;
 const initialState = {
     places: places,
     activePlaceId:null,
@@ -26,7 +26,22 @@ const placeSlice = createSlice({
         setChatbotOpen: (state, action) => {
             state.isChatBotOpen = action.payload;
         },
+        setReview: (state, action) => {
+            const { placeId, summarizedReview,itineraryIdx } = action.payload;
+            console.log("Place ID:", placeId, "Summarized Review:", summarizedReview, "Itinerary Index:", itineraryIdx);
+            console.log("Places before update:", places);
+            const placeIndex = state.places[itineraryIdx].map((days:any)=>{
+                return days.map((place:any)=>{
+                    return {
+                        ...place,
+                        summarizedReview:(place.id==placeId)?summarizedReview:place.summarizedReview
+                    }
+                })
+            })
+            state.places[itineraryIdx] = placeIndex;
+            localStorage.setItem("places", JSON.stringify(state.places));
+        },
     },
 });
-export const { setPlaces, addPlace,setActivePlaceId,setChatbotOpen } = placeSlice.actions;
+export const { setPlaces, addPlace,setActivePlaceId,setChatbotOpen,setReview } = placeSlice.actions;
 export default placeSlice.reducer;

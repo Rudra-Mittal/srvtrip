@@ -30,7 +30,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const itineraries = localStorage.getItem("itineraries")
     ? JSON.parse(localStorage.getItem("itineraries") || "")
-    : [];
+    : null;
 const initialState={
     itineraries: itineraries,
     selectedItinerary: {},
