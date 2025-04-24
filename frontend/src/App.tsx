@@ -10,12 +10,15 @@ import { ItineraryPage } from './pages/ItineraryPage'
 import { ProtectedRoute } from './components/ProtectedRoutes/ProtectedRoute'
 import HistoryPage from './pages/historyPage'
 import { Navbar } from "@/components/Navbar"
+import { AuthRoute } from './components/ProtectedRoutes/AuthRoute'
 
 function App() {
   return (
     <>
       <BrowserRouter>
+        <AuthRoute>
           <Navbar />
+        </AuthRoute>
         <Routes>
           <Route path="/" element={<LandingPage />} /> 
           <Route path="/signup" element={<SignupPage />} />
@@ -31,7 +34,7 @@ function App() {
           <Route path="/form" element={
              <ProtectedRoute>
               <FormPage/>
-            //  </ProtectedRoute> 
+             </ProtectedRoute> 
           } />
           <Route path="/itinerary" element={
              <ProtectedRoute>

@@ -1,8 +1,19 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState={
-    chats: {},//key:placeId, value:array of chat msgs { [placeId]: [{ type: "user"|"ai", message: string }] }
+interface ChatMessage {
+    type: "user" | "ai";
+    message: string;
 }
+
+interface ChatState {
+    chats: {
+        [placeId: string]: ChatMessage[];
+    };
+}
+
+const initialState: ChatState = {
+    chats: {}, // key: placeId, value: array of chat msgs
+};
 
 const chatSlice = createSlice({
     name: "chat",

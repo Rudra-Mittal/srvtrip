@@ -168,7 +168,7 @@ export default function ChatbotD({chatbotRef}:{chatbotRef: React.RefObject<HTMLD
                     `}
                   </style>
                   <div className="chat-scroll flex flex-col gap-5">
-                  {messages.map((msg, idx) => (
+                  {messages.map((msg: { type: string; message: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; }, idx : number) => (
                       <motion.div
                         key={idx}
                         initial={{ opacity: 0, y: 10 }}

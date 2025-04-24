@@ -1,7 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { 
   getAuth, 
-  signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
@@ -9,7 +8,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   User,
-  sendEmailVerification, applyActionCode
+  sendEmailVerification
 } from "firebase/auth";
 import { useState, useEffect } from "react";
 

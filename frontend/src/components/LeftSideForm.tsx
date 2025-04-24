@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/firebase';
 import { toast } from 'react-hot-toast';
 import { genotp, verifyotp } from '@/api/formroute';
-import { verify } from 'crypto';
+
 
 export default function LeftSideForm({ type }: { type: string }) {
   const [name, setName] = useState('');

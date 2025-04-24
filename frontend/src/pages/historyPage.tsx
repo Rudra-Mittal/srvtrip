@@ -58,17 +58,17 @@ const getInterestCategories = () => {
             ? selectedItinerary.interests.split(',')
             : [];
     
-    interestsArray.forEach(interest => {
+    interestsArray.forEach((interest: string) => {
         if (typeof interest !== 'string') return;
         
-        const trimmed = interest.trim().toLowerCase();
+        const trimmed: string = interest.trim().toLowerCase();
         
         // Find a matching interest or use default
-        const key = Object.keys(interestIcons).find(k => 
+        const key: string = Object.keys(interestIcons).find((k: string) => 
             trimmed.includes(k) || k.includes(trimmed)
         ) || trimmed;
         
-        const { icon, category } = interestIcons[key] || { icon: "✨", category: "Other" };
+        const { icon, category }: { icon: string; category: string } = interestIcons[key] || { icon: "✨", category: "Other" };
         
         if (!categories[category]) {
             categories[category] = { icon: icon, interests: [] };
@@ -96,7 +96,7 @@ const getInterestCategories = () => {
                 
                 {itineraries.length > 1 && (
                     <div className="flex justify-center mb-6 gap-2">
-                        {itineraries.map((_, index) => (
+                        {itineraries.map((_: unknown, index: number) => (
                             <motion.button
                                 key={`indicator-${index}`}
                                 className={`w-8 h-1.5 rounded-full transition-all ${
@@ -290,12 +290,12 @@ const getInterestCategories = () => {
                                                 Interests
                                             </h3>
                                             <div className="flex flex-wrap gap-2">
-                                                {(Array.isArray(selectedItinerary.interests) 
+                                                {(Array.isArray(selectedItinerary?.interests) 
                                                     ? selectedItinerary.interests 
-                                                    : typeof selectedItinerary.interests === 'string'
+                                                    : typeof selectedItinerary?.interests === 'string'
                                                         ? selectedItinerary.interests.split(',')
                                                         : []
-                                                ).slice(0, 5).map((interest, index) => (
+                                                ).slice(0, 5).map((interest: string | number, index: number) => (
                                                     <motion.span 
                                                         key={typeof interest === 'string' ? interest : index}
                                                         initial={{ opacity: 0, scale: 0.8 }}

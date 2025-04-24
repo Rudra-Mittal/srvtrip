@@ -41,7 +41,7 @@ const getPlaceReview = async (placeId: string, abortSignal: AbortSignal) => {
                 return data.summarizedReview;
             }
 
-        } catch (err) {
+        } catch (err : any) {
             // Don't log aborted requests as errors
             if (err.name !== 'AbortError') {
                 console.error("Error fetching place review:", err);

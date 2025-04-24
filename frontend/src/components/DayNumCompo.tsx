@@ -6,39 +6,14 @@ import { imageData, itineraryData } from '../sample_Images_itinerary';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 import { setActivePlaceId } from '@/store/slices/placeSlice';
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 export const DayNumCompo = ({ dayNum, itineraryNum }: { dayNum: string, itineraryNum: string }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const placesData = useSelector((state: any) => state.place.places);
-  const CURRENCY_API_KEY=import.meta.env.VITE_CURRENCY_API_KEY;
 
-  const currentDay = dayNum-1
-  const itineraryId = itineraryNum-1 
 
-  const base = "USD"; // Base currency
-  const target = "INR"; // Target currency
+  const currentDay = parseInt(dayNum, 10) - 1;
+  const itineraryId = parseInt(itineraryNum,10) - 1;
 
-  const [exchangeRate, setExchangeRate] = useState<number | null>(null);
-
-  const fetchExchangeRates=async()=>{
-    try{
-      const response=await fetch(`https://v6.exchangerate-api.com/v6/YOUR-API-KEY/pair/${base}/${target}`);
-      const data=await response.json();
-      if(data.result==="success"){
-        console.log("Exchange rate fetched successfully:", data.conversion_rate);
-        return data.conversion_rate;
-      }
-      else{
-        console.error("Error fetching exchange rates:", data);
-       throw new Error("Error fetching exchange rates");
-      }
-    }catch(err){
-      console.error("Error fetching exchange rates:", err);
-      throw err;
-    }
-  }
-  
-  
   //testing
   const dispatch = useDispatch();
   let placesforeachday = [];
