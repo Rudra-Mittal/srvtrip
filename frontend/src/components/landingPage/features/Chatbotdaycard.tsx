@@ -20,10 +20,13 @@ export default function ChatbotD({chatbotRef}:{chatbotRef: React.RefObject<HTMLD
 
   const dispatch=useDispatch();
 
-  // Auto open chatbot when activePlaceId is set
+  // Auto load chat history but don't open chatbot automatically when activePlaceId is set
   useEffect(() => {
     if (activePlaceId) {
-      dispatch(setChatbotOpen(true)); 
+      // Don't automatically open the chatbot
+      // dispatch(setChatbotOpen(true)); 
+      
+      // Just load the chat history for the active place
       dispatch(loadChatForPlace(activePlaceId)); 
     }
   }, [activePlaceId, dispatch]);
@@ -36,6 +39,7 @@ export default function ChatbotD({chatbotRef}:{chatbotRef: React.RefObject<HTMLD
 
   const {chats}=useSelector((state:any)=>state.chat);
   const messages=chats[activePlaceId] || [];
+  console.log("Messages",messages); 
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -59,6 +63,7 @@ export default function ChatbotD({chatbotRef}:{chatbotRef: React.RefObject<HTMLD
     setInput("");
   
     try {
+      console.log("Sending query to backend:", input);
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}query`, {
         method: "POST",
         headers: {
@@ -68,16 +73,17 @@ export default function ChatbotD({chatbotRef}:{chatbotRef: React.RefObject<HTMLD
         body: JSON.stringify({
           query: input,
           placeName: activePlaceId,
-          limit: 5,
+          limit: 7,
         }),
       });
   
       const data = await res.json();
+      console.log("Response from backend /query route:", data);
   
-      if (data?.result) {
+      if (data) {
         dispatch(addChat({
           placeId:activePlaceId,
-          message: { type: "ai", message: data.result }
+          message: { type: "ai", message: data }
         }));
       } else {
         dispatch(addChat({
@@ -139,6 +145,8 @@ export default function ChatbotD({chatbotRef}:{chatbotRef: React.RefObject<HTMLD
                   <div className="flex items-center gap-2">
                     <div className="h-2.5 w-2.5 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
                     <p className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-medium">AI Travel Assistant</p>
+                    {/* show place name for active place id */}
+                     
                   </div>
                   <button 
                     onClick={toggleChatbotPanel}

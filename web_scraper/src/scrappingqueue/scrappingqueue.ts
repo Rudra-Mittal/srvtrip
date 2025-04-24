@@ -39,7 +39,7 @@ class ScrapingQueue {
                     body: JSON.stringify({review: summarizedReview, placeId: task.placeId}),
                     headers: {
                         'Content-Type': 'application/json',
-                        'SERVER-API-KEY': `${process.env.SERVER_API_KEY}` // Add this header
+                        'server-api-key': `${process.env.SERVER_API_KEY}` // Add this header
                     }
                 }).catch((err)=>{
                     console.log("Error in sending request",err)

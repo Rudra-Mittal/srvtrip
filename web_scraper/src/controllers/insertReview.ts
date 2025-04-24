@@ -12,7 +12,10 @@ interface Review {
   place: string;
   placeId: string;  
 }
+
 export async function insertData(reviews: Review):Promise<void> {
+  console.log("studioapikey",studioapikey);
+  console.log("inside insert reviews in weavite");
     const client = await weaviate.connectToWeaviateCloud(
       weaviateURL,
       { authCredentials: new weaviate.ApiKey(weaviateApiKey),
