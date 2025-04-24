@@ -8,6 +8,7 @@ const mistralapikey= process.env.MISTRAL_API_KEY as string
 const studioapikey= process.env.GOOGLE_API_KEY as string
 const query= process.env.SUMMARIZE_REVIEW_QUERY as string
 export default async function summarizeReview(placeId:string):Promise<String>{
+  console.log("Summarizing review for placeId:",placeId)
   const client = await weaviate.connectToWeaviateCloud(
     weaviateURL,
     { authCredentials: new weaviate.ApiKey(weaviateApiKey),
@@ -17,6 +18,7 @@ export default async function summarizeReview(placeId:string):Promise<String>{
       }
      }
   );
+  console.log("Client connected to Weaviate")
 
     const jeopardy = client.collections.get('ReviewSchema');
     const resGen= await jeopardy.generate.nearText([query],{

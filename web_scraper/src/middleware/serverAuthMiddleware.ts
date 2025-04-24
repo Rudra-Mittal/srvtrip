@@ -1,4 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
+import dotenv from 'dotenv';
+dotenv.config();
 
 export function verifyServerApiKey(req: Request, res: Response, next: NextFunction): void {
   const apiKey = req.headers['server-api-key'] as string | undefined;

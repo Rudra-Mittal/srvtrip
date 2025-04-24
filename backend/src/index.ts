@@ -45,7 +45,7 @@ app.post('/api/auth/signout', signoutRoute)
 
 app.get("/api/auth/user", authMiddleware, userRoute)
 
-app.post('/api/summarize', serverAuthMiddleware, summarizeRoute)
+app.post('/api/summarize',serverAuthMiddleware, summarizeRoute)
 
 app.use(authMiddleware);//use auth middleware for all routes after this line 
 
