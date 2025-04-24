@@ -12,7 +12,7 @@ import ThreeDMarque from "@/components/landingPage/footer/threedmarquee";
 const LandingPage: React.FC = () => {
   const [formVisible, setFormVisible] = useState(false);
   const smartFormRef = React.useRef<HTMLDivElement>(null);  
-  const itineraryRef = React.useRef<1>(null);
+  const itineraryRef = React.useRef<HTMLElement>(null);
   const chatbotRef = React.useRef<HTMLDivElement>(null);
   useEffect(() => {
     const timer = setTimeout(() => {

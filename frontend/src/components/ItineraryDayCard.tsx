@@ -1,6 +1,6 @@
 import {motion} from "framer-motion";
 import {cn} from "@/lib/utils";
-import {useState, useEffect, useRef} from "react";
+import {useState, useEffect, useRef, JSXElementConstructor, ReactElement, ReactNode, ReactPortal} from "react";
 import {AnimatePresence} from "framer-motion";
 import { useSelector } from "react-redux";
 
@@ -403,7 +403,7 @@ export const DayCard = ({itineraryIdx,dayIdx}: any) => {
                         </style>
                         
                         <ul className="space-y-2 max-h-[240px] overflow-y-auto pr-3 custom-scrollbar">
-                            {Array(placesforeachday).map((place, idx) => (
+                            {placesforeachday.map((place: { id: any; displayName: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined; }, idx: number) => (
                                 <motion.li 
                                     key={place.id || idx}
                                     initial={{ opacity: 0, x: -10 }}

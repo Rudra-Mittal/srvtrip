@@ -79,7 +79,7 @@ export const DayNumPage = () => {
                         className="w-full lg:w-auto"
                         style={{ flex: `0 0 ${leftWidth}%` }}
                     >
-                        <DayNumCompo dayNum={daynumber} itineraryNum={itinerarynumber} />
+                        <DayNumCompo dayNum={daynumber.toString()} itineraryNum={itinerarynumber.toString()} />
                     </div>
 
                     {/* Resizer handle */}
@@ -104,7 +104,7 @@ export const DayNumPage = () => {
                         {/* Map container */}
                         <div className="w-full h-[400px] rounded-lg overflow-hidden border border-zinc-800">
                             <div className="w-full h-full translate-x-1">
-                                <ParentMap dayNum={dayNum} itineraryNum={itineraryNum} />
+                                <ParentMap dayNum={dayNum || ""} itineraryNum={itineraryNum || ""} />
                             </div>
                         </div>
 

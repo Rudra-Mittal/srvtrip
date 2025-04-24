@@ -121,7 +121,7 @@ function ParentMap({ dayNum, itineraryNum }: { dayNum: string, itineraryNum: str
       return () => clearTimeout(timer);
     }
   }, [selectedMarker, infoOpen]);
-  const apiKey = "AIzaSyBZbm53yrsueed4OWNR4hv_ZCg6aUrzoP0";
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
   
   
   if (!apiKey) {

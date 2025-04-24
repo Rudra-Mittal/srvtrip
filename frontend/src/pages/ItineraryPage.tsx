@@ -1,8 +1,7 @@
 import { Boxes } from "@/components/ui/background-boxes";
 import { motion } from "framer-motion";
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, Key } from "react";
 import { DayCard } from "@/components/ItineraryDayCard";
-import { itineraryData } from "@/data/iteneraryData";
 import { useDebounce } from "use-debounce";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
@@ -13,17 +12,12 @@ export const ItineraryPage = () => {
     const [activeCardIndex, setActiveCardIndex] = useState(0);
     const sliderRef = useRef<HTMLDivElement>(null);
 
-    const itineraries= useSelector((state) => state.itinerary.itineraries);
-    const places= useSelector((state) => state.place.places);
+    const itineraries= useSelector((state: any) => state.itinerary.itineraries);
     const itineraryD=itineraries[itineraryIdx];  
-    console.log("itineraries ",itineraries);
-    console.log(`itinerary ${itineraryNum}`,itineraryD)
-    console.log("places ",places);
-    console.log("itindays",itineraryD.itinerary.days)
+
 
     const cardRefs = useRef<(HTMLDivElement | null)[]>(Array(itineraryD.itinerary.days.length).fill(null));
-    const [scrollPosition] = useDebounce(useScrollPosition(sliderRef), 50);
-    const hoverTimeouts = useRef<(NodeJS.Timeout | null)[]>(Array(itineraryD.itinerary.days.length).fill(null));
+    const [scrollPosition] = useDebounce(useScrollPosition(sliderRef as React.RefObject<HTMLDivElement>), 50);
     const navigateSlider = useCallback((direction: 'prev' | 'next') => {
         if (!sliderRef.current) return;
         let newIndex;
@@ -256,7 +250,7 @@ export const ItineraryPage = () => {
                         style={{ scrollbarWidth: 'none', position: 'relative' }}
                     >
                          <div className="flex gap-5 px-4 py-4"> 
-                            {itineraryD.itinerary.days.map((day, index) => (
+                            {itineraryD.itinerary.days.map((day: { day: number; }, index: number) => (
                                 <motion.div
                                 key={day.day}
                                 className="snap-center flex-shrink-0 pointer-events-auto"
@@ -289,7 +283,7 @@ export const ItineraryPage = () => {
 
                     {/* Day indicators */}
                     <div className="flex justify-center mt-6 gap-2">
-                        {itineraryD.itinerary.days.map((_, index) => (
+                        {itineraryD.itinerary.days.map((_: any, index: number) => (
                             <motion.button
                                 key={`indicator-${index}`}
                                 className={`w-8 h-1.5 rounded-full transition-all ${activeCardIndex === index

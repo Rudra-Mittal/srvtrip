@@ -34,7 +34,7 @@ const Weather = () => {
         }
         const data = await response.json();
         setWeather(data);
-      } catch (err) {
+      } catch (err : any) {
         setError(err.message);
       } finally {
         setLoading(false);
