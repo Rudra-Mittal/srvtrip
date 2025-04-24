@@ -403,7 +403,7 @@ export const DayCard = ({itineraryIdx,dayIdx}: any) => {
                         </style>
                         
                         <ul className="space-y-2 max-h-[240px] overflow-y-auto pr-3 custom-scrollbar">
-                            {placesforeachday.map((place, idx) => (
+                            {Array(placesforeachday).map((place, idx) => (
                                 <motion.li 
                                     key={place.id || idx}
                                     initial={{ opacity: 0, x: -10 }}

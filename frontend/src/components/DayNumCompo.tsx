@@ -208,7 +208,9 @@ const replacePlaceIds = (text: string) => {
   //   const sectionTheme = { 
   //     iconBg: 'bg-gray-900/60'
   //   };
-    
+    if(!itinerary){
+      return <div className="text-gray-300">No itinerary data available</div>
+    }
     return (
       <div className="space-y-4 md:space-y-3">
         {/* Activities - Card style */}

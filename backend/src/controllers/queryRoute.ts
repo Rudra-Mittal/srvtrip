@@ -4,6 +4,7 @@ import { querySchema } from "../zod/itinerary";
 
 export const queryRoute = (req:any, res:any) => {
   try {
+    console.log("Query Route:", req.body);
     const validatedData = querySchema.parse(req.body);
     const { query, placeName, limit } = validatedData;
 

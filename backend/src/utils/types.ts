@@ -3,7 +3,6 @@
 import { Request } from "express";
 
 export interface place{
-    dbId:string,//differentiator
     exist:boolean,
     placename:string,
     id:string,
@@ -14,7 +13,7 @@ export interface place{
         longitude:number
     },
     photos:string[],
-    summarizedReview:string
+    summarizedReview:string|null
 }
 export type day= place[];
 //placesData will array of type day

@@ -52,6 +52,7 @@ export async function itenarariesRoute(req:AuthRequest,res:Response){
                         id:place.placeId,
                         formattedAddress:place.address,
                         displayName:place.name,
+                        summarizedReview:place.summarizedReview,
                         location:{
                             latitude:place.latitude,
                             longitude:place.longitude
