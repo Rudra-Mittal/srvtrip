@@ -25,18 +25,16 @@ export function Globe() {
     rings: 10,
     maxRings: 3,
     initialPosition: { lat: 22.3193, lng: 114.1694 },
-    autoRotate: false,
-    autoRotateSpeed: 1.0,
-    globeScale: 1.15,
+    autoRotate: true,
+    autoRotateSpeed: 0.5,
+    globeScale: 1.5, // Larger scale to make it appear cut off
   };
   
-  
-
   return (
-    <div className="flex flex-row items-center justify-center  h-screen md:h-auto bg-black relative w-full opacity-100 z-50">
-      <div className=" mx-auto w-full relative overflow-hidden h-screen  px-4">
+    <div className="flex items-center justify-start h-full bg-black relative w-full opacity-100 z-30">
+      <div className="relative overflow-hidden h-full w-[150%]">
         <div className="absolute w-full bottom-0 inset-x-0 h-40 bg-gradient-to-b pointer-events-none select-none z-40" />
-        <div className="absolute w-full ml-70  h-72 md:h-full z-50 ">
+        <div className="absolute w-full left-[-25%] h-full z-30">
           <World data={sampleArcs} globeConfig={globeConfig} />
         </div>
       </div>

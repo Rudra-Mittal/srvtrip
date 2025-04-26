@@ -715,9 +715,9 @@ const handleGenerateItinerary = async (formData: FormData) => {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
-              className="text-center z-20"
+              className="text-center z-20 w-full max-w-3xl mx-auto"
             >
-              <div>
+              <div className="w-full flex justify-center items-center mb-4">
                 <Loader />
               </div>
               <motion.div
@@ -736,7 +736,7 @@ const handleGenerateItinerary = async (formData: FormData) => {
                     className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-purple-500"
                     initial={{ width: "0%" }}
                     animate={{ width: "100%" }}
-                    transition={{ duration: 200, ease: "easeInOut" }}
+                    transition={{ duration: 50, ease: "easeInOut" }}
                   />
                 </div>
               </motion.div>

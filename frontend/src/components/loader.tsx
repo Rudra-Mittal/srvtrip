@@ -1,26 +1,37 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three'  
+
 const Loader = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const animationIdRef = useRef<number>(0);
-  useEffect(()=>{
+
+  useEffect(() => {
     if (!containerRef.current) return;
+    
+    const container = containerRef.current;
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
+    
+    // Initialize scene
     const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 1000);
-  const renderer = new THREE.WebGLRenderer({ antialias: false });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
-  sceneRef.current = scene;
+    const camera = new THREE.PerspectiveCamera(50, containerWidth / containerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ 
+      antialias: false,
+      alpha: true // Enable transparency
+    });
+    
+    renderer.setSize(containerWidth, containerHeight);
+    renderer.setClearColor(0x000000, 0); // Transparent background
+    container.appendChild(renderer.domElement);
+    
+    sceneRef.current = scene;
     cameraRef.current = camera;
     rendererRef.current = renderer;
 
-    const container = containerRef.current;
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    container.appendChild(renderer.domElement);
-  const sphere = (() => {
+    const sphere = (() => {
       const geometry = new THREE.SphereGeometry(1.3, 25, 20);
       const edges = new THREE.EdgesGeometry(geometry);
       return new THREE.LineSegments(
@@ -163,17 +174,29 @@ camera.position.set(8, 5, 10);
 
   let lastTime = 0;
 
-      // Handle container resize
-      const resizeObserver = new ResizeObserver(() => {
-        if (!cameraRef.current || !rendererRef.current || !containerRef.current) return;
-        
-        const { clientWidth, clientHeight } = containerRef.current;
-        cameraRef.current.aspect = clientWidth / clientHeight;
-        cameraRef.current.updateProjectionMatrix();
-        rendererRef.current.setSize(clientWidth, clientHeight);
-      });
-  
-      resizeObserver.observe(containerRef.current);
+    // Improved resize handler
+    const handleResize = () => {
+      if (!cameraRef.current || !rendererRef.current || !containerRef.current) return;
+      
+      const container = containerRef.current;
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      
+      // Update camera
+      cameraRef.current.aspect = width / height;
+      cameraRef.current.updateProjectionMatrix();
+      
+      // Update renderer
+      rendererRef.current.setSize(width, height);
+    };
+
+    // Use ResizeObserver for container size changes
+    const resizeObserver = new ResizeObserver(handleResize);
+    resizeObserver.observe(container);
+
+    // Also listen for window resize events
+    window.addEventListener('resize', handleResize);
+
   function animate(timestamp: number) {
     if (!sceneRef.current || !cameraRef.current || !rendererRef.current) return;
     
@@ -222,21 +245,39 @@ camera.position.set(8, 5, 10);
 }
 animationIdRef.current = requestAnimationFrame(animate);
 
-  window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth/window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-  });
   return () => {
     resizeObserver.disconnect();
-    if (animationIdRef.current) cancelAnimationFrame(animationIdRef.current);
+    window.removeEventListener('resize', handleResize);
+    
+    if (animationIdRef.current) {
+      cancelAnimationFrame(animationIdRef.current);
+    }
+    
     if (rendererRef.current) {
       rendererRef.current.dispose();
-      container.removeChild(rendererRef.current.domElement);
+      if (container.contains(rendererRef.current.domElement)) {
+        container.removeChild(rendererRef.current.domElement);
+      }
     }
   };
-},[])
-return <div ref={containerRef} style={{ width: '50vh', height: '50vh' }} />;
-}
+  }, []);
 
-export default Loader
+  // Make container size responsive to viewport
+  return (
+    <div 
+      ref={containerRef} 
+      style={{ 
+        width: '100%', 
+        height: '30vh',
+        minHeight: '200px',
+        maxHeight: '400px',
+        margin: '0 auto',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+      }} 
+    />
+  );
+};
+
+export default Loader;
