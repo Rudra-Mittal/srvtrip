@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/firebase';
 import { toast } from 'react-hot-toast';
 import { genotp, verifyotp } from '@/api/formroute';
+import { useDispatch } from 'react-redux';
+import { loginUser } from '@/store/slices/userSlice';
 
 
 export default function LeftSideForm({ type }: { type: string }) {
@@ -18,6 +20,7 @@ export default function LeftSideForm({ type }: { type: string }) {
   const { signin, signup, signinWithGoogle, loading } = useAuth();
   const [otpLoading, setOtpLoading] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch(); // Moved to component top level
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,21 +76,20 @@ export default function LeftSideForm({ type }: { type: string }) {
 
   const handleGoogleSignIn = async () => {
     try {
-      await signinWithGoogle();
+      const user = await signinWithGoogle();
+      
+      // Immediately update Redux state with the user info
+      // This will make the navbar dropdown appear without needing a refresh
+      if (user) {
+        dispatch(loginUser({
+          isLoggedIn: true,
+          name: user.displayName || 'User',
+          email: user.email || '',
+          uid: user.uid
+        }));
+      }
+      
       navigate('/');
-      // const response = await fetch('http://localhost:4000/signin', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email, password }),
-      //   credentials:'include'
-      // });
-
-      // if (!response.ok) {
-      //   throw new Error('Invalid credentials');
-      // }
-
-      // toast.success('Sign in successful!');
-      // navigate('/'); // Redirect to the landing page
     } catch (err: any) {
       setError(err.message);
     }
