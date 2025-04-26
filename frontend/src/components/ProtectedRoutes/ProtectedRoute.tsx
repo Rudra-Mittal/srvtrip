@@ -49,20 +49,39 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     
     if (loading) {
         return (
-        <div className='flex justify-center items-center h-screen'>
-          <div className="flex flex-col items-center">
-            <div className="flex space-x-2 mb-4">
-              <div className="w-3 h-3 rounded-full bg-blue-500 animate-pulse"></div>
-              <div className="w-3 h-3 rounded-full bg-purple-500 animate-pulse delay-150"></div>
-              <div className="w-3 h-3 rounded-full bg-blue-500 animate-pulse delay-300"></div>
+          <div className='flex justify-center items-center h-screen bg-gradient-to-br from-black to-gray-900/95'>
+            <div className="flex flex-col items-center relative">
+              {/* Ambient glow background */}
+              <div className="absolute -inset-16 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-full blur-3xl opacity-30 animate-pulse"></div>
+              
+              {/* Circular futuristic loader */}
+              <div className="relative w-16 h-16 mb-8">
+                {/* Outer spinning ring */}
+                <div className="absolute inset-0 rounded-full border-2 border-t-blue-400 border-r-indigo-400 border-b-purple-500 border-l-lavender-400 animate-spin" style={{animationDuration: '2s'}}></div>
+                
+                {/* Inner spinning ring - opposite direction */}
+                <div className="absolute inset-2 rounded-full border-2 border-t-lavender-400 border-r-purple-500 border-b-indigo-400 border-l-blue-400 animate-spin" style={{animationDuration: '3s', animationDirection: 'reverse'}}></div>
+                
+                {/* Center glow */}
+                <div className="absolute inset-0 m-auto w-8 h-8 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-full blur-md"></div>
+                <div className="absolute inset-0 m-auto w-4 h-4 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full animate-pulse"></div>
+              </div>
+              
+              {/* Text with gradient */}
+              <p className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 font-bold text-xl mb-4">
+                Loading...
+              </p>
+              
+              {/* Three dots in blue, dark blue, and lavender */}
+              <div className="flex items-center justify-center gap-3">
+                <div className="w-4 h-4 rounded-full bg-blue-400 animate-bounce shadow-md shadow-blue-400/50" style={{animationDuration: '0.6s'}}></div>
+                <div className="w-4 h-4 rounded-full bg-blue-700 animate-bounce shadow-md shadow-blue-700/50" style={{animationDuration: '0.6s', animationDelay: '0.2s'}}></div>
+                <div className="w-4 h-4 rounded-full bg-purple-400 animate-bounce shadow-md shadow-purple-400/50" style={{animationDuration: '0.6s', animationDelay: '0.4s'}}></div>
+              </div>
             </div>
-            <p className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-medium">
-              Loading...
-            </p>
           </div>
-        </div>
-      );
+        );
     }
-    
+
     return children;
   };
