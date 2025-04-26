@@ -730,7 +730,7 @@ export default function Form() {
                   Creating Your Perfect Trip!
                 </h2>
                 <p className="text-blue-200 mb-8 max-w-md mx-auto text-sm sm:text-base lg:text-lg">
-                  We're generating a personalized itinerary for your {formData.days}-day adventure to {formData.destination}. This might take a moment.
+                  We're generating a personalized itinerary for your {formData.number_of_days}-day adventure to {formData.destination}. This might take a moment.
                 </p>
                 <div className="relative h-2 w-64 mx-auto bg-gray-700 rounded-full overflow-hidden">
                   <motion.div
