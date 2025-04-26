@@ -15,9 +15,8 @@ export const AuthRoute = ({ children }: { children: React.ReactNode }) => {
      auth().then((user)=>{
       if(user.error){
         setLoading(true);
-        navigate("/signin", { replace: true });
       }
-      dispatch(loginUser(user));
+      else dispatch(loginUser(user));
      });
       
     },[]);

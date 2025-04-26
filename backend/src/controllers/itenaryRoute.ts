@@ -12,7 +12,7 @@ import createPlace from "../utils/createPlace";
 import callWebScrapper from "./callWebScrapper";
 
 export const itenaryRoute = async (req: AuthRequest, res:Response) => {
-  await new Promise((resolve) => setTimeout(resolve, 100000)); // Simulate a delay of 1 second
+  await new Promise((resolve) => setTimeout(resolve, 1000000)); // Simulate a delay of 1 second
   try{
     const { prompt } = req.body;
   console.log("prompt",prompt);

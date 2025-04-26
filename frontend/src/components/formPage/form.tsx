@@ -159,6 +159,9 @@ export default function Form() {
     }
   };
   const navigate=useNavigate()
+  const timeoutTimer = setTimeout(() => {
+    setShowTimeoutMessage(true);
+  },3000)
   // Update the handleGenerateItinerary function to combine interests and customRequests
   const handleGenerateItinerary = async (formData: FormData) => {
     setFormVisible(false);
@@ -182,6 +185,7 @@ export default function Form() {
     console.log("Form data:", submissionData);
     
     genitinerary(submissionData).then(async (res)=>{
+      clearTimeout(timeoutTimer);
       console.log("newitinerary",JSON.parse(res.newItenary))
       dispatch(addItinerary(await JSON.parse(res.newItenary)))
       dispatch(addPlace(await JSON.parse(res.placesData)))
@@ -196,6 +200,15 @@ export default function Form() {
     y: Math.random() * 100,
     duration: Math.random() * 20 + 10
   }));
+
+  // Add a state to track if loading is taking too long
+  const [showTimeoutMessage, setShowTimeoutMessage] = useState(false);
+
+  // Add function to navigate to homepage or other sections
+  const handleExploreMore = () => {
+    navigate("/");
+    // You could also navigate to another section of your app
+  };
 
   return (
     <div className="relative min-h-screen bg-black text-white flex flex-col items-center justify-center p-4 overflow-hidden">
@@ -228,25 +241,37 @@ export default function Form() {
       ))}
 
       {/* Page title with animation */}
-      <div className="mb-8 text-center relative z-10">
-        <TypewriterEffect
-          words={[
-            { text: "Plan", className: "text-3xl sm:text-4xl lg:text-5xl font-bold" },
-            { text: "Your", className: "text-3xl sm:text-4xl lg:text-5xl font-bold" },
-            { text: "Dream", className: "text-3xl sm:text-4xl lg:text-5xl font-bold" },
-            { text: "Adventure", className: "text-3xl sm:text-4xl lg:text-5xl font-bold text-blue-500" },
-          ]}
-          className="text-center"
-          cursorClassName="bg-blue-400"
-        />
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
+      <div className="relative z-10 mt-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.2, duration: 0.8 }}
-          className="text-blue-300 mt-4 max-w-xl mx-auto text-sm sm:text-base lg:text-lg"
+          transition={{ 
+            duration: 0.8,
+            ease: "easeOut",
+            delay: 0.5
+
+          }}
+          className="mb-8 text-center"
         >
-          Let's create your perfect journey, tailored exactly to your preferences.
-        </motion.p>
+          <TypewriterEffect
+            words={[
+              { text: "Plan", className: "text-3xl sm:text-4xl lg:text-5xl font-bold" },
+              { text: "Your", className: "text-3xl sm:text-4xl lg:text-5xl font-bold" },
+              { text: "Dream", className: "text-3xl sm:text-4xl lg:text-5xl font-bold" },
+              { text: "Adventure", className: "text-3xl sm:text-4xl lg:text-5xl font-bold text-blue-500" },
+            ]}
+            className="text-center"
+            cursorClassName="bg-blue-400"
+          />
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1, duration: 0.8 }}
+            className="text-blue-300 mt-4 max-w-xl mx-auto text-sm sm:text-base lg:text-lg"
+          >
+            Let's create your perfect journey, tailored exactly to your preferences.
+          </motion.p>
+        </motion.div>
       </div>
 
       <AnimatePresence mode="popLayout">
@@ -740,6 +765,36 @@ export default function Form() {
                     transition={{ duration: 50, ease: "easeInOut" }}
                   />
                 </div>
+                
+                {/* Timeout message and button */}
+                <AnimatePresence>
+                  {showTimeoutMessage && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.5 }}
+                      className="mt-10 p-4 rounded-lg border border-blue-500/30 bg-black/60 max-w-md mx-auto"
+                    >
+                      <h3 className="text-xl font-semibold text-blue-300 mb-2">
+                        Taking a bit longer than expected
+                      </h3>
+                      <p className="text-gray-300 mb-4 text-sm">
+                        Don't worry! Your itinerary is still being created. You can continue exploring our site or close this tab - your itinerary will be saved and ready when you return.
+                      </p>
+                      <HoverBorderGradient
+                        as="button"
+                        type="button"
+                        onClick={handleExploreMore}
+                        className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 font-medium text-white shadow-lg shadow-purple-900/20 text-sm"
+                      >
+                        <span className="flex items-center justify-center">
+                          Explore More <ArrowRight className="ml-2 h-4 w-4" />
+                        </span>
+                      </HoverBorderGradient>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
 
             </motion.div>
