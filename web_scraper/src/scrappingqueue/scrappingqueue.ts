@@ -16,6 +16,13 @@ class ScrapingQueue {
         return this.queue.shift();
     }
     
+    getQueueLength():number{
+        return this.queue.length;
+    }
+    getActiveTasks():number{
+        return this.inProgress;
+    }
+    
     private async processNext(): Promise<void> {
         if (this.queue.length === 0) return;
         if(this.inProgress>=this.limit)return ;
