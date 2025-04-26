@@ -160,33 +160,34 @@ export default function Form() {
   };
   const navigate=useNavigate()
   // Update the handleGenerateItinerary function to combine interests and customRequests
-const handleGenerateItinerary = async (formData: FormData) => {
-  setFormVisible(false);
-  setShowSummary(true);
-  
-  // Create a copy of the form data to modify
-  const submissionData = { ...formData };
-  
-  // Combine interests array and custom requests into a single string
-  const interestsArray = [...submissionData.interests];
-  
-  // Add custom requests to interests if it exists
-  if (submissionData.customRequests && submissionData.customRequests.trim() !== '') {
-    interestsArray.push(submissionData.customRequests.trim());
+  const handleGenerateItinerary = async (formData: FormData) => {
+    setFormVisible(false);
+    setShowSummary(true);
+    
+    // Create a copy of the form data to modify
+    const submissionData = { ...formData };
+    
+    // Combine interests array and custom requests into a single array
+    const interestsArray = [...submissionData.interests];
+    
+    // Add custom requests to interests if it exists
+    if (submissionData.customRequests && submissionData.customRequests.trim() !== '') {
+      interestsArray.push(submissionData.customRequests.trim());
+    }
+    
+    // Update submissionData.interests with the updated array
+    submissionData.interests = interestsArray;
+    
+    console.log("submissiondata", submissionData);
+    console.log("Form data:", submissionData);
+    
+    genitinerary(submissionData).then(async (res)=>{
+      console.log("newitinerary",JSON.parse(res.newItenary))
+      dispatch(addItinerary(await JSON.parse(res.newItenary)))
+      dispatch(addPlace(await JSON.parse(res.placesData)))
+      navigate("/itinerary");
+    })
   }
-  
-  // Convert the combined array to a comma-separated string
-  submissionData.interests = interestsArray.join(', ');
-  
-  console.log("Form data:", submissionData);
-  
-  genitinerary(submissionData).then(async (res)=>{
-    console.log("newitinerary",JSON.parse(res.newItenary))
-    dispatch(addItinerary(await JSON.parse(res.newItenary)))
-    dispatch(addPlace(await JSON.parse(res.placesData)))
-    navigate("/itinerary");
-  })
-}
   // Particles for background animation
   const particles = Array.from({ length: 20 }, (_, i) => ({
     id: i,
