@@ -12,14 +12,20 @@ app.use(express.json())
 
 // auth middleware pending
 app.post('/scraper',verifyServerApiKey, async (req,res)=>{
+    console.log("Received request to loadbalancer");
     const {placeName,maxScrolls,placeId,placeAddress}=req.body;
     scrapingQueue.enqueue({placeId,placeName,maxScrolls,placeAddress,iteration:1})
     res.status(200).json({"message":"Sent request successfully"})
     return ;
-})
-app.listen(3000,()=>{
-    console.log("Server is running on port 3000")
-})
+});
+
+app.get("/status",async(req,res)=>{
+    const queueLength=scrapingQueue.getQueueLength();
+    const activeTasks=scrapingQueue.getActiveTasks();
+    res.status(200).send({queueLength,activeTasks});
+    return ;
+});
+
 app.post('/query',(req,res)=>{
     const {query,placeName,limit}=req.body;
     searchQuery(query,placeName,limit)
@@ -52,4 +58,8 @@ app.post('/migrate',async (req,res)=>{
         return ;
     }
 )
+})
+
+app.listen(3003,()=>{
+    console.log("Server is running on port 3000")
 })
