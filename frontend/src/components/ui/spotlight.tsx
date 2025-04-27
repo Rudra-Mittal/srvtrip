@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 type SpotlightProps = {
@@ -8,6 +8,8 @@ type SpotlightProps = {
   mode?: "light" | "dark";
   intensity?: number;
   width?: number;
+  hasScrolled?: boolean;
+  onAnimationComplete?: () => void;
 };
 
 export const Spotlight = ({ 
@@ -15,38 +17,78 @@ export const Spotlight = ({
   fill, 
   direction = "top-left",
   mode = "light",
-  intensity = 0.3,
-  width = 90
+  intensity = 0.4,
+  width = 100,
+  hasScrolled = false,
+  onAnimationComplete
 }: SpotlightProps) => {
-  // Create unique IDs to prevent conflicts when multiple spotlights are used
   const uniqueId = useRef(`spotlight-${Math.random().toString(36).substr(2, 9)}`).current;
   const gradientRef = useRef<SVGRadialGradientElement>(null);
+  const [viewportWidth, setViewportWidth] = useState<number>(0);
+  const [opacity, setOpacity] = useState<number>(0); // Start with opacity 0
+  const animationStartedRef = useRef(false); // Use ref instead of state to prevent re-renders
+  const animationCompletedRef = useRef(false);
+  const fadeOutStartedRef = useRef(false); // Track if fade-out has started
   
+  // Detect viewport width for responsive adjustments
   useEffect(() => {
-    console.log("Spotlight component mounted");
+    const updateWidth = () => {
+      setViewportWidth(window.innerWidth);
+    };
+    
+    // Set initial width
+    updateWidth();
+    
+    // Update on resize
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
+  
+  // Delay spotlight animation start - only run once
+  useEffect(() => {
+    if (animationStartedRef.current) return;
+    
+    const startDelay = setTimeout(() => {
+      animationStartedRef.current = true;
+      setOpacity(1); // Make visible after delay
+      
+      // Start animation after delay
+      startSpotlightAnimation();
+    }, 300); // 0.3 seconds delay
+    
+    return () => clearTimeout(startDelay);
+  }, []);
+  
+  // Define spotlight animation function to avoid duplication
+  const startSpotlightAnimation = () => {
+    // Don't run if animation already completed
+    if (animationCompletedRef.current) return;
     
     // Start with radius at 0%
     const gradient = gradientRef.current;
-    if (!gradient) {
-      console.log("Gradient ref not found");
-      return;
-    }
+    if (!gradient) return;
     
     // Set initial state
     gradient.setAttribute("r", "0%");
     
     // Animation configuration
-    const duration = 2800; // Total animation duration in ms
-    const fps = 60; // Frames per second
-    const steps = Math.floor(duration / 1000 * fps); // Total animation steps
+    const duration = 3000;
+    const fps = 60;
+    const steps = Math.floor(duration / 1000 * fps);
     let currentStep = 0;
     
     // Use cubic-bezier for easing
     const ease = (t: number) => {
-      // Cubic bezier approximation of (0.4, 0, 0.2, 1)
       return t < 0.5
         ? 4 * t * t * t
         : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    };
+    
+    // Calculate max radius based on screen size
+    const getMaxRadius = () => {
+      if (viewportWidth < 640) return 220;
+      if (viewportWidth < 1024) return 250;
+      return 280;
     };
     
     // Start animation loop
@@ -60,47 +102,118 @@ export const Spotlight = ({
       const easedProgress = ease(linearProgress);
       
       // Calculate current radius percentage
-      const radius = Math.min(250, Math.round(easedProgress * 150)); // Increased max radius to 150
+      const maxRadius = getMaxRadius();
+      const radius = Math.min(maxRadius, Math.round(easedProgress * 170));
       
-      // console.log(`Animating spotlight radius: ${radius}%`);
-      gradient.setAttribute("r", `${radius}%`);
+      gradient?.setAttribute("r", `${radius}%`);
       
       // End animation when complete
       if (currentStep >= steps) {
         clearInterval(animationInterval);
-        console.log("Spotlight animation complete");
+        animationCompletedRef.current = true;
+        
+        // Notify parent that animation is complete
+        if (onAnimationComplete) {
+          onAnimationComplete();
+        }
+        
+        // Add fade-out after 1 second or when user scrolls
+        if (hasScrolled) {
+          startFadeOut();
+        } else {
+          setTimeout(() => {
+            if (!fadeOutStartedRef.current) {
+              startFadeOut();
+            }
+          }, 1000); // Reduced from 2000 to 1000 for faster fade-out
+        }
       }
-    }, 1000 / fps); // Update interval based on FPS
+    }, 1000 / fps);
     
-    // Cleanup on unmount
-    return () => {
-      clearInterval(animationInterval);
-      console.log("Spotlight animation cleanup");
+    return () => clearInterval(animationInterval);
+  };
+  
+  // Handle hasScrolled changes separately
+  useEffect(() => {
+    if (hasScrolled && animationCompletedRef.current && !fadeOutStartedRef.current) {
+      startFadeOut();
+    }
+  }, [hasScrolled]);
+  
+  const startFadeOut = () => {
+    // Only start fade-out once
+    if (fadeOutStartedRef.current) return;
+    fadeOutStartedRef.current = true;
+    
+    // Create a faster fade-out animation (1 second instead of 1.5)
+    const fadeOutDuration = 1000;
+    const fadeOutFPS = 60;
+    const fadeOutSteps = Math.floor(fadeOutDuration / 1000 * fadeOutFPS);
+    let fadeOutStep = 0;
+    
+    const ease = (t: number) => {
+      return t < 0.5
+        ? 4 * t * t * t
+        : 1 - Math.pow(-2 * t + 2, 3) / 2;
     };
-  }, [])
-
-  // Determine colors based on mode
-  const primaryColor = mode === "light" ? "white" : "#111";
+    
+    const fadeOutInterval = setInterval(() => {
+      fadeOutStep++;
+      const fadeProgress = fadeOutStep / fadeOutSteps;
+      const easedFadeProgress = ease(fadeProgress);
+      setOpacity(1 - easedFadeProgress);
+      
+      if (fadeOutStep >= fadeOutSteps) {
+        clearInterval(fadeOutInterval);
+        setOpacity(0); // Ensure it's fully invisible at the end
+      }
+    }, 1000 / fadeOutFPS);
+  };
+  
+  // Force fade-out when component unmounts
+  useEffect(() => {
+    return () => {
+      if (!fadeOutStartedRef.current) {
+        fadeOutStartedRef.current = true;
+        setOpacity(0);
+      }
+    };
+  }, []);
+  
+  // Enhanced colors based on mode
+  const getPrimaryColor = () => {
+    if (fill) return fill;
+    return mode === "light" ? "white" : "#111";
+  };
+  
+  const primaryColor = getPrimaryColor();
   const mixBlendMode = mode === "light" ? "screen" : "multiply";
   
-  // Calculate points - adjusted to make the spotlight extend to the bottom
-  const halfSpread = width / 2; // Increased spread
+  // Calculate points for enhanced spread
+  const halfSpread = width / 2;
   const leftPoint = Math.min(0, 50 - halfSpread);
   const rightPoint = Math.max(100, 50 + halfSpread);
-  const points = `50,0 ${leftPoint},150 ${rightPoint},150`; // Increased vertical reach to 150
+  
+  // Make the height of the triangle responsive to screen size
+  const triangleHeight = viewportWidth < 640 ? 100 : 150;
+  const points = `50,0 ${leftPoint},${triangleHeight} ${rightPoint},${triangleHeight}`;
+  
+  // Adjust viewBox height based on screen size
+  const viewBoxHeight = viewportWidth < 640 ? 100 : 150;
   
   return (
     <div className={cn("absolute inset-0 z-10", className)} style={{ pointerEvents: "none" }}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 100 150" // Extended viewBox height to 150
+        viewBox={`0 0 100 ${viewBoxHeight}`}
         width="100%"
         height="100%"
         style={{ 
           mixBlendMode,
           position: "absolute",
           inset: 0,
-          opacity: 1
+          opacity: opacity, // Apply the opacity state
+          transition: "opacity 0.2s linear" // Faster transition for more responsive fade
         }}
         preserveAspectRatio="none"
       >
@@ -109,19 +222,27 @@ export const Spotlight = ({
             ref={gradientRef}
             id={`${uniqueId}-gradient`}
             cx="50%"
-            cy="10%" // Moved gradient origin higher
+            cy={viewportWidth < 640 ? "25%" : "10%"}
             r="50%" 
             fx="50%"
-            fy="10%" // Moved focal point higher
-            style={{ transition: "r" }}
+            fy={viewportWidth < 640 ? "25%" : "10%"}
+            style={{ transition: "r 0.2s ease" }} // Added transition for smoother radius changes
           >
-            <stop offset="0%" stopColor={primaryColor} stopOpacity={intensity} />
-            <stop offset="50%" stopColor={primaryColor} stopOpacity={intensity * 0.6} />
+            {/* Enhanced gradient with multiple color stops for more attractive look */}
+            <stop offset="0%" stopColor={primaryColor} stopOpacity={intensity * 1.2} /> {/* Brighter center */}
+            <stop offset="40%" stopColor={primaryColor} stopOpacity={intensity} />
+            <stop offset="70%" stopColor={primaryColor} stopOpacity={intensity * 0.7} />
             <stop offset="100%" stopColor={primaryColor} stopOpacity="0" />
           </radialGradient>
           
           <filter id={`${uniqueId}-filter`}>
-            <feGaussianBlur stdDeviation="8" />
+            <feGaussianBlur stdDeviation={viewportWidth < 640 ? 6 : 10} /> {/* Increased blur for more glow */}
+            <feColorMatrix
+              type="matrix"
+              values="1 0 0 0 0
+                      0 1 0 0 0
+                      0 0 1 0 0
+                      0 0 0 2 0" /> {/* Enhanced opacity/brightness */}
           </filter>
         </defs>
       

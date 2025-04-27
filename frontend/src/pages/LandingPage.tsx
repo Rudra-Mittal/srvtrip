@@ -26,7 +26,7 @@ const LandingPage: React.FC = () => {
       <HeroParallaxDemo/>
       <div className="relative">
         {/* Smart Form Section */}
-        <section id="smart-form" className="py-6 sm:py-10 lg:py-14" ref={smartFormRef}>
+        <section id="smart-form" className="py-6 sm:py-10  lg:py-14 mt-0" ref={smartFormRef}>
           <SmartForm smartFormRef={smartFormRef} formVisible={formVisible}/>
         </section>
         {/* AI-Generated Itinerary Timeline */}

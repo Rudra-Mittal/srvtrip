@@ -27,19 +27,27 @@ export const HeroParallax = ({
   const [initialized, setInitialized] = useState(false);
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [spotlightActive, setSpotlightActive] = useState(false);
+  const [spotlightCompleted, setSpotlightCompleted] = useState(false);
   const [textVisible, setTextVisible] = useState(false);
   
   // Animation sequence control
   useEffect(() => {
-    // Immediately show images at full brightness
+    // First initialize the component
     const timer1 = setTimeout(() => {
       setInitialized(true);
-      setImagesLoaded(true);
       
-      // After delay, activate spotlight and text at the same time
+      // After a short delay, activate the spotlight only (no content)
       const timer2 = setTimeout(() => {
         setSpotlightActive(true);
         setTextVisible(true);
+        
+        // Wait 3 seconds for spotlight animation to complete before showing images
+        const timer3 = setTimeout(() => {
+          setSpotlightCompleted(true);
+          setImagesLoaded(true);
+        }, 3000); // Match this with the spotlight animation duration
+        
+        return () => clearTimeout(timer3);
       }, 2000);
       
       return () => clearTimeout(timer2);
@@ -111,12 +119,23 @@ export const HeroParallax = ({
     };
   }, [initialized]);
 
+  // Handler for spotlight animation completion
+  const handleSpotlightComplete = () => {
+    setSpotlightCompleted(true);
+    setImagesLoaded(true);
+  };
+
   return (
     <div
       ref={ref}
-      className="h-[300vh] py-96 overflow-hidden antialiased relative flex flex-col self-auto [perspective:1000px] [transform-style:preserve-3d]"
+      className="h-[200vh] overflow-hidden antialiased relative flex flex-col self-auto [perspective:1000px] [transform-style:preserve-3d]"
     >
-      <Header spotlightActive={spotlightActive} textVisible={textVisible} />
+      <Header 
+        spotlightActive={spotlightActive} 
+        textVisible={textVisible} 
+        hasScrolled={hasScrolled}
+        onSpotlightComplete={handleSpotlightComplete}
+      />
       <motion.div
         style={{
           rotateX,
@@ -124,36 +143,36 @@ export const HeroParallax = ({
           translateY,
         }}
         className="z-10 pointer-events-auto"
-        initial={{ opacity: 1 }}
-        animate={{ opacity: initialized ? 1 : 1 }}
-        transition={{ duration: 3}}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: spotlightCompleted ? 1 : 0 }}
+        transition={{ duration: 1 }}
       >
         <motion.div 
-          className="flex flex-row-reverse space-x-reverse space-x-20 mb-20"
+          className="flex flex-row-reverse space-x-reverse space-x-4 xs:space-x-6 sm:space-x-10 md:space-x-16 lg:space-x-20 mb-8 sm:mb-12 md:mb-16 lg:mb-20"
           initial={{ opacity: 0 }}
           animate={{ 
-            opacity: imagesLoaded ? 
-              (hasScrolled ? 0.9 : (spotlightActive ? 0.5 : 0.9)) : 0 
+            opacity: imagesLoaded && spotlightCompleted ? 
+              (hasScrolled ? 0.9 : 0.9) : 0 
           }}
-          transition={{ duration: 1}}
+          transition={{ duration: 1 }}
         >
           {firstRow.map((product) => (
             <ProductCard
               product={product}
               translate={translateX}
               key={product.title}
-              isLoaded={imagesLoaded}
-              spotlightActive={spotlightActive && !hasScrolled}
+              isLoaded={imagesLoaded && spotlightCompleted}
+              spotlightActive={false}
               hasScrolled={hasScrolled}
             />
           ))}
         </motion.div>
         <motion.div 
-          className="flex flex-row mb-20 space-x-20"
+          className="flex flex-row mb-8 sm:mb-12 md:mb-16 lg:mb-20 space-x-4 xs:space-x-6 sm:space-x-10 md:space-x-16 lg:space-x-20"
           initial={{ opacity: 0 }}
           animate={{ 
-            opacity: imagesLoaded ? 
-              (hasScrolled ? 0.9 : (spotlightActive ? 0.5 : 0.9)) : 0 
+            opacity: imagesLoaded && spotlightCompleted ? 
+              (hasScrolled ? 0.9 : 0.9) : 0 
           }}
           transition={{ duration: 1, delay: 0.2 }}
         >
@@ -162,18 +181,18 @@ export const HeroParallax = ({
               product={product}
               translate={translateXReverse}
               key={product.title}
-              isLoaded={imagesLoaded}
-              spotlightActive={spotlightActive && !hasScrolled}
+              isLoaded={imagesLoaded && spotlightCompleted}
+              spotlightActive={false}
               hasScrolled={hasScrolled}
             />
           ))}
         </motion.div>
         <motion.div 
-          className="flex flex-row-reverse space-x-reverse space-x-20"
+          className="flex flex-row-reverse space-x-reverse space-x-4 xs:space-x-6 sm:space-x-10 md:space-x-16 lg:space-x-20"
           initial={{ opacity: 0 }}
           animate={{ 
-            opacity: imagesLoaded ? 
-              (hasScrolled ? 0.9 : (spotlightActive ? 0.5 : 0.9)) : 0 
+            opacity: imagesLoaded && spotlightCompleted ? 
+              (hasScrolled ? 0.9 : 0.9) : 0 
           }}
           transition={{ duration: 1, delay: 0.4 }}
         >
@@ -182,8 +201,8 @@ export const HeroParallax = ({
               product={product}
               translate={translateX}
               key={product.title}
-              isLoaded={imagesLoaded}
-              spotlightActive={spotlightActive && !hasScrolled}
+              isLoaded={imagesLoaded && spotlightCompleted}
+              spotlightActive={false}
               hasScrolled={hasScrolled}
             />
           ))}
@@ -193,72 +212,79 @@ export const HeroParallax = ({
   );
 };
 
-export const Header = ({ spotlightActive = false, textVisible = false }) => {
+export const Header = ({ 
+  spotlightActive = false, 
+  textVisible = false, 
+  hasScrolled = false,
+  onSpotlightComplete 
+}) => {
   return (
-    <div className="absolute top-0 left-0 w-full  z-20 flex flex-col justify-center items-center py-10 sm:py-16 md:py-20 pointer-events-none">
-    {/* Center spotlight with vertical animation */}
-    {spotlightActive && (
-      <>
-       <Spotlight
-          className="w-full h-[140vh]"
+    <div className="absolute inset-0 w-full h-screen z-20 flex flex-col justify-center items-center pointer-events-none">
+      {/* Center spotlight with vertical animation */}
+      {spotlightActive && (
+        <Spotlight
+          className="w-full h-full absolute inset-0"
           fill="rgb(255, 255, 255)"
           mode="light"
+          hasScrolled={hasScrolled}
+          onAnimationComplete={onSpotlightComplete}
         />
-
-      </>
-    )}
-  
-    {/* Text container with better spacing for mobile */}
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: textVisible ? 1 : 0 }}
-      transition={{ duration: 1.5 }}
-      className="translate-y-[2rem] xs:translate-y-[2.5rem] sm:translate-y-[4rem] md:translate-y-[6rem] relative z-30 px-4 sm:px-6 md:px-0"
-    >
-      {/* The rest of your Header content remains the same */}
-      <div className="mb-4 sm:mb-6 md:mb-8 text-3xl font-bold tracking-tight sm:text-5xl md:text-6xl justify-center items-center text-center">
-        {/* Larger SrvTrip text with animated gradient */}
-        <motion.div 
-          className="text-transparent bg-clip-text"
-          animate={{ 
-            backgroundImage: [
-              "linear-gradient(to right, #3b82f6, #6366f1, #a855f7)",
-              "linear-gradient(to right, #8b5cf6, #3b82f6, #06b6d4)",
-              "linear-gradient(to right, #6366f1, #a855f7, #ec4899)",
-              "linear-gradient(to right, #3b82f6, #6366f1, #a855f7)"
-            ]
-          }}
-          transition={{ 
-            duration: 3, 
-            repeat: Infinity,
-            repeatType: "mirror" 
-          }}
-        >
-          <div className="xs:text-xs sm:text-sm md:text-2xl text-3xl">
-            SrvTrip
-          </div>
-        </motion.div>
-          
-          {/* Insert the component here */}
-          <div className="h-[15rem] flex flex-col justify-center items-center px-4 mt-4">
-            <div className="flex justify-center items-center gap-3 sm:gap-5 mb-4">
-              <span className=" sm:text-xl md:text-3xl text-3xl font-semibold  bg-clip-text text-white whitespace-nowrap">
+      )}
+    
+      {/* Text container centered vertically */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: textVisible ? 1 : 0 }}
+        transition={{ duration: 1.5 }}
+        className="relative z-30 px-4 sm:px-6 md:px-0 w-full max-w-full"
+      >
+        {/* The rest of your Header content remains the same */}
+        <div className="mb-4 sm:mb-6 md:mb-8 text-3xl font-bold tracking-tight sm:text-5xl md:text-6xl flex flex-col justify-center items-center text-center">
+          {/* Larger SrvTrip text with animated gradient */}
+          <motion.div 
+            className="text-transparent bg-clip-text filter drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]"
+            animate={{ 
+              backgroundImage: [
+                "linear-gradient(to right, #3b82f6, #6366f1, #a855f7)",
+                "linear-gradient(to right, #8b5cf6, #3b82f6, #06b6d4)",
+                "linear-gradient(to right, #6366f1, #a855f7, #ec4899)",
+                "linear-gradient(to right, #3b82f6, #6366f1, #a855f7)"
+              ]
+            }}
+            transition={{ 
+              duration: 3, 
+              repeat: Infinity,
+              repeatType: "mirror" 
+            }}
+          >
+            <div className="xs:text-2xl sm:text-3xl md:text-7xl text-6xl font-bold ">
+              SrvTrip
+            </div>
+          </motion.div>
+            
+          {/* Text sections with better mobile centering */}
+          <div className="h-auto sm:h-[15rem] flex flex-col justify-center items-center px-4 mt-4">
+            {/* Build + FlipWords section */}
+            <div className="flex flex-col xs:flex-row justify-center items-center gap-2 xs:gap-3 sm:gap-5 mb-4 w-full">
+              <span className="sm:text-lg md:text-2xl text-2xl font-semibold text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
                 Build
               </span>
-              <div className="w-[180px] sm:w-[220px] md:w-[280px] min-h-[60px] flex items-center">
+              <div className="w-full xs:w-[180px] sm:w-[220px] md:w-[280px] min-h-[60px] flex items-center justify-center">
                 <FlipWords 
                   words={words} 
-                  className="text-4xl sm:text-5xl md:text-6xl font-semibold"
+                  className="text-3xl sm:text-4xl md:text-5xl font-semibold text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]"
                 />
               </div>
             </div>
-            <div className="text-4xl sm:text-5xl md:text-6xl font-semibold text-transparent bg-clip-text bg-gradient-to-b from-blue-200 to-blue-600">
-              Travel Itineraries with AI
+            
+            {/* Travel Itineraries text */}
+            <div className="text-center text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-semibold text-white bg-clip-text drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] mt-2 xs:mt-0">
+              <span className="bg-gradient-to-b from-white to-blue-300 text-transparent bg-clip-text drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+                Travel Itineraries with AI
+              </span>
             </div>
           </div>
         </div>
-        
-        
       </motion.div>
     </div>
   );
@@ -322,7 +348,7 @@ export const ProductCard = ({
         y: -20,
       }}
       key={product.title}
-      className="group/product h-64 sm:h-80 md:h-96 w-[16rem] sm:w-[24rem] md:w-[30rem] relative shrink-0"
+      className="group/product h-40 xs:h-48 sm:h-64 md:h-80 lg:h-96 w-[8rem] xs:w-[10rem] sm:w-[16rem] md:w-[20rem] lg:w-[24rem] relative shrink-0"
     >
         <motion.img
           src={product.thumbnail}
