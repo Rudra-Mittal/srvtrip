@@ -90,6 +90,7 @@ export async function itenarariesRoute(req:AuthRequest,res:Response){
         
         itineraries.push({
             itinerary:{
+                id:itinerary.id,
                 budget:itinerary.budget,
                 destination:itinerary.destination,
                 number_of_days:itinerary.duration,

@@ -21,6 +21,7 @@ import { useDispatch } from 'react-redux';
 import { addItinerary } from '@/store/slices/itinerarySlice';
 import { addPlace } from '@/store/slices/placeSlice';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 
 interface FormData {
   destination: string;
@@ -186,6 +187,24 @@ export default function Form() {
     
     genitinerary(submissionData).then(async (res)=>{
       clearTimeout(timeoutTimer);
+      //if error thrown is invalid destination then show the error message
+      if(res.error){
+        //handle error here and sendback to form page
+        console.log("Error in generating itinerary:",res.error)
+        setIsAggregating(false);
+        setShowSummary(false);
+        setFormVisible(true);
+        toast.error("Invalid destination. Please try again with a valid destination.", {
+          duration: 4000,
+          style: {
+            background: '#000',
+            color: '#fff',
+            border: '1px solid rgba(59, 130, 246, 0.5)',
+          },
+          icon: '🌍',
+        });
+        navigate("/form");
+      }
       console.log("newitinerary",JSON.parse(res.newItenary))
       dispatch(addItinerary(await JSON.parse(res.newItenary)))
       dispatch(addPlace(await JSON.parse(res.placesData)))
