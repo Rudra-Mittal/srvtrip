@@ -14,6 +14,15 @@ export async function placeInfo(placename: string,dayNum:number,photoLimit=5): P
     }).
         then(async (da) => {
             const data = await da.json() as any;
+            console.log("Places data from places api:",data)
+            //check if any place is found or the place is not found (if gibberish or not a place)
+            if(!data.places||data.places.length==0){
+                console.log("No place found for this name")
+                //this is just to check if the place is not found or gibberish from the form data destination
+                return{
+                    notfound :true,
+                }
+            }
             const place= data.places[0];
             // console.log("Place data:",place)
             // check if this place exist already in db

@@ -11,10 +11,24 @@ import { ProtectedRoute } from './components/ProtectedRoutes/ProtectedRoute'
 import HistoryPage from './pages/historyPage'
 import { Navbar } from "@/components/Navbar"
 import { AuthRoute } from './components/ProtectedRoutes/AuthRoute'
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   return (
     <>
+      {/* Toast container */}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 5000,
+          style: {
+            background: '#000',
+            color: '#fff',
+            border: '1px solid rgba(59, 130, 246, 0.5)',
+          },
+        }}
+      />
+      
       <BrowserRouter>
         <AuthRoute>
           <Navbar />

@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import { generateItinerary } from "./services/genItinerary";
 import { extractPlacesByRegex } from "./services/extractPlacesbyRegex";
 import { convertItineraryToPara } from "./services/convertItineraryToPara";
+import { placeInfo } from "../controllers/places";
 
 
 const app = express();

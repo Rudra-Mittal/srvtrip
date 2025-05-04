@@ -12,7 +12,7 @@ import createPlace from "../utils/createPlace";
 import callWebScrapper from "./callWebScrapper";
 
 export const itenaryRoute = async (req: AuthRequest, res:Response) => {
-  await new Promise((resolve) => setTimeout(resolve, 1000000)); // Simulate a delay of 1 second
+  // await new Promise((resolve) => setTimeout(resolve, 1000000)); // Simulate a delay of 1 second
   try{
     const { prompt } = req.body;
   console.log("prompt",prompt);
@@ -22,6 +22,14 @@ export const itenaryRoute = async (req: AuthRequest, res:Response) => {
 
   if (!userId) {
     res.status(403).json({ "error": "User not found" });
+    return
+  }
+
+  //firstly check if destination is valid or not it shouldnt be gibberish or not a place
+  const placeFound=await placeInfo(prompt.destination,1,0);
+  if(placeFound.notfound){
+    console.log("No place found for this name");
+    res.status(403).json({ "error": "Invalid destination" });
     return
   }
 
