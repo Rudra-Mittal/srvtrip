@@ -43,8 +43,18 @@ export const itenaryRoute = async (req: AuthRequest, res:Response) => {
     )
   ) as placesData;
   let dayNum = 0
-  const newItenary = replacePlace(itenary, placesData)
+  let newItenary = replacePlace(itenary, placesData)
   const itenaryid = await createItenary(newItenary, userId);
+  if (!itenaryid) {
+    res.status(403).json({ "error": "User not found" });
+    return;
+  }
+
+  // Add the itinerary ID to the new itinerary
+  const newItenaryObject = JSON.parse(newItenary); // Parse the JSON string
+    newItenaryObject.itinerary.id = itenaryid; // Append the ID
+    newItenary = JSON.stringify(newItenaryObject); 
+  
   if (!itenaryid) {
     res.status(403).json({ "error": "User not found" });
     return

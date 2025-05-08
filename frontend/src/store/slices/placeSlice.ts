@@ -16,6 +16,14 @@ const placeSlice = createSlice({
             state.places = action.payload;
             localStorage.setItem("places", JSON.stringify(action.payload));
         },
+        appendPlaces: (state,action) =>
+        {
+            const oldplaces = localStorage.getItem("places")
+            const newplaces = action.payload
+            const updatedPlaces = oldplaces ? [...JSON.parse(oldplaces), ...newplaces] : newplaces;
+            state.places = updatedPlaces;
+            localStorage.setItem("places", JSON.stringify(updatedPlaces));
+        },
         addPlace: (state, action) => {
             state.places.push(action.payload);
             localStorage.setItem("places", JSON.stringify(state.places));
@@ -43,5 +51,5 @@ const placeSlice = createSlice({
         },
     },
 });
-export const { setPlaces, addPlace,setActivePlaceId,setChatbotOpen,setReview } = placeSlice.actions;
+export const { setPlaces, addPlace,setActivePlaceId,setChatbotOpen,setReview , appendPlaces } = placeSlice.actions;
 export default placeSlice.reducer;
