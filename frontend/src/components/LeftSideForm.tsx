@@ -47,7 +47,7 @@ export default function LeftSideForm({ type }: { type: string }) {
         }
       } else {
         await signin(email, password);
-        // navigate('/'); // Navigate to home after successful authentication
+        navigate('/'); // Navigate to home after successful authentication
       }
     } catch (err: any) {
       setError(err.message);

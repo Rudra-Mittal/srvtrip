@@ -16,6 +16,7 @@ import { queryRoute } from './controllers/queryRoute';
 import { itenarariesRoute } from './controllers/itenarariesRoute';
 import { serverAuthMiddleware } from './middleware/serverAuthMiddleware';
 import { summaryRoute } from './utils/summaryRoute';
+import { fetchItineraries } from './controllers/fetchitineraries';
 dotenv.config();
 const app = express();
 const PORT = 4000;
@@ -47,8 +48,9 @@ app.get("/api/auth/user", authMiddleware, userRoute)
 
 app.post('/api/summarize',serverAuthMiddleware, summarizeRoute)
 
-app.use(authMiddleware);//use auth middleware for all routes after this line 
 
+app.use(authMiddleware);//use auth middleware for all routes after this line 
+app.post('/api/fetchitineraries', fetchItineraries)
 app.post('/api/itenary', itenaryRoute)
 app.get('/api/itineraries', itenarariesRoute)
 app.post('/query', queryRoute)

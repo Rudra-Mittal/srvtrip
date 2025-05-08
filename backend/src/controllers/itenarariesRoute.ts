@@ -102,7 +102,7 @@ export async function itenarariesRoute(req:AuthRequest,res:Response){
                 remaining_budget:itinerary.remainingBudget,
             }
         })
-        // console.log("modifiedDays",modifiedDays)
+        console.log("modifiedDays",itineraries)
     }
    
     res.status(200).json({itineraries:itineraries,placesData:placesData})

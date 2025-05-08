@@ -17,6 +17,14 @@ const itinerarySlice = createSlice({
             state.itineraries = action.payload;
             localStorage. setItem("itineraries", JSON.stringify(action.payload));
         },
+        appenditinerary: (state,action) =>
+            {
+                const olditinerary = localStorage.getItem("itineraries")
+                const newitinerary = action.payload
+                const updateditinerary = olditinerary ? [...JSON.parse(olditinerary), ...newitinerary] : newitinerary;
+                state.itineraries = updateditinerary;
+                localStorage.setItem("itineraries", JSON.stringify(updateditinerary));
+            },
         addItinerary: (state, action) => {
             state.itineraries.push(action.payload);
             localStorage.setItem("itineraries", JSON.stringify(state.itineraries));
@@ -26,5 +34,5 @@ const itinerarySlice = createSlice({
         }
     },
 });
-export const {setItineraries,addItinerary,setSelectedItinerary} = itinerarySlice.actions;
+export const {setItineraries,addItinerary,setSelectedItinerary , appenditinerary} = itinerarySlice.actions;
 export default itinerarySlice.reducer;

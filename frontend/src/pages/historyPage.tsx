@@ -1,22 +1,62 @@
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon, RefreshCwIcon } from "lucide-react";
+import { handleFetchItineraries } from "@/api/itineraryfetch";
+import { appenditinerary} from "@/store/slices/itinerarySlice";
+import { appendPlaces } from "@/store/slices/placeSlice";
 
 export default function HistoryPage() {
     const itineraries = useSelector((state: any) => state.itinerary.itineraries);
-
+    console.log("Itineraries from Redux:", itineraries);
+    const storedIds = itineraries
+    .map((itinerary: any) => itinerary?.itinerary?.id)
+    .filter(Boolean);
+    console.log("Stored IDdddss:", storedIds);
     // Default to showing the most recent itinerary if available
     const [selectedItineraryIndex, setSelectedItineraryIndex] = useState(0);
+    // Add loading state for fetch action
+    const [isLoading, setIsLoading] = useState(false);
+    const dispatch = useDispatch();
+    
+    const fetchItineraries = async () => {
+        console.log("request reach here")
+        setIsLoading(true);
+        try {
+            const response = await handleFetchItineraries(storedIds);
+            console.log("Fetched itineraries:", response);
+            dispatch(appenditinerary(response.itineraries));
+            dispatch(appendPlaces(response.placesData));
+        } catch (error) {
+            console.error("Error fetching itineraries:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
     
     if (!itineraries || itineraries.length === 0) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-                <div className="max-w-md w-full bg-gray-800/50 backdrop-blur-lg p-6 rounded-lg shadow-lg border border-blue-500/20">
+                <div className="max-w-md w-full bg-gray-800/50 backdrop-blur-lg p-6 rounbded-lg shadow-lg border border-blue-500/20">
                     <h2 className="text-2xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">No Itineraries Found</h2>
                     <p className="text-gray-400 mb-6">
                         You haven't created any itineraries yet.
                     </p>
+                    <motion.button
+                        className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg text-white font-medium flex items-center justify-center gap-2 overflow-hidden group relative"
+                        whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(79, 70, 229, 0.5)" }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={fetchItineraries}
+                    >
+                        <motion.span
+                            animate={isLoading ? { rotate: 360 } : { rotate: 0 }}
+                            transition={isLoading ? { repeat: Infinity, duration: 1, ease: "linear" } : {}}
+                        >
+                            <RefreshCwIcon className="w-5 h-5" />
+                        </motion.span>
+                        <span>Fetch Itineraries From DB</span>
+                        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-blue-600/0 via-white/10 to-blue-600/0 opacity-0 group-hover:opacity-100 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-all duration-1000"></div>
+                    </motion.button>
                 </div>
             </div>
         );
@@ -45,40 +85,39 @@ export default function HistoryPage() {
     };
     
     // Get interest categories if interests exist
-    // Update the getInterestCategories function
-const getInterestCategories = () => {
-    if (!selectedItinerary?.interests) return {};
-    
-    const categories: Record<string, { icon: string; interests: string[] }> = {};
-    
-    // Handle both string and array types
-    const interestsArray = Array.isArray(selectedItinerary.interests)
-        ? selectedItinerary.interests
-        : typeof selectedItinerary.interests === 'string'
-            ? selectedItinerary.interests.split(',')
-            : [];
-    
-    interestsArray.forEach((interest: string) => {
-        if (typeof interest !== 'string') return;
+    const getInterestCategories = () => {
+        if (!selectedItinerary?.interests) return {};
         
-        const trimmed: string = interest.trim().toLowerCase();
+        const categories: Record<string, { icon: string; interests: string[] }> = {};
         
-        // Find a matching interest or use default
-        const key: string = Object.keys(interestIcons).find((k: string) => 
-            trimmed.includes(k) || k.includes(trimmed)
-        ) || trimmed;
+        // Handle both string and array types
+        const interestsArray = Array.isArray(selectedItinerary.interests)
+            ? selectedItinerary.interests
+            : typeof selectedItinerary.interests === 'string'
+                ? selectedItinerary.interests.split(',')
+                : [];
         
-        const { icon, category }: { icon: string; category: string } = interestIcons[key] || { icon: "✨", category: "Other" };
+        interestsArray.forEach((interest: string) => {
+            if (typeof interest !== 'string') return;
+            
+            const trimmed: string = interest.trim().toLowerCase();
+            
+            // Find a matching interest or use default
+            const key: string = Object.keys(interestIcons).find((k: string) => 
+                trimmed.includes(k) || k.includes(trimmed)
+            ) || trimmed;
+            
+            const { icon, category }: { icon: string; category: string } = interestIcons[key] || { icon: "✨", category: "Other" };
+            
+            if (!categories[category]) {
+                categories[category] = { icon: icon, interests: [] };
+            }
+            
+            categories[category].interests.push(interest.trim());
+        });
         
-        if (!categories[category]) {
-            categories[category] = { icon: icon, interests: [] };
-        }
-        
-        categories[category].interests.push(interest.trim());
-    });
-    
-    return categories;
-};
+        return categories;
+    };
     
     const interestCategories = getInterestCategories();
     
@@ -90,9 +129,30 @@ const getInterestCategories = () => {
                 transition={{ duration: 0.6 }}
                 className="max-w-2xl w-full"
             >
-                <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
-                    Your Travel History
-                </h1>
+                <div className="flex flex-col md:flex-row items-center justify-between mb-6">
+                    <h1 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
+                        Your Travel History
+                    </h1>
+                    
+                    <motion.button
+                        className="mt-4 md:mt-0 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg text-white font-medium flex items-center gap-2 relative overflow-hidden group"
+                        whileHover={{ scale: 1.05, boxShadow: "0 0 15px rgba(79, 70, 229, 0.4)" }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => fetchItineraries()}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.4 }}
+                    >
+                        <motion.span
+                            animate={isLoading ? { rotate: 360 } : { rotate: 0 }}
+                            transition={isLoading ? { repeat: Infinity, duration: 1, ease: "linear" } : {}}
+                        >
+                            <RefreshCwIcon className="w-4 h-4" />
+                        </motion.span>
+                        <span>Fetch Itineraries From DB</span>
+                        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-blue-600/0 via-white/10 to-blue-600/0 opacity-0 group-hover:opacity-100 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-all duration-1000"></div>
+                    </motion.button>
+                </div>
                 
                 {itineraries.length > 1 && (
                     <div className="flex justify-center mb-6 gap-2">
