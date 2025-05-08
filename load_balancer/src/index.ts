@@ -1,40 +1,99 @@
 import express from 'express';
 import { trySendingRequest } from './services/trySendingRequests';
 import { getAllHealthyScrapers } from './services/getAllHealthyScraper';
-const app=express();
+const app = express();
+
+// Simple in-memory storage to track pending requests
+const pendingRequests = new Map();
 
 app.use(express.json());
 
-app.post("/loadbalancer", async(req, res) => {
+// Main load balancer endpoint - send to best scraper asynchronously
+app.post("/loadbalancer", async(req:any, res:any) => {
+    // Generate a unique request ID
+    const requestId = Date.now().toString() + Math.random().toString(36).substring(2, 15);
+    
     // Get all healthy scrapers in order from best to worst
     const healthyScrapers = await getAllHealthyScrapers();
     
     if(healthyScrapers.length === 0){
-        res.status(503).json({ "error": "No healthy scraper servers available" });
-        return;
+        return res.status(503).json({ "error": "No healthy scraper servers available" });
     }
     
-    // Try each server in order until one succeeds or we run out of servers
-    for (let i = 0; i < healthyScrapers.length; i++) {
-        const currentScraper = healthyScrapers[i];
-        console.log(`Attempt ${i+1}/${healthyScrapers.length}: Trying scraper ${currentScraper}`);
-        
-        const result = await trySendingRequest(currentScraper, req.body);
-        
-        if (result.success) {
-            console.log(`Successfully processed by scraper: ${currentScraper}`);
-            res.status(200).json(result.data);
-            return;
-        }
-        
-        console.log(`Scraper ${currentScraper} failed. ${i < healthyScrapers.length - 1 ? 'Trying next server.' : 'No more servers to try.'}`);
-    }
+    // Take only the best scraper
+    const bestScraper = healthyScrapers[0];
+    console.log(`Selected best scraper: ${bestScraper}`);
     
-    // If we get here, all servers failed
-    res.status(503).json({ "error": "All available scraper servers failed to process the request" });
+    // Store the request data and available scrapers for potential retry
+    pendingRequests.set(requestId, {
+        requestData: req.body,
+        scrapers: healthyScrapers,
+        currentScraperIndex: 0,
+        attempts: 1
+    });
+    
+    // Send request to best scraper asynchronously (fire and forget)
+    trySendingRequest(bestScraper, {
+        ...req.body,
+        requestId // Pass the request ID so scraper can include it when reporting back
+    }).catch(err => {
+        console.error("Error sending request to scraper:", err);
+    });
+    
+    // Respond immediately to client
+    res.status(202).json({ 
+        message: "Request accepted and sent to best available scraper",
+        requestId: requestId
+    });
 });
 
-//test by sending requests to the load balancer server by sending 10 places simultaneously
+// New endpoint for scrapers to report success/failure
+app.post("/scraper-result", async(req:any, res:any) => {
+    const { requestId, success, data, error } = req.body;
+    
+    if (!requestId || pendingRequests.has(requestId) === false) {
+        return res.status(400).json({ error: "Invalid or unknown requestId" });
+    }
+    
+    const requestInfo = pendingRequests.get(requestId);
+    
+    if (success) {
+        console.log(`Request ${requestId} completed successfully`);
+        pendingRequests.delete(requestId);
+        return res.status(200).json({ message: "Success acknowledged" });
+    } else {
+        // Handle failure - try next best scraper if available
+        const nextScraperIndex = requestInfo.currentScraperIndex + 1;
+        
+        if (nextScraperIndex < requestInfo.scrapers.length) {
+            const nextScraper = requestInfo.scrapers[nextScraperIndex];
+            console.log(`Request ${requestId} failed. Retrying with next scraper: ${nextScraper}`);
+            
+            // Update request info
+            requestInfo.currentScraperIndex = nextScraperIndex;
+            requestInfo.attempts += 1;
+            pendingRequests.set(requestId, requestInfo);
+            
+            // Send to next scraper asynchronously
+            trySendingRequest(nextScraper, {
+                ...requestInfo.requestData,
+                requestId
+            }).catch(err => {
+                console.error("Error sending request to next scraper:", err);
+            });
+            
+            return res.status(200).json({ message: "Failure acknowledged, retrying with next scraper" });
+        } else {
+            // All scrapers have been tried
+            console.log(`Request ${requestId} failed on all available scrapers`);
+            pendingRequests.delete(requestId);
+            return res.status(200).json({ message: "Failure acknowledged, no more scrapers available" });
+        }
+    }
+});
+
+// For development/testing only
+// In production, you would remove this test code
 const places = [
     "Taj Mahal", "Red Fort", "India Gate", "Qutub Minar", "Gateway of India", 
     "Charminar", "Hawa Mahal", "Amber Fort", "Mysore Palace", "Victoria Memorial"
@@ -63,10 +122,10 @@ async function fireRequests() {
     }
 }
 
-fireRequests();
+// Uncomment to test
+// fireRequests();
 
-
-const PORT=9000;    
-app.listen(PORT,()=>{
+const PORT = 9000;    
+app.listen(PORT, () => {
     console.log("Load Balancer Server is running on port 9000");
-})
+});

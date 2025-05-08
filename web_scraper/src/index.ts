@@ -12,11 +12,28 @@ app.use(express.json())
 
 // auth middleware pending
 app.post('/scraper',verifyServerApiKey, async (req,res)=>{
-    console.log("Received request to loadbalancer");
-    const {placeName,maxScrolls,placeId,placeAddress}=req.body;
-    scrapingQueue.enqueue({placeId,placeName,maxScrolls,placeAddress,iteration:1})
-    res.status(200).json({"message":"Sent request successfully"})
-    return ;
+    console.log("Received request from loadbalancer");
+    const {placeName, maxScrolls, placeId, placeAddress, requestId} = req.body;
+    
+    // Check if requestId is provided
+    if (!requestId) {
+        console.log("Request received without requestId, processing normally");
+    } else {
+        console.log(`Processing request with ID: ${requestId}`);
+    }
+    
+    // Queue the task with all parameters including requestId
+    scrapingQueue.enqueue({
+        placeId, 
+        placeName, 
+        maxScrolls, 
+        placeAddress, 
+        iteration: 1,
+        requestId // Pass the requestId to the queue
+    });
+    
+    res.status(200).json({"message":"Sent request successfully"});
+    return;
 });
 
 app.get("/status",async(req,res)=>{

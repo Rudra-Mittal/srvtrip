@@ -4,4 +4,5 @@ export interface ScrapingTask {
     maxScrolls: number;
     placeAddress:string,
     iteration:number 
+    requestId?: string; // Optional requestId for load balancer 
 }

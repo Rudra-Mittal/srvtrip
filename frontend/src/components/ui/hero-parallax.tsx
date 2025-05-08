@@ -29,6 +29,23 @@ export const HeroParallax = ({
   const [spotlightActive, setSpotlightActive] = useState(false);
   const [spotlightCompleted, setSpotlightCompleted] = useState(false);
   const [textVisible, setTextVisible] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState(0);
+  
+  // Detect viewport size
+  useEffect(() => {
+    const updateDimensions = () => {
+      setViewportHeight(window.innerHeight);
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Initial check
+    updateDimensions();
+    
+    // Listen for resize events
+    window.addEventListener('resize', updateDimensions);
+    return () => window.removeEventListener('resize', updateDimensions);
+  }, []);
   
   // Animation sequence control
   useEffect(() => {
@@ -91,15 +108,16 @@ export const HeroParallax = ({
     useTransform(scrollYProgress, [0, 0.2], [15, 0]),
     springConfig
   );
-  // Update opacity to be based on scroll position
-
   
   const rotateZ = useSpring(
     useTransform(scrollYProgress, [0, 0.2], [20, 0]),
     springConfig
   );
+  
+  // Position images with a consistent approach for all screen sizes
+  // Start with images near the center, then transition down as you scroll
   const translateY = useSpring(
-    useTransform(scrollYProgress, [0, 0.2], [-700, 500]),
+    useTransform(scrollYProgress, [0, 0.2], [0, 300]),
     springConfig
   );
   
@@ -115,7 +133,7 @@ export const HeroParallax = ({
       translateXReverse.set(0);
       rotateX.set(15);
       rotateZ.set(20);
-      translateY.set(-700);
+      translateY.set(0);
     };
   }, [initialized]);
 
@@ -136,78 +154,73 @@ export const HeroParallax = ({
         hasScrolled={hasScrolled}
         onSpotlightComplete={handleSpotlightComplete}
       />
-      <motion.div
-        style={{
-          rotateX,
-          rotateZ,
-          translateY,
-        }}
-        className="z-10 pointer-events-auto"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: spotlightCompleted ? 1 : 0 }}
-        transition={{ duration: 1 }}
-      >
-        <motion.div 
-          className="flex flex-row-reverse space-x-reverse space-x-4 xs:space-x-6 sm:space-x-10 md:space-x-16 lg:space-x-20 mb-8 sm:mb-12 md:mb-16 lg:mb-20"
-          initial={{ opacity: 0 }}
-          animate={{ 
-            opacity: imagesLoaded && spotlightCompleted ? 
-              (hasScrolled ? 0.9 : 0.9) : 0 
+      
+      {/* Position the content container in the center of viewport initially */}
+      <div className="absolute inset-0 flex  justify-center">
+        <motion.div
+          style={{
+            rotateX,
+            rotateZ,
+            translateY,
           }}
+          className="z-10 pointer-events-auto"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: spotlightCompleted ? 1 : 0 }}
           transition={{ duration: 1 }}
         >
-          {firstRow.map((product) => (
-            <ProductCard
-              product={product}
-              translate={translateX}
-              key={product.title}
-              isLoaded={imagesLoaded && spotlightCompleted}
-              spotlightActive={false}
-              hasScrolled={hasScrolled}
-            />
-          ))}
+          <motion.div 
+            className="flex flex-row-reverse space-x-reverse space-x-4 xs:space-x-6 sm:space-x-10 md:space-x-16 lg:space-x-20 mb-8 sm:mb-12 md:mb-16 lg:mb-20"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: imagesLoaded && spotlightCompleted ? 1 : 0 }}
+            transition={{ duration: 1 }}
+          >
+            {firstRow.map((product) => (
+              <ProductCard
+                product={product}
+                translate={translateX}
+                key={product.title}
+                isLoaded={imagesLoaded && spotlightCompleted}
+                spotlightActive={spotlightActive}
+                hasScrolled={hasScrolled}
+              />
+            ))}
+          </motion.div>
+          <motion.div 
+            className="flex flex-row mb-8 sm:mb-12 md:mb-16 lg:mb-20 space-x-4 xs:space-x-6 sm:space-x-10 md:space-x-16 lg:space-x-20"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: imagesLoaded && spotlightCompleted ? 1 : 0 }}
+            transition={{ duration: 1, delay: 0.2 }}
+          >
+            {secondRow.map((product) => (
+              <ProductCard
+                product={product}
+                translate={translateXReverse}
+                key={product.title}
+                isLoaded={imagesLoaded && spotlightCompleted}
+                spotlightActive={spotlightActive}
+                hasScrolled={hasScrolled}
+              />
+            ))}
+          </motion.div>
+          <motion.div 
+            className="flex flex-row-reverse space-x-reverse space-x-4 xs:space-x-6 sm:space-x-10 md:space-x-16 lg:space-x-20"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: imagesLoaded && spotlightCompleted ? 1 : 0 }}
+            transition={{ duration: 1, delay: 0.4 }}
+          >
+            {thirdRow.map((product) => (
+              <ProductCard
+                product={product}
+                translate={translateX}
+                key={product.title}
+                isLoaded={imagesLoaded && spotlightCompleted}
+                spotlightActive={spotlightActive}
+                hasScrolled={hasScrolled}
+              />
+            ))}
+          </motion.div>
         </motion.div>
-        <motion.div 
-          className="flex flex-row mb-8 sm:mb-12 md:mb-16 lg:mb-20 space-x-4 xs:space-x-6 sm:space-x-10 md:space-x-16 lg:space-x-20"
-          initial={{ opacity: 0 }}
-          animate={{ 
-            opacity: imagesLoaded && spotlightCompleted ? 
-              (hasScrolled ? 0.9 : 0.9) : 0 
-          }}
-          transition={{ duration: 1, delay: 0.2 }}
-        >
-          {secondRow.map((product) => (
-            <ProductCard
-              product={product}
-              translate={translateXReverse}
-              key={product.title}
-              isLoaded={imagesLoaded && spotlightCompleted}
-              spotlightActive={false}
-              hasScrolled={hasScrolled}
-            />
-          ))}
-        </motion.div>
-        <motion.div 
-          className="flex flex-row-reverse space-x-reverse space-x-4 xs:space-x-6 sm:space-x-10 md:space-x-16 lg:space-x-20"
-          initial={{ opacity: 0 }}
-          animate={{ 
-            opacity: imagesLoaded && spotlightCompleted ? 
-              (hasScrolled ? 0.9 : 0.9) : 0 
-          }}
-          transition={{ duration: 1, delay: 0.4 }}
-        >
-          {thirdRow.map((product) => (
-            <ProductCard
-              product={product}
-              translate={translateX}
-              key={product.title}
-              isLoaded={imagesLoaded && spotlightCompleted}
-              spotlightActive={false}
-              hasScrolled={hasScrolled}
-            />
-          ))}
-        </motion.div>
-      </motion.div>
+      </div>
     </div>
   );
 };
@@ -325,13 +338,13 @@ export const ProductCard = ({
         // Keep the high opacity
         setImageOpacity(0.9);
       } else {
-        // Initial state behavior
-        setImageOpacity(spotlightActive ? 0.5 : 0.9);
+        // Initial state behavior - always visible
+        setImageOpacity(0.9);
       }
     } else if (isLoaded && !hasScrolled) {
-      // Initial state or after refresh
+      // Initial state or after refresh - ensure visibility
       if (!hasEverScrolled) {
-        setImageOpacity(spotlightActive ? 1: 0.9);
+        setImageOpacity(0.9);
       }
     }
     
@@ -357,9 +370,7 @@ export const ProductCard = ({
           initial={{ opacity: 0, filter: "brightness(80%)" }}
           animate={{ 
             opacity: isLoaded ? imageOpacity : 0,
-            filter: hasEverScrolled || hasScrolled
-              ? "brightness(80%)" // Full brightness when ever scrolled
-              : (spotlightActive ? "brightness(40%)" : "brightness(80%)") // Dimmed with spotlight initially
+            filter: "brightness(80%)"
           }}
           transition={{ 
             opacity: { duration: 1 },
