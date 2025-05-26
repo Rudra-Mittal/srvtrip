@@ -11,27 +11,38 @@ export function summaryRoute(req: any, res: any) {
         return
     }
     console.log("Place ID:", placeid);
-     prisma.place.findFirst({
-        where:{
-            placeId:placeid
+    interface SummarizedReviewData {
+        summarizedReview: string | null;
+    }
+
+    interface ErrorResponse {
+        error: string;
+    }
+
+    interface SuccessResponse {
+        summarizedReview: string;
+    }
+
+    prisma.place.findFirst({
+        where: {
+            placeId: placeid
         },
-        select:{
-            summarizedReview:true,
+        select: {
+            summarizedReview: true,
         }
-     }).then((data)=>{
+    }).then((data: SummarizedReviewData | null) => {
         // console.log("Data fetched from DB:", data);
-        if(data?.summarizedReview){
-            res.status(200).json({summarizedReview:data.summarizedReview})
-        }else{
-            res.status(404).json({error:"No summary found"})
+        if (data?.summarizedReview) {
+            res.status(200).json({ summarizedReview: data.summarizedReview });
+        } else {
+            res.status(404).json({ error: "No summary found" });
         }
-        return ;
-        
-     }).catch((error)=>{
+        return;
+    }).catch((error: Error) => {
         // console.error("Error fetching summary:", error);
-        res.status(500).json({error:"DB Error"})
-        return
-     })
+        res.status(500).json({ error: "DB Error" });
+        return;
+    })
    }catch(error){
         // console.error("Error in summaryRoute:", error);
         res.status(500).json({error:"Internal Server Error"})
