@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 export default async function callWebScrapper(placeName:string,maxScrolls:Number,placeId:string,placeAddress:string){
-   return fetch("http://localhost:9000/loadbalancer",{
+   return fetch(process.env.LOAD_BALANCER_URL as string,{
         method:'POST',
         headers:{
             'Content-Type':'application/json',

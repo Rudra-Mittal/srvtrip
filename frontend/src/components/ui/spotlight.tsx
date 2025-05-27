@@ -17,7 +17,7 @@ export const Spotlight = ({
   fill, 
   direction = "top-left",
   mode = "light",
-  intensity = 0.4,
+  intensity = 0.2,
   width = 100,
   hasScrolled = false,
   onAnimationComplete
