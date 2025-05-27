@@ -24,7 +24,7 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
           console.log(itineraries)
           if(!itineraries){
             console.log("tyao")
-            fetch("http://localhost:4000/api/itineraries", {
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/itineraries`, {
               method: "GET",
               headers: {
                 "Content-Type": "application/json", 

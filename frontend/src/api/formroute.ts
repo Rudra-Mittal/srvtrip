@@ -22,7 +22,7 @@
     });
     }
 
-   export  const genotp = async (email:any) => await fetch('http://localhost:4000/generate-otp',{
+   export  const genotp = async (email:any) => await fetch(`${import.meta.env.VITE_BACKEND_URL}/generate-otp`,{
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -42,7 +42,7 @@
     }
     );
    
-    export const verifyotp = async(email:string,otp:any,password:string,name:string) => await fetch('http://localhost:4000/verify-otp', {
+    export const verifyotp = async(email:string,otp:any,password:string,name:string) => await fetch(`${import.meta.env.VITE_BACKEND_URL}/verify-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

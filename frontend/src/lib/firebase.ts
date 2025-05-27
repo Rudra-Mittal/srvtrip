@@ -65,7 +65,7 @@ export function useAuth() {
       
       // Call your backend to store user in your database
       try {
-        const response = await fetch('http://localhost:4000/signup', {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/signup`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -124,7 +124,7 @@ const signin = async (email: string, password: string) => {
     
     // Verify with backend
     try {
-      const response = await fetch('http://localhost:4000/signin', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/signin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -175,7 +175,7 @@ const signin = async (email: string, password: string) => {
       
       // Create or verify user in backend
       try {
-        const response = await fetch('http://localhost:4000/signin', {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/signin`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
