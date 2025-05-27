@@ -1,22 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { loginUser } from "@/store/slices/userSlice";
 import { auth } from "@/api/auth";
-import {useNavigate} from "react-router-dom";
+// import {useNavigate} from "react-router-dom";
 
 
 // Simple protected route helper function that handles its own loading state
 export const AuthRoute = ({ children }: { children: React.ReactNode }) => {
 
-    const [loading, setLoading] = useState(true);
-    const navigate=useNavigate();
+    // const navigate=useNavigate();
     const dispatch = useDispatch();
     useEffect(()=>{
      auth().then((user)=>{
-      if(user.error){
-        setLoading(true);
+      if(!user.error){
+        dispatch(loginUser(user));
       }
-      else dispatch(loginUser(user));
      });
       
     },[]);

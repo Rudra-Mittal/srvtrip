@@ -1,14 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
-import {  AnimatePresence } from "framer-motion"
+import { AnimatePresence } from "framer-motion"
 import { Star } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { BackgroundGradient } from "@/components/ui/backgroud-gradient";
 export default function Reviews() {
   const [isAggregating, setIsAggregating] = useState(false)
-  const [isSwirling, setIsSwirling] = useState(false)
   const [showSummary, setShowSummary] = useState(false)
   const [initialPositions, setInitialPositions] = useState<Array<{ x: number; y: number }>>([])
   const containerRef = useRef<HTMLDivElement>(null)
@@ -108,7 +107,6 @@ const handleAggregate = async () => {
 
   const handleReset = () => {
     setIsAggregating(false)
-    setIsSwirling(false)
     setShowSummary(false)
   }
 
@@ -321,4 +319,3 @@ const handleAggregate = async () => {
        </div>
   )
 }
-        

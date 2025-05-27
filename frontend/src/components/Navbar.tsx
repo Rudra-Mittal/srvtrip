@@ -38,7 +38,7 @@ export const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
   
   // Handle logout functionality
   const handleLogout = () => {
@@ -46,7 +46,7 @@ export const Navbar = () => {
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     
     // Show loading state if needed
-    setIsLoading(true);
+    // setIsLoading(true);
     
     // Call the backend route to signout the user - Remove double slash
     fetch(`${backendUrl}api/auth/signout`, {
@@ -72,7 +72,7 @@ export const Navbar = () => {
       // You might want to show an error notification here
     })
     .finally(() => {
-      setIsLoading(false);
+      // setIsLoading(false);
     });
   };
   

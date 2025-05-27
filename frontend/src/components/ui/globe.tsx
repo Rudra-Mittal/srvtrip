@@ -14,21 +14,21 @@ declare module "@react-three/fiber" {
   }
 }
 
-function hexToRgb(hex: string) {
-  // Remove the # if present
-  hex = hex.replace(/^#/, '');
+// function hexToRgb(hex: string) {
+//   // Remove the # if present
+//   hex = hex.replace(/^#/, '');
   
-  // Parse the hex values
-  const bigint = parseInt(hex, 16);
+//   // Parse the hex values
+//   const bigint = parseInt(hex, 16);
   
-  // Extract the RGB components
-  const r = (bigint >> 16) & 255;
-  const g = (bigint >> 8) & 255;
-  const b = bigint & 255;
+//   // Extract the RGB components
+//   const r = (bigint >> 16) & 255;
+//   const g = (bigint >> 8) & 255;
+//   const b = bigint & 255;
   
-  // Return as an object
-  return { r, g, b };
-}
+//   // Return as an object
+//   return { r, g, b };
+// }
 
 extend({ ThreeGlobe: ThreeGlobe });
 
@@ -79,7 +79,6 @@ interface WorldProps {
   data: Position[];
 }
 
-let numbersOfRings = [0];
 
 export function Globe({ globeConfig, data }: WorldProps) {
   const globeRef = useRef<ThreeGlobe | null>(null);
@@ -293,7 +292,7 @@ export function Globe({ globeConfig, data }: WorldProps) {
     let points = [];
     for (let i = 0; i < arcs.length; i++) {
       const arc = arcs[i];
-      const rgb = hexToRgb(arc.color) as { r: number; g: number; b: number };
+      // const rgb = hexToRgb(arc.color) as { r: number; g: number; b: number };
       points.push({
         size: defaultProps.pointSize,
         order: arc.order,
@@ -386,7 +385,7 @@ export function Globe({ globeConfig, data }: WorldProps) {
       );
 
       const ringsData = data
-        .filter((d, i) => newNumbersOfRings.includes(i))
+        .filter((_d, i) => newNumbersOfRings.includes(i))
         .map((d) => ({
           lat: d.startLat,
           lng: d.startLng,
@@ -424,9 +423,9 @@ export function World(props: WorldProps) {
   // Increase camera distance to accommodate the larger globe
   const adjustedCameraZ = cameraZ * (props.globeConfig.globeScale || 1.8) / 1.2;
   
-  const cameraPosition = globeConfig.positionOffset ? 
-    new Vector3(0, 0, adjustedCameraZ) : 
-    new Vector3(-(globeConfig.positionOffset ?? 0) * 100, 0, adjustedCameraZ);
+  // const cameraPosition = globeConfig.positionOffset ? 
+  //   new Vector3(0, 0, adjustedCameraZ) : 
+  //   new Vector3(-(globeConfig.positionOffset ?? 0) * 100, 0, adjustedCameraZ);
   
   const targetPosition = globeConfig.positionOffset ? 
     new Vector3(globeConfig.positionOffset * 100, 0, 0) : 

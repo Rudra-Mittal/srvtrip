@@ -164,7 +164,7 @@ export const Toaster: React.FC<ToastPosition> = ({ position = 'top-center' }) =>
 };
 
 // Toast function to create new toasts
-export function toast({ title, description, type = 'info', duration = 5000, position }: ToastOptions) {
+export function toast({ title, description, type = 'info', duration = 5000}: ToastOptions) {
   const id = Math.random().toString(36).substring(2, 9);
   const newToast = { id, title, description, type, duration };
   

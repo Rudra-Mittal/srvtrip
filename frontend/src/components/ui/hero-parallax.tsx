@@ -29,14 +29,14 @@ export const HeroParallax = ({
   const [spotlightActive, setSpotlightActive] = useState(false);
   const [spotlightCompleted, setSpotlightCompleted] = useState(false);
   const [textVisible, setTextVisible] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [viewportHeight, setViewportHeight] = useState(0);
+  // const [isMobile, setIsMobile] = useState(false);
+  // const [viewportHeight, setViewportHeight] = useState(0);
   
   // Detect viewport size
   useEffect(() => {
     const updateDimensions = () => {
-      setViewportHeight(window.innerHeight);
-      setIsMobile(window.innerWidth < 768);
+      // setViewportHeight(window.innerHeight);
+      // setIsMobile(window.innerWidth < 768);
     };
     
     // Initial check
@@ -230,6 +230,11 @@ export const Header = ({
   textVisible = false, 
   hasScrolled = false,
   onSpotlightComplete 
+}: {
+  spotlightActive?: boolean;
+  textVisible?: boolean; 
+  hasScrolled?: boolean;
+  onSpotlightComplete?: () => void;
 }) => {
   return (
     <div className="absolute inset-0 w-full h-screen z-20 flex flex-col justify-center items-center pointer-events-none">
