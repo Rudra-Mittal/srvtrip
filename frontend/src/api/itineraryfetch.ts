@@ -13,7 +13,7 @@ export const handleFetchItineraries = async ( storedIds: string[]) => {
     }
 
     try {
-        const response = await fetch("http://localhost:4000/api/fetchitineraries", {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/fetchitineraries`, {
             method: "POST",
             credentials: "include",
             headers: {
