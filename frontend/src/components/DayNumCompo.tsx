@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 // Extend the Window interface to include handlePlaceClick
 
-import { imageData, itineraryData } from '../sample_Images_itinerary';
+import { itineraryData } from '../sample_Images_itinerary';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 import { setActivePlaceId } from '@/store/slices/placeSlice';
@@ -167,7 +167,7 @@ const replacePlaceIds = (text: string) => {
     return processed;
   };
   
-  const renderSectionContent = (section: string, data: { activities: any; food: any; transport: any; cost: any; }) => {
+  const renderSectionContent = (data: { activities: any; food: any; transport: any; cost: any; }) => {
     // Process the data to replace place IDs with names
     const processedData = processSection(data);
 
@@ -393,7 +393,7 @@ const replacePlaceIds = (text: string) => {
                   </div>
                 </div>
                 <div className="p-3 bg-black/30 text-gray-300">
-                  {renderSectionContent('morning',processSection( itinerary[itineraryId].itinerary.days[currentDay].morning))}
+                  {renderSectionContent(processSection( itinerary[itineraryId].itinerary.days[currentDay].morning))}
                 </div>
               </div>
 
@@ -411,7 +411,7 @@ const replacePlaceIds = (text: string) => {
                   </div>
                 </div>
                 <div className="p-3 bg-black/30 text-gray-300">
-                  {renderSectionContent('afternoon', processSection(itinerary[itineraryId].itinerary.days[currentDay].afternoon))}
+                  {renderSectionContent(processSection(itinerary[itineraryId].itinerary.days[currentDay].afternoon))}
                 </div>
               </div>
 
@@ -429,7 +429,7 @@ const replacePlaceIds = (text: string) => {
                   </div>
                 </div>
                 <div className="p-3 bg-black/30 text-gray-300">
-                  {renderSectionContent('evening', processSection(itinerary[itineraryId].itinerary.days[currentDay].evening) || processSection(itinerary[itineraryId].itinerary.days[currentDay].afternoon))}
+                  {renderSectionContent(processSection(itinerary[itineraryId].itinerary.days[currentDay].evening) || processSection(itinerary[itineraryId].itinerary.days[currentDay].afternoon))}
                 </div>
               </div>
             </div>

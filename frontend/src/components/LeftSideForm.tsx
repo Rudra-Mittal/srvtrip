@@ -17,7 +17,7 @@ export default function LeftSideForm({ type }: { type: string }) {
     type === 'signup' ? 'form' : 'form'
   );
   const [error, setError] = useState('');
-  const { signin, signup, signinWithGoogle, loading } = useAuth();
+  const { signin,  signinWithGoogle, loading } = useAuth();
   const [otpLoading, setOtpLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch(); // Moved to component top level

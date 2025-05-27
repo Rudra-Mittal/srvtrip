@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import  { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 type SpotlightProps = {
@@ -15,7 +15,6 @@ type SpotlightProps = {
 export const Spotlight = ({ 
   className, 
   fill, 
-  direction = "top-left",
   mode = "light",
   intensity = 0.4,
   width = 100,

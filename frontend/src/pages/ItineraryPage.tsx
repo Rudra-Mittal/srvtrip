@@ -1,6 +1,6 @@
 import { Boxes } from "@/components/ui/background-boxes";
 import { motion } from "framer-motion";
-import { useState, useRef, useCallback, useEffect, Key } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { DayCard } from "@/components/ItineraryDayCard";
 import { useDebounce } from "use-debounce";
 import { useSelector } from "react-redux";

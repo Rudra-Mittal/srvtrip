@@ -229,6 +229,7 @@ export default function Form() {
     // You could also navigate to another section of your app
   };
 
+
   return (
     <div className="relative min-h-screen bg-black text-white flex flex-col items-center justify-center p-4 overflow-hidden">
       <BackgroundBeams className="absolute inset-0 opacity-20" />
@@ -408,6 +409,7 @@ export default function Form() {
                       <div className="flex justify-end mt-8">
                         <HoverBorderGradient
                           as="button"
+                          //@ts-ignore
                           type="button"
                           onClick={nextStep}
                           className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 font-medium text-white shadow-lg shadow-purple-900/20"
@@ -584,6 +586,7 @@ export default function Form() {
                         </Button>
                         <HoverBorderGradient
                           as="button"
+                          //@ts-ignore
                           type="button"
                           onClick={nextStep}
                           className="px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 font-medium text-white shadow-lg shadow-purple-900/20 text-sm sm:text-base"
@@ -656,6 +659,7 @@ export default function Form() {
                         </Button>
                         <HoverBorderGradient
                           as="button"
+                          //@ts-ignore
                           type="button"
                           onClick={nextStep}
                           className="px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 font-medium text-white shadow-lg shadow-purple-900/20 text-sm sm:text-base"
@@ -704,7 +708,7 @@ export default function Form() {
                           </div>
                           <div>
                             <p className="text-gray-400 text-sm md:text-base">Travelers</p>
-                            <p className="text-white text-base md:text-lg font-medium">{formData.persons} {formData.persons === 1 ? "person" : "people"}</p>
+                            <p className="text-white text-base md:text-lg font-medium">{formData.number_of_persons} {formData.number_of_persons === 1 ? "person" : "people"}</p>
                           </div>
                           <div>
                           </div>
@@ -737,6 +741,7 @@ export default function Form() {
                         </Button>
                         <HoverBorderGradient
                           as="button"
+                          //@ts-ignore
                           type="button"
                           className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 font-medium text-white shadow-lg shadow-purple-900/20"
                           onClick={()=>handleGenerateItinerary(formData)}
@@ -803,6 +808,7 @@ export default function Form() {
                       </p>
                       <HoverBorderGradient
                         as="button"
+                        //@ts-ignore
                         type="button"
                         onClick={handleExploreMore}
                         className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 font-medium text-white shadow-lg shadow-purple-900/20 text-sm"
