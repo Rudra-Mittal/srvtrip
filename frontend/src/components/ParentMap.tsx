@@ -1,12 +1,12 @@
 import { APIProvider } from "@vis.gl/react-google-maps";
-import { useEffect, useRef, useState} from "react";
+import { useEffect, useState} from "react";
 import MapComponent from "./Map";
 import { useSelector } from "react-redux";
 function ParentMap({ dayNum, itineraryNum }: { dayNum: string, itineraryNum: string }) {
   // Convert string params to numbers (subtract 1 for zero-based array index)
   const activePlaceId = useSelector((state: any) => state.place.activePlaceId);
   console.log("Active place ID from Redux:", activePlaceId);
-  const [mapInstance, setMapInstance] = useState<any>(null); // Store the map instance
+  // const [mapInstance, setMapInstance] = useState<any>(null); // Store the map instance
 
   const currentDay = dayNum ? parseInt(dayNum) - 1 : 0;
   const itineraryId = itineraryNum ? parseInt(itineraryNum) - 1 : 0;
@@ -63,13 +63,14 @@ function ParentMap({ dayNum, itineraryNum }: { dayNum: string, itineraryNum: str
         console.log(`Zooming in on: ${activeMarker.name}`);
         console.log(`Coordinates: ${activeMarker.lat}, ${activeMarker.lng}`);
         setSelectedMarker(activeMarker === selectedMarker ? null : activeMarker);
+        //@ts-ignore
         setInfoOpen(activeMarker);
         // mapInstance.panTo({ lat: activeMarker.lat, lng: activeMarker.lng }); // Center the map on the marker
         // mapInstance.setZoom(14); // Zoom in on the marker
       }
       
     }
-  }, [activePlaceId, predefinedMarkers, mapInstance]);
+  }, [activePlaceId, predefinedMarkers]);
 
   const [hoveredMarker, setHoveredMarker] = useState<Marker | null>(null);
   const [selectedMarker, setSelectedMarker] = useState<Marker | null>(null);
@@ -121,7 +122,7 @@ function ParentMap({ dayNum, itineraryNum }: { dayNum: string, itineraryNum: str
       return () => clearTimeout(timer);
     }
   }, [selectedMarker, infoOpen]);
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
   
   
   if (!apiKey) {

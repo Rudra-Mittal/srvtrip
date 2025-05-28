@@ -80,6 +80,7 @@ export function useAuth() {
         });
 
         const data = await response.text();
+        //@ts-ignore
         let jsonData;
         try {
           jsonData = JSON.parse(data);
