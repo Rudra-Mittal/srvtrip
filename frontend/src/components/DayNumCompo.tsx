@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 
 // Extend the Window interface to include handlePlaceClick
-
-import { imageData, itineraryData } from '../sample_Images_itinerary';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 import { setActivePlaceId } from '@/store/slices/placeSlice';
@@ -166,7 +164,7 @@ const replacePlaceIds = (text: string) => {
     
     return processed;
   };
-  
+  //@ts-ignore
   const renderSectionContent = (section: string, data: { activities: any; food: any; transport: any; cost: any; }) => {
     // Process the data to replace place IDs with names
     const processedData = processSection(data);
@@ -433,7 +431,7 @@ const replacePlaceIds = (text: string) => {
                 </div>
               </div>
             </div>
-                          
+            <div className="mt-3 pt-2 border-t border-blue-500/20">
               {/* Tips Section */}
               <div className="mt-4">
                 <h4 className="font-bold animated-gradient-text mb-3 flex items-center">
