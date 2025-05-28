@@ -25,7 +25,7 @@ const getPlaceReview = async (placeId: string, abortSignal: AbortSignal) => {
         }
         
         try {
-            const res = await fetch(`${BACKEND_URL}api/summarize?placeid=${placeId}`, {
+            const res = await fetch(`${BACKEND_URL}/api/summarize?placeid=${placeId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
