@@ -64,7 +64,7 @@ export default function ChatbotD({chatbotRef}:{chatbotRef: React.RefObject<HTMLD
   
     try {
       console.log("Sending query to backend:", input);
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}query`, {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/query`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
