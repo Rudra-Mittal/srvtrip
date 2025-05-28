@@ -164,8 +164,8 @@ const replacePlaceIds = (text: string) => {
     
     return processed;
   };
-  //@ts-ignore
-  const renderSectionContent = (section: string, data: { activities: any; food: any; transport: any; cost: any; }) => {
+  
+  const renderSectionContent = (data: { activities: any; food: any; transport: any; cost: any; }) => {
     // Process the data to replace place IDs with names
     const processedData = processSection(data);
 
