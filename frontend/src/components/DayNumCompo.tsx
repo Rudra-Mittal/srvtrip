@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 
 // Extend the Window interface to include handlePlaceClick
-
-import { itineraryData } from '../sample_Images_itinerary';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 import { setActivePlaceId } from '@/store/slices/placeSlice';
@@ -433,57 +431,7 @@ const replacePlaceIds = (text: string) => {
                 </div>
               </div>
             </div>
-
-            {/* Daily Summary Section */}
             <div className="mt-3 pt-2 border-t border-blue-500/20">
-              <h3 className="font-bold mb-3 flex items-center animated-gradient-text">
-                <svg className="w-5 h-5 mr-2 text-blue-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                  <path fillRule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clipRule="evenodd"></path>
-                </svg>
-                Daily Summary
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="bg-black/50 rounded-lg p-3 border border-blue-500/10 transform transition-all duration-300 hover:shadow-blue-900/30 hover:shadow-lg hover:-translate-y-1">
-                  <div className="text-xs animated-gradient-text uppercase font-semibold">Total Budget Used</div>
-                  <div className="text-white font-bold mt-1">{itineraryData.total_budget_used}</div>
-                </div>
-                
-                <div className="bg-black/50 rounded-lg p-3 border border-blue-500/10 transform transition-all duration-300 hover:shadow-blue-900/30 hover:shadow-lg hover:-translate-y-1">
-                  <div className="text-xs animated-gradient-text uppercase font-semibold">Remaining Budget</div>
-                  <div className="text-white font-bold mt-1">{itineraryData.remaining_budget}</div>
-                </div>
-                
-                <div className="bg-black/50 rounded-lg p-3 border border-blue-500/10 transform transition-all duration-300 hover:shadow-blue-900/30 hover:shadow-lg hover:-translate-y-1">
-                  <div className="text-xs animated-gradient-text uppercase font-semibold">Accommodation Cost</div>
-                  <div className="text-white font-bold mt-1">{itineraryData.accommodation.cost}</div>
-                </div>
-              </div>
-              
-              {/* Accommodation Section */}
-              <div className="mt-4">
-                <h4 className="font-bold animated-gradient-text mb-3 flex items-center">
-                  <svg className="w-5 h-5 mr-2 text-blue-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
-                  </svg>
-                  Accommodation Details
-                </h4>
-                
-                <div className="mt-2 p-3 bg-black/50 rounded-lg border border-blue-500/10 transform transition-all duration-300 hover:shadow-blue-900/30 hover:shadow-lg">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center mb-2 sm:mb-0">
-                      <svg className="w-5 h-5 mr-2 text-blue-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
-                      </svg>
-                      <span className="font-medium text-white">{itineraryData.accommodation.hotel}</span>
-                    </div>
-                    <div className="bg-blue-900/20 text-blue-300 px-3 py-1 rounded text-sm font-semibold border border-blue-500/20">
-                      {itineraryData.accommodation.cost}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
               {/* Tips Section */}
               <div className="mt-4">
                 <h4 className="font-bold animated-gradient-text mb-3 flex items-center">
