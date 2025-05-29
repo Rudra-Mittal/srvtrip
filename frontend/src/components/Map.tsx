@@ -207,11 +207,37 @@ const MarkerManager = ({
   const infoWindowCloseIntentionalRef = useRef(false);
   // Images for carousel
   const popupLeaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const carouselImages = [
-  "https://www.google.com/imgres?q=images&imgurl=https%3A%2F%2Fimages.pexels.com%2Fphotos%2F674010%2Fpexels-photo-674010.jpeg%3Fcs%3Dsrgb%26dl%3Dpexels-anjana-c-169994-674010.jpg%26fm%3Djpg&imgrefurl=https%3A%2F%2Fwww.pexels.com%2Fsearch%2Fbeautiful%2F&docid=B51x0PBR9KNzvM&tbnid=sKMM4eBjWSQEBM&vet=12ahUKEwi2wNaC3eGMAxUyxzgGHfz8HMQQM3oECGQQAA..i&w=2976&h=3968&hcb=2&ved=2ahUKEwi2wNaC3eGMAxUyxzgGHfz8HMQQM3oECGQQAA"
-    // Add more images as needed
+
+  // Get images from predefined markers data
+  const getCurrentImages = () => {
+    if (!infoOpen?.photos || !Array.isArray(infoOpen.photos)) {
+      return getDefaultImages();
+    }
+    return infoOpen.photos.map((photo: string) => resizeGoogleImage(photo));
+  };
+
+  // Helper function to resize Google images
+  const resizeGoogleImage = (url: string): string => {
+    if (url.includes('googleusercontent.com') && !url.includes('=s')) {
+      return `${url}=s400-c`;
+    }
+    return url;
+  };
+
+  // Default fallback images
+  const getDefaultImages = () => [
+    "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=300&fit=crop",
+    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
+    "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=300&fit=crop",
+    "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=400&h=300&fit=crop",
+    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop"
   ];
   
+  // Reset image index when location changes
+  useEffect(() => {
+    setCurrentImageIndex(0);
+  }, [infoOpen?.placeId]);
+
   // Effect for watching selected marker changes
   useEffect(() => {
     if (selectedMarker && map) {
@@ -348,9 +374,8 @@ const MarkerManager = ({
       // Select new marker
       // console.log("selectedMarker",selectedMarker)
       setSelectedMarker(position);
-      // console.log("selectedMarkersdsdr",selectedMarker)
-      // console.log("position",position)
       setInfoOpen(position);
+      
       // Smooth zoom animation to the selected marker
       if (map) {
         map.panTo(position);
@@ -449,40 +474,6 @@ const handlePopupMouseLeave = () => {
 };
 
 
-// Handle next image in carousel
-const handleNextImage = (e: React.MouseEvent) => {
-  e.stopPropagation();
-  e.preventDefault(); // Prevent any default behavior
-  setCurrentImageIndex((prevIndex) => (prevIndex + 1) % carouselImages.length);
-  
-  // Force maintain hover state
-  isMouseOverPopupRef.current = true;
-  isInfoWindowHoveredRef.current = true;
-  
-  // Clear any pending close timeouts
-  if (popupLeaveTimeoutRef.current) {
-    clearTimeout(popupLeaveTimeoutRef.current);
-    popupLeaveTimeoutRef.current = null;
-  }
-};
-
-// Handle previous image in carousel
-const handlePrevImage = (e: React.MouseEvent) => {
-  e.stopPropagation();
-  e.preventDefault(); // Prevent any default behavior
-  setCurrentImageIndex((prevIndex) => (prevIndex - 1 + carouselImages.length) % carouselImages.length);
-  
-  // Force maintain hover state
-  isMouseOverPopupRef.current = true;
-  isInfoWindowHoveredRef.current = true;
-  
-  // Clear any pending close timeouts
-  if (popupLeaveTimeoutRef.current) {
-    clearTimeout(popupLeaveTimeoutRef.current);
-    popupLeaveTimeoutRef.current = null;
-  }
-};
-
   // Calculate adjusted position for InfoWindow (directly above marker)
   const getInfoWindowPosition = (position: any) => {
     if (!position) return null;
@@ -546,27 +537,38 @@ const handlePrevImage = (e: React.MouseEvent) => {
   onMouseEnter={handlePopupMouseEnter}
   onMouseLeave={handlePopupMouseLeave}
 >
-            <div style={{ position: "relative", overflow: "hidden", height: "100px"}}>
+            <div style={{ position: "relative", overflow: "hidden", height: "150px", width: "280px"}}>
+              
               {/* Carousel container */}
-              {carouselImages.map((image, index) => (
+              {getCurrentImages().map((image:any, index:any) => (
                 <img
-                  key={index}
+                  key={`${infoOpen.placeId || infoOpen.name}-${index}`}
                   src={image}
-                  alt={`Location ${index + 1}`}
+                  alt={`${infoOpen.name || 'Location'} ${index + 1}`}
                   style={{
                     width: "100%",
                     height: "150px",
                     objectFit: "cover",
                     borderRadius: "5px 5px 0 0",
                     marginBottom: "0",
-                    position: 'absolute', // Make images absolute positioned
+                    position: 'absolute',
                     top: 0,
                     left: 0,
                     opacity: currentImageIndex === index ? 1 : 0,
                     transition: "opacity 0.5s ease-in-out",
                   }}
+                  onError={(e) => {
+                    // Fallback to default image if current image fails to load
+                    const target = e.target as HTMLImageElement;
+                    target.src = getDefaultImages()[index % getDefaultImages().length];
+                  }}
                 />
               ))}
+
+              {/* Image counter */}
+              <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
+                {currentImageIndex + 1} / {getCurrentImages().length}
+              </div>
 
 {/* Enhanced Carousel Arrows */}
 <div className="absolute inset-0 flex items-center justify-between px-2 z-20 pointer-events-none">
@@ -575,7 +577,8 @@ const handlePrevImage = (e: React.MouseEvent) => {
     onClick={(e) => {
       e.stopPropagation();
       e.preventDefault();
-      handlePrevImage(e);
+      const images = getCurrentImages();
+      setCurrentImageIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
       // Force maintain hover state
       isMouseOverPopupRef.current = true;
       isInfoWindowHoveredRef.current = true;
@@ -602,7 +605,8 @@ const handlePrevImage = (e: React.MouseEvent) => {
     onClick={(e) => {
       e.stopPropagation();
       e.preventDefault();
-      handleNextImage(e); // This was calling handlePrevImage incorrectly - fixed to call handleNextImage
+      const images = getCurrentImages();
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
       // Force maintain hover state
       isMouseOverPopupRef.current = true;
       isInfoWindowHoveredRef.current = true;

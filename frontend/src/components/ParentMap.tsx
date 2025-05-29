@@ -19,7 +19,7 @@ function ParentMap({ dayNum, itineraryNum }: { dayNum: string, itineraryNum: str
   // console.log("Predefined markers:", placesData[currentDay]);
   useEffect(() => {
     // if (placesData && placesData.length > currentDay && placesData[itineraryId][currentDay]) {
-      const markers: Array<{ lat: number; lng: number; name: string; placeId: string}> = [];
+      const markers: Array<{ lat: number; lng: number; name: string; placeId: string; photos?: string[]; rating?: number; category?: string}> = [];
       // console.log("reached")
       // Only process places for the current day
       const dayPlaces = placesData[itineraryId][currentDay];
@@ -36,6 +36,9 @@ function ParentMap({ dayNum, itineraryNum }: { dayNum: string, itineraryNum: str
               lng: place.location.longitude,
               name: place.displayName,
               placeId: place.id, // Add placeId here
+              photos: place.photos || [], // Add photos from place data
+              rating: place.rating || 4.5, // Add rating from place data
+              category: place.types?.[0] || "Tourist Attraction", // Add category from place data
             });
           }
         });

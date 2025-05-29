@@ -17,7 +17,7 @@ import { Slider } from "@/components/ui/slider";
 import Loader from '../loader';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { genitinerary } from '@/api/formroute';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { addItinerary } from '@/store/slices/itinerarySlice';
 import { addPlace } from '@/store/slices/placeSlice';
 import { useNavigate } from 'react-router-dom';
@@ -116,6 +116,8 @@ export default function Form() {
     });
   };
   const dispatch= useDispatch()
+  const itineraries = useSelector((state: any) => state.itinerary.itineraries);
+  
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -208,7 +210,12 @@ export default function Form() {
       console.log("newitinerary",JSON.parse(res.newItenary))
       dispatch(addItinerary(await JSON.parse(res.newItenary)))
       dispatch(addPlace(await JSON.parse(res.placesData)))
-      navigate("/itinerary");
+      
+      // Calculate the itinerary number based on current store count
+      const currentItinerariesCount = itineraries ? itineraries.length : 0;
+      const newItineraryNumber = currentItinerariesCount + 1;
+      
+      navigate(`/itinerary/${newItineraryNumber}`);
     })
   }
   // Particles for background animation

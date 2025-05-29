@@ -4,9 +4,11 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { DayCard } from "@/components/ItineraryDayCard";
 import { useDebounce } from "use-debounce";
 import { useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+
 export const ItineraryPage = () => {
     const {itineraryNum}= useParams();
+    const navigate = useNavigate();
     console.log("itineraryNumber",itineraryNum);
     const itineraryIdx= Number(itineraryNum)-1;
     const [activeCardIndex, setActiveCardIndex] = useState(0);
@@ -153,6 +155,10 @@ export const ItineraryPage = () => {
     }, []);
     
 
+    const handleCardClick = useCallback((dayNumber: number) => {
+        navigate(`${window.location.pathname}/day/${dayNumber}`);
+    }, [navigate]);
+
     return (
         <div className="bg-black max-h-screen max-w-screen overflow-hidden  ">
             <div className="absolute inset-0 z-0 overflow-hidden min-w-secreen min-h-screen opacity-50">
@@ -253,11 +259,12 @@ export const ItineraryPage = () => {
                             {itineraryD.itinerary.days.map((day: { day: number; }, index: number) => (
                                 <motion.div
                                 key={day.day}
-                                className="snap-center flex-shrink-0 pointer-events-auto"
+                                className="snap-center flex-shrink-0 pointer-events-auto cursor-pointer"
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ delay: 0 , duration: 0.5 }}
                                 ref={el => { cardRefs.current[index] = el; }}
+                                onClick={() => handleCardClick(day.day)}
                                 onMouseEnter={() => {
                                     setTimeout(()=>handleCardHover(index, true),1600)
                                 }}
@@ -267,9 +274,8 @@ export const ItineraryPage = () => {
                                     transition: 'transform 300ms ease, box-shadow 300ms ease',
                                     position: 'relative',
                                     zIndex: '10',
-                                    marginLeft: '5px', // Add small gap between cards
+                                    marginLeft: '5px',
                                     marginRight: '5px'
-                                    
                                 }}
                             >
                                     <DayCard

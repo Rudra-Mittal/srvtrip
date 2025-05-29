@@ -3,7 +3,6 @@ import {cn} from "@/lib/utils";
 import {useState, useEffect, useRef, JSXElementConstructor, ReactElement, ReactNode, ReactPortal, useCallback} from "react";
 import {AnimatePresence} from "framer-motion";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 
 export const DayCard = ({itineraryIdx,dayIdx}: any) => {
     const [isHovered, setIsHovered] = useState(false);
@@ -24,10 +23,6 @@ export const DayCard = ({itineraryIdx,dayIdx}: any) => {
     const itinerary = itineraries[itineraryIdx];
     const placesforeachday = places[itineraryIdx][dayIdx];
 
-    const navigate = useNavigate()
-    const handlefullItinerary = (daynumber: number , itinerarynumb: number) => {
-        navigate(`/itinerary/${itinerarynumb}/day/${daynumber}`);
-    }
     useEffect(() => {
         const checkIfMobile = () => {
             setIsMobile(window.innerWidth < 768);
@@ -449,20 +444,7 @@ export const DayCard = ({itineraryIdx,dayIdx}: any) => {
                         "mt-auto flex items-center",
                         isMobile ? "flex-col w-full space-y-4 absolute bottom-4 left-0 right-0 px-5" : "justify-between"
                     )}>
-                        <motion.button 
-                            className={cn(
-                                "py-2.5 bg-gradient-to-r from-indigo-600 to-purple-500 rounded-lg text-sm font-medium flex items-center shadow-lg shadow-indigo-900/20",
-                                isMobile ? "w-full justify-center px-6 py-3 mt-4 sticky bottom-0 z-30" : "px-5 gap-2"
-                            )}
-                            whileHover={{ scale: 1.03, boxShadow: "0 0 15px rgba(121, 113, 234, 0.5)" }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => handlefullItinerary(dayIdx + 1 , itineraryIdx + 1)}
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className={cn("h-5 w-5", isMobile ? "mr-2" : "")} viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                            </svg>
-                            View Full Itinerary
-                        </motion.button>
+                        
                         
                         <motion.div 
                             className={cn(
