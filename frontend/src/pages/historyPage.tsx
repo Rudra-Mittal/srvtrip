@@ -5,6 +5,7 @@ import { ChevronLeftIcon, ChevronRightIcon, RefreshCwIcon } from "lucide-react";
 import { handleFetchItineraries } from "@/api/itineraryfetch";
 import { appenditinerary} from "@/store/slices/itinerarySlice";
 import { appendPlaces } from "@/store/slices/placeSlice";
+import { useNavigate } from "react-router-dom";
 
 export default function HistoryPage() {
     const itineraries = useSelector((state: any) => state.itinerary.itineraries);
@@ -18,7 +19,13 @@ export default function HistoryPage() {
     // Add loading state for fetch action
     const [isLoading, setIsLoading] = useState(false);
     const dispatch = useDispatch();
-    
+
+    const navigate = useNavigate()
+    const handleViewDetails = (itinerarynumber: number) => {
+        console.log("View details for itinerary ID:", itinerarynumber);
+        // Navigate to the itinerary details page
+        navigate(`/itinerary/${itinerarynumber}`);
+    };
     const fetchItineraries = async () => {
         console.log("request reach here")
         setIsLoading(true);
@@ -122,37 +129,37 @@ export default function HistoryPage() {
     const interestCategories = getInterestCategories();
     
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white p-4">
-            <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="max-w-2xl w-full"
-            >
-                <div className="flex flex-col md:flex-row items-center justify-between mb-6">
-                    <h1 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
-                        Your Travel History
-                    </h1>
-                    
-                    <motion.button
-                        className="mt-4 md:mt-0 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg text-white font-medium flex items-center gap-2 relative overflow-hidden group"
-                        whileHover={{ scale: 1.05, boxShadow: "0 0 15px rgba(79, 70, 229, 0.4)" }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => fetchItineraries()}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.4 }}
+        <div className="min-h-screen bg-gray-900 text-white p-4 pt-30"> {/* Added pt-20 for navbar spacing */}
+        <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="max-w-2xl w-full mx-auto" 
+        >
+            <div className="flex flex-col md:flex-row items-center justify-between mb-8"> {/* Increased mb-6 to mb-8 */}
+                <h1 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
+                    Your Travel History
+                </h1>
+                
+                <motion.button
+                    className="mt-4 md:mt-0 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg text-white font-medium flex items-center gap-2 relative overflow-hidden group"
+                    whileHover={{ scale: 1.05, boxShadow: "0 0 15px rgba(79, 70, 229, 0.4)" }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => fetchItineraries()}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                >
+                    <motion.span
+                        animate={isLoading ? { rotate: 360 } : { rotate: 0 }}
+                        transition={isLoading ? { repeat: Infinity, duration: 1, ease: "linear" } : {}}
                     >
-                        <motion.span
-                            animate={isLoading ? { rotate: 360 } : { rotate: 0 }}
-                            transition={isLoading ? { repeat: Infinity, duration: 1, ease: "linear" } : {}}
-                        >
-                            <RefreshCwIcon className="w-4 h-4" />
-                        </motion.span>
-                        <span>Fetch Itineraries From DB</span>
-                        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-blue-600/0 via-white/10 to-blue-600/0 opacity-0 group-hover:opacity-100 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-all duration-1000"></div>
-                    </motion.button>
-                </div>
+                        <RefreshCwIcon className="w-4 h-4" />
+                    </motion.span>
+                    <span>Fetch Itineraries From DB</span>
+                    <div className="absolute inset-0 -z-10 bg-gradient-to-r from-blue-600/0 via-white/10 to-blue-600/0 opacity-0 group-hover:opacity-100 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-all duration-1000"></div>
+                </motion.button>
+            </div>
                 
                 {itineraries.length > 1 && (
                     <div className="flex justify-center mb-6 gap-2">
@@ -403,6 +410,7 @@ export default function HistoryPage() {
                                     className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg text-white font-medium"
                                     whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(79, 70, 229, 0.5)" }}
                                     whileTap={{ scale: 0.98 }}
+                                    onClick={() => handleViewDetails(selectedItineraryIndex + 1)}
                                 >
                                     View Full Itinerary Details
                                 </motion.button>
@@ -410,88 +418,88 @@ export default function HistoryPage() {
                         </div>
                     </motion.div>
                     
-                    {/* NEW: Enhanced Interests Section below the card */}
-                    {selectedItinerary?.interests && Object.keys(interestCategories).length > 0 && (
-                        <motion.div 
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 1.2, duration: 0.8 }}
-                            className="mt-8 relative overflow-hidden rounded-2xl border border-blue-500/20 backdrop-blur-md shadow-xl"
-                        >
-                            {/* Background gradient */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-gray-900/90 to-gray-800/70 z-0"></div>
-                            
-                            {/* Animated glow effects */}
-                            <motion.div 
-                                className="absolute bottom-0 -left-20 w-60 h-60 bg-blue-500 rounded-full opacity-10 blur-3xl z-0"
-                                animate={{ 
-                                    x: [0, 20, 0], 
-                                    y: [0, 10, 0],
-                                }}
-                                transition={{ 
-                                    repeat: Infinity, 
-                                    duration: 12, 
-                                    ease: "easeInOut" 
-                                }}
-                            />
-                            
-                            <div className="relative z-10 p-6 md:p-8">
-                                <div className="flex items-center justify-center mb-6">
-                                    <div className="h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent flex-grow"></div>
-                                    <h3 className="text-xl font-bold mx-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300">
-                                        Travel Interests
-                                    </h3>
-                                    <div className="h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent flex-grow"></div>
-                                </div>
-                                
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-                                    {Object.entries(interestCategories).map(([category, { icon, interests }], catIndex) => (
-                                        <motion.div
-                                            key={category}
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: 1.4 + (catIndex * 0.1) }}
-                                            className="bg-gradient-to-br from-gray-900/60 to-black/60 rounded-lg border border-blue-500/20 overflow-hidden"
-                                        >
-                                            <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 px-4 py-3 flex items-center">
-                                                <span className="text-xl mr-2">{icon}</span>
-                                                <h4 className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300">
-                                                    {category}
-                                                </h4>
-                                            </div>
-                                            <div className="p-4">
-                                                <div className="flex flex-wrap gap-2">
-                                                    {interests.map((interest, index) => (
-                                                        <motion.div
-                                                            key={interest}
-                                                            initial={{ opacity: 0, scale: 0.8 }}
-                                                            animate={{ opacity: 1, scale: 1 }}
-                                                            transition={{ delay: 1.6 + (catIndex * 0.1) + (index * 0.05) }}
-                                                            whileHover={{ scale: 1.05, y: -2 }}
-                                                            className="px-3 py-1.5 bg-blue-900/20 hover:bg-blue-800/30 text-blue-300 rounded-full text-sm border border-blue-500/20 transition-all duration-300 shadow-sm hover:shadow-md hover:shadow-blue-500/10"
-                                                        >
-                                                            {interest}
-                                                        </motion.div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </motion.div>
-                                    ))}
-                                </div>
-                                
-                                <motion.div 
-                                    className="mt-6 flex justify-center"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ delay: 2 }}
+                    {/* NEW: Enhanced Interests Section below the card with proper spacing */}
+            {selectedItinerary?.interests && Object.keys(interestCategories).length > 0 && (
+                <motion.div 
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1.2, duration: 0.8 }}
+                    className="mt-8 mb-20 relative overflow-hidden rounded-2xl border border-blue-500/20 backdrop-blur-md shadow-xl"
+                >
+                    {/* Background gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-gray-900/90 to-gray-800/70 z-0"></div>
+                    
+                    {/* Animated glow effects */}
+                    <motion.div 
+                        className="absolute bottom-0 -left-20 w-60 h-60 bg-blue-500 rounded-full opacity-10 blur-3xl z-0"
+                        animate={{ 
+                            x: [0, 20, 0], 
+                            y: [0, 10, 0],
+                        }}
+                        transition={{ 
+                            repeat: Infinity, 
+                            duration: 12, 
+                            ease: "easeInOut" 
+                        }}
+                    />
+                    
+                    <div className="relative z-10 p-6 md:p-8">
+                        <div className="flex items-center justify-center mb-6">
+                            <div className="h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent flex-grow"></div>
+                            <h3 className="text-xl font-bold mx-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300">
+                                Travel Interests
+                            </h3>
+                            <div className="h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent flex-grow"></div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"> {/* Changed md:grid-cols-3 to lg:grid-cols-3 and reduced gap */}
+                            {Object.entries(interestCategories).map(([category, { icon, interests }], catIndex) => (
+                                <motion.div
+                                    key={category}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 1.4 + (catIndex * 0.1) }}
+                                    className="bg-gradient-to-br from-gray-900/60 to-black/60 rounded-lg border border-blue-500/20 overflow-hidden"
                                 >
-                                    <div className="text-gray-400 text-sm border-t border-gray-700/50 pt-4 text-center max-w-md">
-                                        Your travel interests help us generate personalized recommendations for your future trips
+                                    <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 px-4 py-2 flex items-center"> {/* Reduced py-3 to py-2 */}
+                                        <span className="text-lg mr-2">{icon}</span> {/* Reduced text-xl to text-lg */}
+                                        <h4 className="font-bold text-sm text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300"> {/* Added text-sm */}
+                                            {category}
+                                        </h4>
+                                    </div>
+                                    <div className="p-3"> {/* Reduced p-4 to p-3 */}
+                                        <div className="flex flex-wrap gap-1.5"> {/* Reduced gap-2 to gap-1.5 */}
+                                            {interests.map((interest, index) => (
+                                                <motion.div
+                                                    key={interest}
+                                                    initial={{ opacity: 0, scale: 0.8 }}
+                                                    animate={{ opacity: 1, scale: 1 }}
+                                                    transition={{ delay: 1.6 + (catIndex * 0.1) + (index * 0.05) }}
+                                                    whileHover={{ scale: 1.05, y: -2 }}
+                                                    className="px-2 py-1 bg-blue-900/20 hover:bg-blue-800/30 text-blue-300 rounded-full text-xs border border-blue-500/20 transition-all duration-300 shadow-sm hover:shadow-md hover:shadow-blue-500/10" 
+                                                >
+                                                    {interest}
+                                                </motion.div>
+                                            ))}
+                                        </div>
                                     </div>
                                 </motion.div>
+                            ))}
+                        </div>
+                        
+                        <motion.div 
+                            className="mt-4 flex justify-center" 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 2 }}
+                        >
+                            <div className="text-gray-400 text-xs border-t border-gray-700/50 pt-3 text-center max-w-md"> {/* Reduced text-sm to text-xs and pt-4 to pt-3 */}
+                                Your travel interests help us generate personalized recommendations for your future trips
                             </div>
                         </motion.div>
-                    )}
+                    </div>
+                </motion.div>
+            )}
                 </div>
             </motion.div>
         </div>

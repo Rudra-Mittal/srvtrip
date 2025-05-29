@@ -3,6 +3,7 @@ import {cn} from "@/lib/utils";
 import {useState, useEffect, useRef, JSXElementConstructor, ReactElement, ReactNode, ReactPortal, useCallback} from "react";
 import {AnimatePresence} from "framer-motion";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 export const DayCard = ({itineraryIdx,dayIdx}: any) => {
     const [isHovered, setIsHovered] = useState(false);
@@ -22,7 +23,11 @@ export const DayCard = ({itineraryIdx,dayIdx}: any) => {
 
     const itinerary = itineraries[itineraryIdx];
     const placesforeachday = places[itineraryIdx][dayIdx];
-    
+
+    const navigate = useNavigate()
+    const handlefullItinerary = (daynumber: number , itinerarynumb: number) => {
+        navigate(`/itinerary/${itinerarynumb}/day/${daynumber}`);
+    }
     useEffect(() => {
         const checkIfMobile = () => {
             setIsMobile(window.innerWidth < 768);
@@ -451,6 +456,7 @@ export const DayCard = ({itineraryIdx,dayIdx}: any) => {
                             )}
                             whileHover={{ scale: 1.03, boxShadow: "0 0 15px rgba(121, 113, 234, 0.5)" }}
                             whileTap={{ scale: 0.98 }}
+                            onClick={() => handlefullItinerary(dayIdx + 1 , itineraryIdx + 1)}
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className={cn("h-5 w-5", isMobile ? "mr-2" : "")} viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
