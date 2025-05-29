@@ -1,0 +1,1 @@
+{"root":["./src/index.ts","./src/config/scraperUrls.ts","./src/services/fetchStatus.ts","./src/services/getAllHealthyScraper.ts","./src/services/trySendingRequests.ts"],"version":"5.8.2"}
