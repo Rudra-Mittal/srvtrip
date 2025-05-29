@@ -231,7 +231,7 @@ export default function Form() {
 
 
   return (
-    <div className="relative min-h-screen bg-black text-white flex flex-col items-center justify-center p-4 overflow-hidden">
+    <div className="relative min-h-screen bg-black text-white flex flex-col items-center justify-center p-4 pt-20 pb-16 sm:pt-24 md:pt-28 lg:pt-32 overflow-hidden">
       <BackgroundBeams className="absolute inset-0 opacity-20" />
       {/* <div> */}
 
@@ -261,7 +261,7 @@ export default function Form() {
       ))}
 
       {/* Page title with animation */}
-      <div className="relative z-10 mt-4">
+      <div className="relative z-10 mt-8 sm:mt-4">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -302,7 +302,7 @@ export default function Form() {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="w-full max-w-3xl z-10"
+            className="w-full max-w-3xl z-10 mt-4 sm:mt-6 md:mt-8"
           >
             <BackgroundGradient className="rounded-2xl p-0.5">
               <form onSubmit={handleSubmit} className="bg-black/90 rounded-2xl p-8 relative">
@@ -743,10 +743,10 @@ export default function Form() {
                           as="button"
                           //@ts-ignore
                           type="button"
-                          className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 font-medium text-white shadow-lg shadow-purple-900/20"
+                          className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 font-medium text-white shadow-lg shadow-purple-900/20"
                           onClick={()=>handleGenerateItinerary(formData)}
                         >
-                          <span className="flex items-center justify-center text-xs sm:text-sm md:text-xl">
+                          <span className="flex items-center justify-center text-xs sm:text-sm whitespace-nowrap">
                             Generate My Itinerary <Sparkles className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                           </span>
                         </HoverBorderGradient>
@@ -765,7 +765,7 @@ export default function Form() {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
-              className="text-center z-20 w-full max-w-3xl mx-auto"
+              className="text-center z-20 w-full max-w-3xl mx-auto mt-10 sm:mt-12 md:mt-16"
             >
               <div className="w-full flex justify-center items-center mb-4">
                 <Loader />
