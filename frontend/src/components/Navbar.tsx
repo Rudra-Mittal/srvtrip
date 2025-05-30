@@ -49,7 +49,7 @@ export const Navbar = () => {
     // setIsLoading(true);
     
     // Call the backend route to signout the user - Remove double slash
-    fetch(`${backendUrl}api/auth/signout`, {
+    fetch(`${backendUrl}/api/auth/signout`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

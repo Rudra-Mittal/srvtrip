@@ -10,6 +10,9 @@ import { genOtpRoute } from './controllers/auth/genOtpRoute';
 import { verifyOtp } from './controllers/auth/verifyOtp';
 import { signoutRoute } from './controllers/auth/signoutRoute';
 import { userRoute } from './controllers/auth/userRoute';
+import { sendForgotPasswordOtp } from './controllers/auth/sendForgotPasswordOtp';
+import { verifyForgotPasswordOtp } from './controllers/auth/verifyForgotPasswordOtp';
+import { resetPassword } from './controllers/auth/resetPassword';
 import { itenaryRoute } from './controllers/itenaryRoute';
 import { summarizeRoute } from './controllers/summarizeRoute';
 import { queryRoute } from './controllers/queryRoute';
@@ -17,10 +20,21 @@ import { itenarariesRoute } from './controllers/itenarariesRoute';
 import { serverAuthMiddleware } from './middleware/serverAuthMiddleware';
 import { summaryRoute } from './utils/summaryRoute';
 import { fetchItineraries } from './controllers/fetchitineraries';
+import { 
+  generalLimiter, 
+  authLimiter, 
+  otpLimiter, 
+  otpEmailLimiter, 
+  speedLimiter 
+} from './middleware/rateLimiter';
 dotenv.config();
 const app = express();
 const PORT = 4000;
-app.use(express.json());
+// Rate limiting
+app.use(generalLimiter);
+app.use(speedLimiter);
+
+app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser()); // Enable cookie parsing middleware
 
 app.use(cors({
@@ -34,16 +48,15 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 })
 
-app.post('/signup', signupRoute);
-
-app.post('/signin', firebaseAuth, signinRoute);
-
-app.post('/generate-otp', genOtpRoute);
-
-app.post('/verify-otp', verifyOtp);
-
+// Auth routes with additional rate limiting
+app.post('/signup', authLimiter, signupRoute);
+app.post('/signin', authLimiter, firebaseAuth, signinRoute);
+app.post('/generate-otp', otpLimiter, otpEmailLimiter, genOtpRoute);
+app.post('/verify-otp', authLimiter, verifyOtp);
+app.post('/forgot-password/send-otp', otpLimiter, otpEmailLimiter, sendForgotPasswordOtp);
+app.post('/forgot-password/verify-otp', authLimiter, verifyForgotPasswordOtp);
+app.post('/forgot-password/reset', authLimiter, resetPassword);
 app.post('/api/auth/signout', signoutRoute)
-
 app.get("/api/auth/user", authMiddleware, userRoute)
 
 app.post('/api/summarize',serverAuthMiddleware, summarizeRoute)
