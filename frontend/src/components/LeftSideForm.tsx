@@ -33,7 +33,8 @@ export default function LeftSideForm({ type }: { type: string }) {
           return;
         }
         
-        // Send OTP instead of directly creating account
+        // Only set loading state for email/password signup flow
+        // This won't run on Google signup or page refresh
         setOtpLoading(true);
         try {
           await genotp(email);
