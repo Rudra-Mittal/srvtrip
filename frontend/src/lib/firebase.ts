@@ -156,7 +156,7 @@ export function useAuth() {
   // Sign in with Google
   const signinWithGoogle = async () => {
     try {
-      setLoading(true);
+      // setLoading(true);
       setError(null);
       
       const result = await signInWithPopup(auth, googleProvider);
