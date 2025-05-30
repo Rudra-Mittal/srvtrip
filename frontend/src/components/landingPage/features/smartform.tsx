@@ -58,28 +58,28 @@ export default function SmartForm({smartFormRef,formVisible}:{smartFormRef:React
       );
     }
   return (
-    <div className="container mx-auto px-4">
+    <div className="container mx-auto px-4 pt-0 sm:pt-2 lg:pt-4">
       {/* Replace TextGenerateEffect with TypewriterEffect */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={smartFormInView ? { opacity: 1 } : { opacity: 0 }}
-        className="text-center"
+        className="text-center mb-6 sm:mb-8 lg:mb-12"
       >
         <TypewriterEffect
           key={smartFormInView ? "visible" : "hidden"}
           words={[
-            { text: "Let", className: "text-2xl sm:text-3xl lg:text-4xl font-bold" },
-            { text: "AI", className: "text-2xl sm:text-3xl lg:text-4xl font-bold " },
-            { text: "Personalize", className: "text-2xl sm:text-3xl lg:text-4xl font-bold" },
-            { text: "Your", className: "text-2xl sm:text-3xl lg:text-4xl font-bold " },
-            { text: "Journey", className: "text-2xl sm:text-3xl lg:text-4xl font-bold " }
+            { text: "Let", className: "text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold" },
+            { text: "AI", className: "text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold " },
+            { text: "Personalize", className: "text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold" },
+            { text: "Your", className: "text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold " },
+            { text: "Journey", className: "text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold " }
           ]}
           className="text-center"
           cursorClassName="bg-blue-400"
         />
 
         {/* Added description with gradient text */}
-        <p className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 max-w-2xl mx-auto text-sm sm:text-base mt-3 sm:mt-4 mb-8 sm:mb-10">
+        <p className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 max-w-2xl mx-auto text-sm sm:text-base mt-2 sm:mt-3 lg:mt-4 px-4">
           Tell us where you want to go, and we'll create a detailed itinerary tailored perfectly to your preferences and style.
         </p>
 
@@ -96,9 +96,9 @@ export default function SmartForm({smartFormRef,formVisible}:{smartFormRef:React
 
             <CardContainer className="w-full pointer-events-auto">
               <BackgroundGradient className="rounded-xl sm:rounded-2xl p-0.5">
-                <div className="bg-black/95 rounded-lg sm:rounded-xl lg:rounded-2xl p-4 sm:p-6 lg:p-8">
-                  <form className="space-y-4 sm:space-y-5 lg:space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 lg:gap-6">
+                <div className="bg-black/95 rounded-lg sm:rounded-xl lg:rounded-2xl p-3 sm:p-4 md:p-6 lg:p-8">
+                  <form className="space-y-3 sm:space-y-4 lg:space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
                       <div className="space-y-1 sm:space-y-2">
                         <Label className="text-blue-100 text-xs sm:text-sm lg:text-base">Destination</Label>
                         <Input
@@ -106,7 +106,7 @@ export default function SmartForm({smartFormRef,formVisible}:{smartFormRef:React
                           value={formData.destination}
                           onChange={handleFormChange}
                           placeholder="Where would you like to go?"
-                          className="bg-black/50 border border-blue-500/20 focus:border-purple-500/50 text-white text-xs sm:text-sm lg:text-base h-8 sm:h-9 lg:h-10"
+                          className="bg-black/50 border border-blue-500/20 focus:border-purple-500/50 text-white text-xs sm:text-sm lg:text-base h-9 sm:h-10 lg:h-11"
                         />
                       </div>
 
@@ -117,7 +117,7 @@ export default function SmartForm({smartFormRef,formVisible}:{smartFormRef:React
                           value={formData.days}
                           onValueChange={(value) => setFormData(prev => ({ ...prev, days: value }))}
                         >
-                          <SelectTrigger className="bg-black/50 border border-blue-500/20 focus:border-purple-500/50 text-white text-xs sm:text-sm lg:text-base h-8 sm:h-9 lg:h-10">
+                          <SelectTrigger className="bg-black/50 border border-blue-500/20 focus:border-purple-500/50 text-white text-xs sm:text-sm lg:text-base h-9 sm:h-10 lg:h-11">
                             <SelectValue placeholder="Select days" />
                           </SelectTrigger>
                           <SelectContent className="bg-black/90 border border-blue-500/30 text-white text-xs sm:text-sm lg:text-base">
@@ -137,7 +137,7 @@ export default function SmartForm({smartFormRef,formVisible}:{smartFormRef:React
                           value={formData.budget}
                           onValueChange={(value) => setFormData(prev => ({ ...prev, budget: value }))}
                         >
-                          <SelectTrigger className="bg-black/50 border border-blue-500/20 focus:border-purple-500/50 text-white text-xs sm:text-sm lg:text-base h-8 sm:h-9 lg:h-10">
+                          <SelectTrigger className="bg-black/50 border border-blue-500/20 focus:border-purple-500/50 text-white text-xs sm:text-sm lg:text-base h-9 sm:h-10 lg:h-11">
                             <SelectValue placeholder="Select budget" />
                           </SelectTrigger>
                           <SelectContent className="bg-black/90 border border-blue-500/30 text-white">
@@ -155,7 +155,7 @@ export default function SmartForm({smartFormRef,formVisible}:{smartFormRef:React
                           value={formData.persons}
                           onValueChange={(value) => setFormData(prev => ({ ...prev, persons: value }))}
                         >
-                          <SelectTrigger className="bg-black/50 border border-blue-500/20 focus:border-purple-500/50 text-white text-xs sm:text-sm lg:text-base h-8 sm:h-9 lg:h-10">
+                          <SelectTrigger className="bg-black/50 border border-blue-500/20 focus:border-purple-500/50 text-white text-xs sm:text-sm lg:text-base h-9 sm:h-10 lg:h-11">
                             <SelectValue placeholder="Select number" />
                           </SelectTrigger>
                           <SelectContent className="bg-black/90 border border-blue-500/30 text-white">
@@ -198,7 +198,7 @@ export default function SmartForm({smartFormRef,formVisible}:{smartFormRef:React
                     <div className="flex justify-center pt-2 sm:pt-3 lg:pt-4">
                       <HoverBorderGradient
                         as="button"
-                        className="px-5 sm:px-6 lg:px-8 py-2 sm:py-2.5 lg:py-3 bg-gradient-to-r from-blue-600 to-purple-600 font-medium text-sm sm:text-base lg:text-lg shadow-lg shadow-purple-900/20"
+                        className="px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 lg:py-3 bg-gradient-to-r from-blue-600 to-purple-600 font-medium text-sm sm:text-base lg:text-lg shadow-lg shadow-purple-900/20"
                       >
                         <span className="flex items-center whitespace-nowrap">
                           Generate My Itinerary <ArrowRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
@@ -211,7 +211,7 @@ export default function SmartForm({smartFormRef,formVisible}:{smartFormRef:React
             </CardContainer>
 
             {/* text reveal */}
-            <div className="mt-6 sm:mt-8 lg:mt-10 mb-0">
+            <div className="mt-4 sm:mt-6 lg:mt-10 mb-2 sm:mb-4 lg:mb-8">
               <TextRevealCard
                 text="You pick the destination"
                 revealText="Stellar itinerary is our creation."
