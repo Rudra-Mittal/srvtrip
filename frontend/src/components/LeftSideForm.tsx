@@ -19,22 +19,23 @@ export default function LeftSideForm({ type }: { type: string }) {
   const [error, setError] = useState('');
   const { signin,  signinWithGoogle, loading } = useAuth();
   const [otpLoading, setOtpLoading] = useState(false);
+  const [formSubmitting, setFormSubmitting] = useState(false); // New state for form submission
   const navigate = useNavigate();
-  const dispatch = useDispatch(); // Moved to component top level
+  const dispatch = useDispatch();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setFormSubmitting(true); // Set form submission state to true
 
     try {
       if (type === 'signup') {
         if (!name) {
           setError('Name is required');
+          setFormSubmitting(false); // Reset form submission state
           return;
         }
         
-        // Only set loading state for email/password signup flow
-        // This won't run on Google signup or page refresh
         setOtpLoading(true);
         try {
           await genotp(email);
@@ -46,13 +47,12 @@ export default function LeftSideForm({ type }: { type: string }) {
           toast.error(err.message || 'Failed to send OTP');
         } finally {
           setOtpLoading(false);
+          setFormSubmitting(false); // Reset form submission state
         }
       } else {
-        // For signin, handle the response properly
         try {
           const response = await signin(email, password);
           
-          // Update Redux state immediately after successful signin
           if (response.success && response.user) {
             dispatch(loginUser({
               isLoggedIn: true,
@@ -68,11 +68,14 @@ export default function LeftSideForm({ type }: { type: string }) {
           setError(err.message || 'Sign in failed');
           toast.error(err.message || 'Sign in failed');
           console.error('Sign in failed:', err);
+        } finally {
+          setFormSubmitting(false); // Reset form submission state
         }
       }
     } catch (err: any) {
       setError(err.message || 'An error occurred');
       toast.error(err.message || 'An error occurred');
+      setFormSubmitting(false); // Reset form submission state
     }
   };
   
@@ -80,11 +83,11 @@ export default function LeftSideForm({ type }: { type: string }) {
     e.preventDefault();
     setError('');
     setOtpLoading(true);
+    setFormSubmitting(true); // Set form submission state to true
     
     try {
       const response = await verifyotp(email, otp, password, name);
       
-      // Update Redux state immediately after successful signup
       if (response.user) {
         dispatch(loginUser({
           isLoggedIn: true,
@@ -102,15 +105,15 @@ export default function LeftSideForm({ type }: { type: string }) {
       toast.error(err.message || 'Failed to verify OTP');
     } finally {
       setOtpLoading(false);
+      setFormSubmitting(false); // Reset form submission state
     }
   };
 
   const handleGoogleSignIn = async () => {
+    // setFormSubmitting(true); // Set form submission state to true
     try {
       const user = await signinWithGoogle();
       
-      // Immediately update Redux state with the user info
-      // This will make the navbar dropdown appear without needing a refresh
       if (user) {
         dispatch(loginUser({
           isLoggedIn: true,
@@ -124,6 +127,7 @@ export default function LeftSideForm({ type }: { type: string }) {
     } catch (err: any) {
       setError(err.message || 'Google sign in failed');
       toast.error(err.message || 'Google sign in failed');
+      setFormSubmitting(false); // Reset form submission state
     }
   };
 
@@ -242,10 +246,10 @@ export default function LeftSideForm({ type }: { type: string }) {
             {/* Main Button (Sign up / Sign in) */}
             <button
               type="submit"
-              disabled={loading || otpLoading}
+              disabled={loading || otpLoading || formSubmitting}
               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-2 px-4 rounded-lg mb-4 transition duration-200 cursor-pointer hover:-translate-y-0.5 shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {loading || otpLoading
+              {formSubmitting
                 ? (type === 'signup' ? 'Sending OTP...' : 'Signing in...') 
                 : (type === 'signup' ? 'Continue' : 'Sign In')
               }
@@ -262,11 +266,14 @@ export default function LeftSideForm({ type }: { type: string }) {
             <button
               type="button"
               onClick={handleGoogleSignIn}
-              disabled={loading}
+              disabled={loading || formSubmitting}
               className="w-full flex items-center justify-center bg-gray-900/60 border border-blue-500/20 py-2 px-4 rounded-lg mb-4 hover:bg-gray-800/70 transition duration-200 cursor-pointer hover:-translate-y-0.5 text-white disabled:opacity-70 disabled:cursor-not-allowed"
             >
               <img src={googlelogo} alt="Google" className="w-5 h-5 mr-2" />
-              {type === 'signup' ? 'Sign up with Google' : 'Sign in with Google'}
+              {formSubmitting && type === 'signin' 
+                ? 'Signing in with Google...'
+                : (type === 'signup' ? 'Sign up with Google' : 'Sign in with Google')
+              }
             </button>
             
             {/* Page Navigation (Sign Up ↔ Sign In) */}
@@ -309,10 +316,10 @@ export default function LeftSideForm({ type }: { type: string }) {
             <div className="space-y-3">
               <button
                 type="submit"
-                disabled={otpLoading}
+                disabled={otpLoading || formSubmitting}
                 className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-2 px-4 rounded-lg transition duration-200 cursor-pointer hover:-translate-y-0.5 shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                {otpLoading ? 'Verifying...' : 'Verify & Create Account'}
+                {formSubmitting ? 'Verifying...' : 'Verify & Create Account'}
               </button>
               
               <button
