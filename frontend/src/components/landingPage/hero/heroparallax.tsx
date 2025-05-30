@@ -107,3 +107,108 @@ export const products = [
     thumbnail: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGFyaXMlMjBmcmFuY2V8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=80",
   }
 ];
+
+
+/* 
+{
+    title: "Santorini, Greece",
+    link: "https://en.wikipedia.org/wiki/Santorini",
+    thumbnail: "/parallaximages/image1.jpg",
+  },
+  {
+    title: "Kyoto, Japan",
+    link: "https://en.wikipedia.org/wiki/Kyoto",
+    thumbnail: "/parallaximages/image2.jpg",
+  },
+  {
+    title: "Banff National Park, Canada",
+    link: "https://en.wikipedia.org/wiki/Banff_National_Park",
+    thumbnail: "/parallaximages/image3.jpg",
+  },
+  {
+    title: "Taj Mahal, India",
+    link: "https://en.wikipedia.org/wiki/Taj_Mahal",
+    thumbnail: "/parallaximages/image4.jpg",
+  },
+  {
+    title: "Cappadocia, Turkey",
+    link: "https://en.wikipedia.org/wiki/Cappadocia",
+    thumbnail: "/parallaximages/image5.jpg",
+  },
+  {
+    title: "Amalfi Coast, Italy",
+    link: "https://en.wikipedia.org/wiki/Amalfi_Coast",
+    thumbnail: "/parallaximages/image6.jpg",
+  },
+  {
+    title: "Machu Picchu, Peru",
+    link: "https://en.wikipedia.org/wiki/Machu_Picchu",
+    thumbnail: "/parallaximages/image7.jpg",
+  },
+  {
+    title: "Sahara Desert, Morocco",
+    link: "https://en.wikipedia.org/wiki/Sahara",
+    thumbnail: "/parallaximages/image8.jpg",
+  },
+  {
+    title: "New York, USA",
+    link: "https://en.wikipedia.org/wiki/USA",
+    thumbnail: "/parallaximages/image9.jpg",
+  },
+  {
+    title: "Iceland Northern Lights",
+    link: "https://en.wikipedia.org/wiki/Aurora",
+    thumbnail: "/parallaximages/image10.jpg",
+  },
+  // New entries below
+  {
+    title: "Rio de Janeiro, Brazil",
+    link: "https://en.wikipedia.org/wiki/Rio_de_Janeiro",
+    thumbnail: "/parallaximages/image11.jpg",
+  },
+  {
+    title: "Maldives",
+    link: "https://en.wikipedia.org/wiki/Maldives",
+    thumbnail: "/parallaximages/image12.jpg",
+  },
+  {
+    title: "Barcelona, Spain",
+    link: "https://en.wikipedia.org/wiki/Barcelona",
+    thumbnail: "/parallaximages/image13.jpg",
+  },
+  {
+    title: "Bangkok, Thailand",
+    link: "https://en.wikipedia.org/wiki/Eiffel_Tower",
+    thumbnail: "/parallaximages/image14.jpg",
+  },
+  {
+    title: "Angkor Wat, Cambodia",
+    link: "https://en.wikipedia.org/wiki/Angkor_Wat",
+    thumbnail: "/parallaximages/image15.jpg",
+  },
+  {
+    title: "Fiordland, New Zealand",
+    link: "https://en.wikipedia.org/wiki/Fiordland_National_Park",
+    thumbnail: "/parallaximages/image16.jpg",
+  },
+  {
+    title: "Petra, Jordan",
+    link: "https://en.wikipedia.org/wiki/Petra",
+    thumbnail: "/parallaximages/image17.jpg",
+  },
+  {
+    title: "Bali, Indonesia",
+    link: "https://en.wikipedia.org/wiki/Bali",
+    thumbnail: "/parallaximages/image18.jpg",
+  },
+  {
+    title: "Grand Canyon, USA",
+    link: "https://en.wikipedia.org/wiki/Grand_Canyon",
+    thumbnail: "/parallaximages/image19.jpg",
+  },
+  {
+    title: "Paris, France",
+    link: "https://en.wikipedia.org/wiki/Paris",
+    thumbnail: "/parallaximages/image20.jpg",
+  }
+*/
