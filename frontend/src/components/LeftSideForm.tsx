@@ -36,21 +36,42 @@ export default function LeftSideForm({ type }: { type: string }) {
         // Send OTP instead of directly creating account
         setOtpLoading(true);
         try {
-          genotp(email);
+          await genotp(email);
           toast.success('OTP sent to your email!');
           setStep('otp');
         } catch (err: any) {
           console.error('OTP generation error:', err);
           setError(err.message || 'Failed to send OTP');
+          toast.error(err.message || 'Failed to send OTP');
         } finally {
           setOtpLoading(false);
         }
       } else {
-        await signin(email, password);
-        navigate('/'); // Navigate to home after successful authentication
+        // For signin, handle the response properly
+        try {
+          const response = await signin(email, password);
+          
+          // Update Redux state immediately after successful signin
+          if (response.success && response.user) {
+            dispatch(loginUser({
+              isLoggedIn: true,
+              name: response.user.name,
+              email: response.user.email,
+              uid: 'backend-user'
+            }));
+          }
+          
+          toast.success('Sign in successful!');
+          navigate('/');
+        } catch (err: any) {
+          setError(err.message || 'Sign in failed');
+          toast.error(err.message || 'Sign in failed');
+          console.error('Sign in failed:', err);
+        }
       }
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'An error occurred');
+      toast.error(err.message || 'An error occurred');
     }
   };
   
@@ -60,15 +81,24 @@ export default function LeftSideForm({ type }: { type: string }) {
     setOtpLoading(true);
     
     try {
-       verifyotp(email, otp, password, name);
-
+      const response = await verifyotp(email, otp, password, name);
       
-      // console.log('OTP verified successfully',response);
+      // Update Redux state immediately after successful signup
+      if (response.user) {
+        dispatch(loginUser({
+          isLoggedIn: true,
+          name: response.user.name,
+          email: response.user.email,
+          uid: 'backend-user'
+        }));
+      }
+      
       toast.success('Account created successfully!');
-      navigate('/'); // Navigate to home after successful verification
+      navigate('/');
     } catch (err: any) {
       console.error('OTP verification error:', err);
       setError(err.message || 'Failed to verify OTP');
+      toast.error(err.message || 'Failed to verify OTP');
     } finally {
       setOtpLoading(false);
     }
@@ -91,7 +121,8 @@ export default function LeftSideForm({ type }: { type: string }) {
       
       navigate('/');
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'Google sign in failed');
+      toast.error(err.message || 'Google sign in failed');
     }
   };
 
@@ -195,6 +226,16 @@ export default function LeftSideForm({ type }: { type: string }) {
                 placeholder="Enter your password"
                 required
               />
+              {type === 'signin' && (
+                <div className="mt-2 text-right">
+                  <Link 
+                    to="/forgot-password" 
+                    className="text-sm text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 hover:underline"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+              )}
             </div>
             
             {/* Main Button (Sign up / Sign in) */}

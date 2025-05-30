@@ -9,6 +9,10 @@ export const genOtpRoute = async (req:any, res:any) => {
   try {
     const { email } = req.body;
 
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
     // Check if user with this email already exists
     const existingUser = await prisma.user.findUnique({
       where: { email },
@@ -18,10 +22,19 @@ export const genOtpRoute = async (req:any, res:any) => {
       return res.status(400).json({ error: 'User with this email already exists' });
     }
 
+    // Check if OTP was recently sent to this email
+    const existingOtp = otps.get(email);
+    if (existingOtp && existingOtp.expiresAt > Date.now()) {
+      const timeLeft = Math.ceil((existingOtp.expiresAt - Date.now()) / (60 * 1000));
+      return res.status(429).json({ 
+        error: `OTP already sent. Please wait ${timeLeft} minutes before requesting a new one.` 
+      });
+    }
+
     // Generate a 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     // Store the OTP with a 5-minute expiration
-    otps.set(email, { otp, expiresAt: Date.now() + 5 * 60 * 1000 });
+    otps.set(email, { otp, expiresAt: Date.now() + 1 * 60 * 1000 });
     
     // Send the OTP via email
     const transporter = nodemailer.createTransport({
@@ -36,7 +49,7 @@ export const genOtpRoute = async (req:any, res:any) => {
       from: process.env.EMAIL_USER,
       to: email,
       subject: 'Your OTP for Signup',
-      text: `Your OTP for signup is: ${otp}. It is valid for 5 minutes.`,
+      text: `Your OTP for signup is: ${otp}. It is valid for 1 minutes.`,
       html: `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
       <h2 style="color: #4a4a4a;">Verify Your Account</h2>
@@ -50,10 +63,9 @@ export const genOtpRoute = async (req:any, res:any) => {
   `, 
     });
 
-    res.status(200).json({ message: 'OTP sent to email' });
-    return 
+    return res.status(200).json({ message: 'OTP sent to email' });
   } catch (err) {
     console.error('Error sending OTP:', err);
-    res.status(500).json({ error: 'Failed to send OTP' });
+    return res.status(500).json({ error: 'Failed to send OTP' });
   }
 }

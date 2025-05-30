@@ -7,6 +7,10 @@ export const verifyOtp = async (req:any , res: any) => {
   try {
     const { email, otp, password, name } = req.body;
 
+    if (!email || !otp || !password || !name) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+
     // Check if the OTP exists and is valid
     const storedOtp = otps.get(email);
     if (!storedOtp || storedOtp.otp !== otp || storedOtp.expiresAt < Date.now()) {
@@ -27,13 +31,13 @@ export const verifyOtp = async (req:any , res: any) => {
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
-      return res.status(200).json({ token, message: 'Signup successful' });
+      return res.status(200).json({ message: 'Account created successfully', token });
     } catch (err: any) {
       console.error('Error creating user:', err);
-      return res.status(400).json({ error: err.message || 'Failed to create user' });
+      return res.status(400).json({ error: err.message || 'Failed to create user account' });
     }
   } catch (err) {
     console.error('Error verifying OTP:', err);
-    return res.status(500).json({ error: 'Failed to verify OTP' });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 }

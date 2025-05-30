@@ -111,54 +111,47 @@ export function useAuth() {
   };
 
   // Sign in with email and password
-// Sign in with email and password
-const signin = async (email: string, password: string) => {
-  try {
-    setLoading(true);
-    setError(null);
-    
-    // const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    
-    // Get Firebase token for backend integration
-    // const idToken = await userCredential.user.getIdToken();
-    
-    // Verify with backend
+  const signin = async (email: string, password: string) => {
     try {
+      setLoading(true);
+      setError(null);
+      
+      // Call backend signin directly (no Firebase authentication for regular signin)
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/signin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // 'Authorization': `Bearer ${idToken}`
         },
         credentials: 'include', // Include cookies in the request
         body: JSON.stringify({
           email,
-          password, // Include the password
+          password,
           googleAuth: false,
-          // firebaseUserId: userCredential.user.uid
         })
       });
       
+      const data = await response.json();
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        console.warn('Backend login warning:', errorData);
-        // Continue anyway since Firebase login succeeded
+        throw new Error(data.error || 'Invalid email or password');
       }
-    } catch (backendError) {
-      console.error('Backend login error:', backendError);
-      // Continue since Firebase login succeeded
+      
+      // Return user data for state management
+      return { 
+        success: true, 
+        user: { 
+          email: email,
+          name: data.name || 'User' // Get name from backend response
+        } 
+      };
+    } catch (err: any) {
+      console.error('Signin error:', err);
+      setError(err.message);
+      throw new Error(err.message);
+    } finally {
+      setLoading(false);
     }
-    
-    // return userCredential.user;
-    return 
-  } catch (err: any) {
-    console.error('Signin error:', err);
-    setError(err.message);
-    throw new Error(err.message);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   // Sign in with Google
   const signinWithGoogle = async () => {

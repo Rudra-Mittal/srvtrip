@@ -8,6 +8,11 @@ export const userRoute=(req:AuthRequest,res:Response)=>{
     res.status(403).json({"error":"User not found"});
     return
   }
-  res.status(200).json({userId:user.userId,email:user.email,name:user.name})//send userId in response;
+  res.status(200).json({
+    userId: user.userId,
+    email: user.email,
+    name: user.name,
+    isLoggedIn: true
+  });//send userId in response;
   return
 }
