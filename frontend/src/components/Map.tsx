@@ -226,13 +226,8 @@ const MarkerManager = ({
 
   // Default fallback images
   const getDefaultImages = () => [
-    "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=400&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop"
+    "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI0NSUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNiIgZmlsbD0iIzk5OTk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+SW1hZ2UgTG9hZGluZyBGYWlsZWQ8L3RleHQ+PHRleHQgeD0iNTAlIiB5PSI1NSUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2JiYmJiYiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+UGhvdG9zIG5vdCBhdmFpbGFibGU8L3RleHQ+PC9zdmc+"
   ];
-  
   // Reset image index when location changes
   useEffect(() => {
     setCurrentImageIndex(0);
@@ -373,8 +368,13 @@ const MarkerManager = ({
       isTrackingMouseRef.current = false;
       // Select new marker
       // console.log("selectedMarker",selectedMarker)
+      const fullMarkerData=predefinedMarkers.find(marker=>
+        marker.lat === position.lat &&
+        marker.lng === position.lng &&
+        marker.name === position.name
+      );
       setSelectedMarker(position);
-      setInfoOpen(position);
+      setInfoOpen(fullMarkerData || position);
       
       // Smooth zoom animation to the selected marker
       if (map) {
