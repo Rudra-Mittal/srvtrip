@@ -26,7 +26,8 @@ import {
   otpLimiter, 
   otpEmailLimiter, 
   speedLimiter, 
-  AIexpensiveLimiter
+  AIexpensiveLimiter,
+  syncLimiter
 } from './middleware/rateLimiter';
 dotenv.config();
 const app = express();
@@ -64,7 +65,7 @@ app.post('/api/summarize',serverAuthMiddleware, summarizeRoute)
 
 
 app.use(authMiddleware);//use auth middleware for all routes after this line 
-app.post('/api/fetchitineraries', fetchItineraries)
+app.post('/api/fetchitineraries', syncLimiter, fetchItineraries)
 app.post('/api/itenary',AIexpensiveLimiter, itenaryRoute)
 app.get('/api/itineraries', itenarariesRoute)
 app.post('/query', queryRoute)

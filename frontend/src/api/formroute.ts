@@ -7,10 +7,14 @@ export const genitinerary = async (data: any) => {
         },
         credentials: 'include',
         body: JSON.stringify({"prompt":data}),
-    }).then((res) => {
+    }).then(async (res) => {
         //if not a valid place it is gibberish or not a place so backend will return res.status(403).json({ "error": "Invalid destination" });
         if (res.status === 403) {
             throw new Error('Invalid destination');
+        }
+        if (res.status === 429) {
+            const errorData = await res.json();
+            throw new Error(errorData.error || 'Rate limit exceeded');
         }
         if (!res.ok) {
             throw new Error('Network response was not ok');
@@ -18,7 +22,7 @@ export const genitinerary = async (data: any) => {
         return res.json();
     }).catch((err)=>{
         console.log(err)
-        return {error: 'Failed to generate itinerary'}
+        throw err; // Re-throw to allow proper error handling in components
     });
     }
 
