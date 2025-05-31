@@ -1,171 +1,193 @@
 import { Boxes } from "@/components/ui/background-boxes";
 import { motion } from "framer-motion";
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { DayCard } from "@/components/ItineraryDayCard";
-import { useDebounce } from "use-debounce";
 import { useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
 
 export const ItineraryPage = () => {
-    const {itineraryNum}= useParams();
+    const { itineraryNum } = useParams();
     const navigate = useNavigate();
-    console.log("itineraryNumber",itineraryNum);
-    const itineraryIdx= Number(itineraryNum)-1;
+    
+    const itineraryIdx = useMemo(() => Number(itineraryNum) - 1, [itineraryNum]);
     const [activeCardIndex, setActiveCardIndex] = useState(0);
     const sliderRef = useRef<HTMLDivElement>(null);
 
-    const itineraries= useSelector((state: any) => state.itinerary.itineraries);
-    const itineraryD=itineraries[itineraryIdx];  
+    const itineraries = useSelector((state: any) => state.itinerary.itineraries);
+    const itineraryD = useMemo(() => itineraries[itineraryIdx], [itineraries, itineraryIdx]);
 
-
-    const cardRefs = useRef<(HTMLDivElement | null)[]>(Array(itineraryD.itinerary.days.length).fill(null));
-    const [scrollPosition] = useDebounce(useScrollPosition(sliderRef as React.RefObject<HTMLDivElement>), 50);
-    const navigateSlider = useCallback((direction: 'prev' | 'next') => {
+    // Simplified scroll to card function
+    const scrollToCard = useCallback((index: number) => {
         if (!sliderRef.current) return;
-        let newIndex;
-        if (direction === 'prev') {
-            newIndex = Math.max(0, activeCardIndex - 1);
-        } else {
-            newIndex = Math.min(itineraryD.itinerary.days.length - 1, activeCardIndex + 1);
-        }
+
+        const slider = sliderRef.current;
+        const cards = slider.querySelectorAll('[data-card-index]');
+        const targetCard = cards[index] as HTMLElement;
+        
+        if (!targetCard) return;
+
+        // Get card and slider dimensions
+        const cardRect = targetCard.getBoundingClientRect();
+        const sliderRect = slider.getBoundingClientRect();
+        
+        // Calculate current card position relative to slider
+        const cardLeft = targetCard.offsetLeft;
+        const cardWidth = targetCard.offsetWidth;
+        const sliderWidth = slider.clientWidth;
+        
+        // Calculate scroll position to center the card
+        const scrollLeft = cardLeft - (sliderWidth - cardWidth) / 2;
+        
+        // Ensure scroll position is within bounds
+        const maxScroll = slider.scrollWidth - sliderWidth;
+        const clampedScroll = Math.max(0, Math.min(scrollLeft, maxScroll));
+        
+        slider.scrollTo({
+            left: clampedScroll,
+            behavior: 'smooth'
+        });
+    }, []);
+
+    // Navigate to next/previous card
+    const navigateSlider = useCallback((direction: 'prev' | 'next') => {
+        const newIndex = direction === 'prev' 
+            ? Math.max(0, activeCardIndex - 1)
+            : Math.min(itineraryD.itinerary.days.length - 1, activeCardIndex + 1);
         
         setActiveCardIndex(newIndex);
-        
-        // Scroll to the card using proper measurement
-        const card = cardRefs.current[newIndex];
-        if (card) {
-            const slider = sliderRef.current;
-            const cardLeft = card.offsetLeft;
-            const sliderWidth = slider.clientWidth;
-            
-            slider.scrollTo({
-                left: cardLeft - (sliderWidth - card.offsetWidth) / 2,
-                behavior: 'smooth'
-            });
-        }
-    }, [activeCardIndex]);
-    function useScrollPosition(ref: React.RefObject<HTMLDivElement>) {
-        const [scrollPosition, setScrollPosition] = useState(0);
-    
-        useEffect(() => {
-            const element = ref.current;
-            if (!element) return;
-    
-            const updatePosition = () => {
-                setScrollPosition(element.scrollLeft);
-            };
-    
-            element.addEventListener('scroll', updatePosition);
-            return () => element.removeEventListener('scroll', updatePosition);
-        }, [ref]);
-    
-        return scrollPosition;
-    }
+        scrollToCard(newIndex);
+    }, [activeCardIndex, itineraryD.itinerary.days.length, scrollToCard]);
+
+    // Handle indicator click
+    const handleIndicatorClick = useCallback((index: number) => {
+        setActiveCardIndex(index);
+        scrollToCard(index);
+    }, [scrollToCard]);
+
+    // Track scroll position to update active card (simplified)
     useEffect(() => {
-        if (!sliderRef.current || !cardRefs.current.length) return;
+        if (!sliderRef.current) return;
 
-        // Calculate visible card index
-        const calculateActiveIndex = () => {
-            const slider = sliderRef.current!;
-            const scrollLeft = slider.scrollLeft + slider.clientWidth * 0.1; // 10% threshold
-            
-            // Find the first card that's mostly visible from left
-            const activeIndex = cardRefs.current.findIndex((card) => {
-                if (!card) return false;
-                const cardLeft = card.offsetLeft;
-                const cardRight = cardLeft + card.offsetWidth;
-                return cardLeft <= scrollLeft && cardRight > scrollLeft;
-            });
+        let timeoutId: NodeJS.Timeout;
+        
+        const handleScroll = () => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                if (!sliderRef.current) return;
 
-            return activeIndex >= 0 ? activeIndex : 0;
+                const slider = sliderRef.current;
+                const sliderCenter = slider.scrollLeft + slider.clientWidth / 2;
+                const cards = slider.querySelectorAll('[data-card-index]');
+                
+                let closestIndex = 0;
+                let closestDistance = Infinity;
+                
+                cards.forEach((card, index) => {
+                    const cardElement = card as HTMLElement;
+                    const cardCenter = cardElement.offsetLeft + cardElement.offsetWidth / 2;
+                    const distance = Math.abs(cardCenter - sliderCenter);
+                    
+                    if (distance < closestDistance) {
+                        closestDistance = distance;
+                        closestIndex = index;
+                    }
+                });
+                
+                if (closestIndex !== activeCardIndex) {
+                    setActiveCardIndex(closestIndex);
+                }
+            }, 150); // Debounce scroll updates
         };
 
-        const newActiveIndex = calculateActiveIndex();
-        if (newActiveIndex !== activeCardIndex) {
-            setActiveCardIndex(newActiveIndex);
-        }
-    }, [scrollPosition, activeCardIndex]);
-    // Handle navigation
-   // Enhanced handleCardHover function with edge detection and smooth adjustments
-   const handleCardHover = useCallback((index: number, isHovering: boolean) => {
-        if (!cardRefs.current[index] || !sliderRef.current) return;
-
-        const card = cardRefs.current[index];
         const slider = sliderRef.current;
+        slider.addEventListener('scroll', handleScroll, { passive: true });
         
-        // Define constants
-        const SCALE_FACTOR = 1.05;
-        const BUFFER_PX = 10;
-        
+        return () => {
+            slider.removeEventListener('scroll', handleScroll);
+            clearTimeout(timeoutId);
+        };
+    }, [activeCardIndex]);
+
+    // Intelligent hover effect that adjusts expansion direction based on available space
+    const handleCardHover = useCallback((element: HTMLElement, isHovering: boolean) => {
         if (isHovering) {
-            // First set z-index to ensure card is on top
-            card.style.zIndex = '30';
-            
-            // Force layout recalculation before measuring
-            void card.offsetWidth;
-            
-            // Get accurate measurements
-            const cardRect = card.getBoundingClientRect();
+            const slider = sliderRef.current;
+            if (!slider) return;
+
+            // Get element and slider dimensions
+            const elementRect = element.getBoundingClientRect();
             const sliderRect = slider.getBoundingClientRect();
             
-            // Calculate how much the card will grow on each side when scaled
-            const originalWidth = cardRect.width;
-            const expandedWidth = originalWidth * SCALE_FACTOR;
-            const growthPerSide = (expandedWidth - originalWidth) / 2;
+            // Account for gradient overlays (20px each side)
+            const gradientWidth = 80; // w-20 = 80px
+            const effectiveSliderLeft = sliderRect.left + gradientWidth;
+            const effectiveSliderRight = sliderRect.right - gradientWidth;
+            const effectiveSliderWidth = effectiveSliderRight - effectiveSliderLeft;
             
-            // Calculate space available on each side
-            const leftSpace = cardRect.left - sliderRect.left;
-            const rightSpace = sliderRect.right - cardRect.right;
+            // Calculate how much the card will grow (5% scale = 5% larger)
+            const scaleGrowth = 0.05;
+            const currentWidth = elementRect.width;
+            const expandedWidth = currentWidth * (1 + scaleGrowth);
+            const growthAmount = expandedWidth - currentWidth;
+            const halfGrowth = growthAmount / 2;
             
-            // Determine if adjustments are needed
+            // Calculate available space on each side (excluding gradient areas)
+            const spaceOnLeft = elementRect.left - effectiveSliderLeft;
+            const spaceOnRight = effectiveSliderRight - elementRect.right;
+            
             let translateX = 0;
+            const buffer = 20; // Increased buffer for better visibility
             
-            if (leftSpace < growthPerSide + BUFFER_PX) {
-                // Not enough space on left, shift right
-                translateX = (growthPerSide + BUFFER_PX) - leftSpace;
-                console.log(`Card ${index} - LEFT adjustment: ${translateX}px`);
-            } 
-            else if (rightSpace < growthPerSide + BUFFER_PX) {
-                // Not enough space on right, shift left
-                translateX = -((growthPerSide + BUFFER_PX) - rightSpace);
-                console.log(`Card ${index} - RIGHT adjustment: ${translateX}px`);
+            // Check if there's enough space on both sides for normal expansion
+            if (spaceOnLeft >= halfGrowth + buffer && spaceOnRight >= halfGrowth + buffer) {
+                // Enough space on both sides - expand normally (centered)
+                translateX = 0;
+            } else if (spaceOnRight < halfGrowth + buffer) {
+                // Not enough space on right - shift left
+                const deficit = (halfGrowth + buffer) - spaceOnRight;
+                translateX = -deficit;
+                
+                // Ensure we don't push too far left
+                const maxLeftShift = spaceOnLeft - buffer;
+                translateX = Math.max(translateX, -maxLeftShift);
+            } else if (spaceOnLeft < halfGrowth + buffer) {
+                // Not enough space on left - shift right
+                const deficit = (halfGrowth + buffer) - spaceOnLeft;
+                translateX = deficit;
+                
+                // Ensure we don't push too far right
+                const maxRightShift = spaceOnRight - buffer;
+                translateX = Math.min(translateX, maxRightShift);
             }
             
-            // Apply transformations with hardware acceleration
-            card.style.willChange = 'transform';
-            card.style.transition = 'transform 300ms ease-out, box-shadow 300ms ease';
-            card.style.transform = `translateX(${translateX}px) scale(${SCALE_FACTOR})`;
-            card.style.boxShadow = '0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22)';
-            card.style.backgroundColor = 'black';
+            // Apply the transformations
+            element.style.transform = `translateX(${translateX}px) scale(1.05)`;
+            element.style.zIndex = '30';
+            element.style.boxShadow = '0 20px 40px rgba(0,0,0,0.3)';
         } else {
-            // Reset transforms
-            card.style.willChange = 'auto';
-            card.style.transition = 'transform 300ms ease, box-shadow 300ms ease';
-            card.style.transform = 'translateX(0) scale(1)';
-            card.style.boxShadow = 'none';
-            card.style.backgroundColor = 'transparent';
-            
-            // Reset z-index after transition completes
-            setTimeout(() => {
-                if (!card.matches(':hover')) {
-                    card.style.zIndex = '10';
-                }
-            }, 300);
+            // Reset transformations
+            element.style.transform = 'translateX(0) scale(1)';
+            element.style.zIndex = '10';
+            element.style.boxShadow = 'none';
         }
     }, []);
-    
 
     const handleCardClick = useCallback((dayNumber: number) => {
         navigate(`${window.location.pathname}/day/${dayNumber}`);
     }, [navigate]);
 
+    const destinationTitle = useMemo(() => 
+        itineraryD.itinerary.destination[0].toUpperCase() + itineraryD.itinerary.destination.slice(1),
+        [itineraryD.itinerary.destination]
+    );
+
     return (
-        <div className="bg-black max-h-screen max-w-screen overflow-hidden  ">
-            <div className="absolute inset-0 z-0 overflow-hidden min-w-secreen min-h-screen opacity-50">
+        <div className="bg-black max-h-screen max-w-screen overflow-hidden">
+            <div className="absolute inset-0 z-0 overflow-hidden min-w-screen min-h-screen opacity-50">
                 <Boxes />
             </div>
 
-            <div className="relative z-10 container min-h-screen min-w-screen pointer-events-none mx-auto px-4 py-12 ">
+            <div className="relative z-10 container min-h-screen min-w-screen pointer-events-none mx-auto px-4 py-12">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -174,7 +196,7 @@ export const ItineraryPage = () => {
                 >
                     <div className="mt-12">
                         <h1 className="text-4xl sm:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-3">
-                            Your {itineraryD.itinerary.destination[0].toUpperCase()+itineraryD.itinerary.destination.slice(1)} Adventure
+                            Your {destinationTitle} Adventure
                         </h1>
                     </div>
                     <p className="text-gray-300 max-w-2xl mx-auto">
@@ -201,7 +223,7 @@ export const ItineraryPage = () => {
                             className={`p-2 rounded-full ${activeCardIndex > 0
                                     ? "bg-blue-600/20 text-blue-400 hover:bg-blue-600/30"
                                     : "bg-gray-800/30 text-gray-600"
-                                } transition-colors `}
+                                } transition-colors`}
                             onClick={() => navigateSlider('prev')}
                             disabled={activeCardIndex === 0}
                             whileHover={activeCardIndex > 0 ? { scale: 1.05 } : {}}
@@ -238,7 +260,7 @@ export const ItineraryPage = () => {
                 {/* Card slider */}
                 <div className="relative pb-8 min-h-screen">
                     <motion.div
-                        className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-black to-transparent z-20 "
+                        className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-black to-transparent z-20 pointer-events-none"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.3 }}
@@ -251,36 +273,36 @@ export const ItineraryPage = () => {
                     />
 
                     <div
-                        className="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-4"
+                        className="overflow-x-auto scrollbar-hide pb-4"
                         ref={sliderRef}
-                        style={{ scrollbarWidth: 'none', position: 'relative' }}
+                        style={{ 
+                            scrollbarWidth: 'none',
+                            msOverflowStyle: 'none'
+                        }}
                     >
-                         <div className="flex gap-5 px-4 py-4"> 
+                        <div className="flex gap-6 px-6 py-4" style={{ width: 'max-content' }}> 
                             {itineraryD.itinerary.days.map((day: { day: number; }, index: number) => (
                                 <motion.div
-                                key={day.day}
-                                className="snap-center flex-shrink-0 pointer-events-auto cursor-pointer"
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: 0 , duration: 0.5 }}
-                                ref={el => { cardRefs.current[index] = el; }}
-                                onClick={() => handleCardClick(day.day)}
-                                onMouseEnter={() => {
-                                    setTimeout(()=>handleCardHover(index, true),1600)
-                                }}
-                                onMouseLeave={() => handleCardHover(index, false)}
-                                style={{
-                                    transformOrigin: 'center center',
-                                    transition: 'transform 300ms ease, box-shadow 300ms ease',
-                                    position: 'relative',
-                                    zIndex: '10',
-                                    marginLeft: '5px',
-                                    marginRight: '5px'
-                                }}
-                            >
+                                    key={day.day}
+                                    data-card-index={index}
+                                    className="flex-shrink-0 pointer-events-auto cursor-pointer"
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: index * 0.1, duration: 0.5 }}
+                                    onClick={() => handleCardClick(day.day)}
+                                    onMouseEnter={(e) => handleCardHover(e.currentTarget, true)}
+                                    onMouseLeave={(e) => handleCardHover(e.currentTarget, false)}
+                                    style={{
+                                        transformOrigin: 'center center',
+                                        transition: 'transform 250ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 250ms ease',
+                                        position: 'relative',
+                                        zIndex: '10',
+                                        willChange: 'transform'
+                                    }}
+                                >
                                     <DayCard
                                         itineraryIdx={itineraryIdx} 
-                                        dayIdx={day.day-1}  
+                                        dayIdx={day.day - 1}  
                                     />
                                 </motion.div>
                             ))}
@@ -288,24 +310,15 @@ export const ItineraryPage = () => {
                     </div>
 
                     {/* Day indicators */}
-                    <div className="flex justify-center mt-6 gap-2">
+                    <div className="flex justify-center mt-6 gap-2 pointer-events-auto">
                         {itineraryD.itinerary.days.map((_: any, index: number) => (
                             <motion.button
                                 key={`indicator-${index}`}
-                                className={`w-8 h-1.5 rounded-full transition-all ${activeCardIndex === index
+                                className={`h-1.5 rounded-full transition-all duration-300 ${activeCardIndex === index
                                         ? "bg-gradient-to-r from-blue-500 to-purple-500 w-12"
-                                        : "bg-gray-700 hover:bg-gray-600"
+                                        : "bg-gray-700 hover:bg-gray-600 w-8"
                                     }`}
-                                onClick={() => {
-                                    setActiveCardIndex(index);
-                                    if (sliderRef.current) {
-                                        const cardWidth = 440;
-                                        sliderRef.current.scrollTo({
-                                            left: index * cardWidth,
-                                            behavior: 'smooth'
-                                        });
-                                    }
-                                }}
+                                onClick={() => handleIndicatorClick(index)}
                                 whileHover={{ scale: 1.2 }}
                                 whileTap={{ scale: 0.95 }}
                                 initial={{ opacity: 0, y: 10 }}
