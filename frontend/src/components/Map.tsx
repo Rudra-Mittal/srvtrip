@@ -25,15 +25,35 @@ const directionsGlobalCache = {
 
 
 // Component to render directions between markers
-const DirectionsRenderer = ({predefinedMarkers, triggerDirections}: { predefinedMarkers: any[], triggerDirections: boolean }) => {
+const DirectionsRenderer = ({predefinedMarkers, triggerDirections, isDarkTheme}: { 
+  predefinedMarkers: any[], 
+  triggerDirections: boolean,
+  isDarkTheme: boolean 
+}) => {
   const routesLibrary = useMapsLibrary("routes");
   const map = useMap();
   const directionsCache = useRef<any[]>([]); // Local cache reference
   
+  // Clear previous directions when theme changes
+  useEffect(() => {
+    // Clear existing directions when theme changes
+    directionsGlobalCache.directions.forEach(renderer => {
+      if (renderer) renderer.setMap(null);
+    });
+    directionsGlobalCache.directions = [];
+    directionsGlobalCache.rendered = false;
+  }, [isDarkTheme]);
+  
   useEffect(() => {
     // Use global cache to prevent re-rendering directions
-    if (!routesLibrary || !map || !triggerDirections || directionsGlobalCache.rendered) return;
+    if (!routesLibrary || !map || !triggerDirections) return;
 
+    // Clear existing directions first
+    directionsCache.current.forEach(renderer => {
+      if (renderer) renderer.setMap(null);
+    });
+    directionsCache.current = [];
+    
     // Create directions for each pair of consecutive markers
     predefinedMarkers.forEach((_, index) => {
       if (index < predefinedMarkers.length - 1) {
@@ -71,7 +91,7 @@ const DirectionsRenderer = ({predefinedMarkers, triggerDirections}: { predefined
         }, 500 * (index + 1));
       }
     });
-  }, [routesLibrary, map, triggerDirections]);
+  }, [routesLibrary, map, triggerDirections, isDarkTheme]);
   
   return null;
 };
@@ -161,7 +181,11 @@ const MapComponent = ({
             hoveredMarker={hoveredMarker}
             isDarkTheme={isDarkTheme}
           />
-          {allMarkersVisible && <DirectionsRenderer predefinedMarkers={predefinedMarkers} triggerDirections={true} />}
+          {allMarkersVisible && <DirectionsRenderer 
+            predefinedMarkers={predefinedMarkers} 
+            triggerDirections={true} 
+            isDarkTheme={isDarkTheme} 
+          />}
         </Map>
       </div>
     </div>
@@ -527,7 +551,7 @@ const handlePopupMouseLeave = () => {
       {infoOpen && (
         <InfoWindow 
           position={getInfoWindowPosition(infoOpen)}
-          pixelOffset={[0, 150]} // Increase vertical offset to position higher above marker
+          pixelOffset={[0, 130]} // Increase vertical offset to position higher above marker
           // onCloseClick={handleZoomOut}
           disableAutoPan={true} // Prevent automatic panning
           className={isDarkTheme ? "bg-gray-700" : "bg-white"}
@@ -537,7 +561,7 @@ const handlePopupMouseLeave = () => {
   onMouseEnter={handlePopupMouseEnter}
   onMouseLeave={handlePopupMouseLeave}
 >
-            <div style={{ position: "relative", overflow: "hidden", height: "150px", width: "280px"}}>
+            <div style={{ position: "relative", overflow: "hidden", height: "100px", width: "300px"}}>
               
               {/* Carousel container */}
               {getCurrentImages().map((image:any, index:any) => (
@@ -565,10 +589,10 @@ const handlePopupMouseLeave = () => {
                 />
               ))}
 
-              {/* Image counter */}
+              {/* Image counter
               <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
                 {currentImageIndex + 1} / {getCurrentImages().length}
-              </div>
+              </div> */}
 
 {/* Enhanced Carousel Arrows */}
 <div className="absolute inset-0 flex items-center justify-between px-2 z-20 pointer-events-none">

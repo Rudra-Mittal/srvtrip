@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { CalendarIcon, ArrowRight, Sparkles } from "lucide-react";
-import { format } from "date-fns";
+import { CalendarIcon, ArrowRight, Sparkles, AlertCircle } from "lucide-react";
+import { format, isBefore, startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -34,6 +34,11 @@ interface FormData {
   currency: string;
 }
 
+interface ValidationErrors {
+  startdate?: string;
+  number_of_days?: string;
+}
+
 export default function Form() {
   // Form data state
   const [formData, setFormData] = useState<FormData>({
@@ -46,6 +51,9 @@ export default function Form() {
     customRequests: "",
     currency: "INR"
   });
+  
+  // Add validation errors state
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   
   const currencies = [
     { value: "USD", label: "USD - $", symbol: "$" },
@@ -95,9 +103,51 @@ export default function Form() {
     "Nightlife", "Architecture", "Art", "Music", "Local Experiences"
   ];
 
-  // Handle form changes
+  // Validate form data
+  const validateForm = () => {
+    const errors: ValidationErrors = {};
+    
+    // Validate date is not in the past
+    if (formData.startdate) {
+      const today = startOfDay(new Date());
+      if (isBefore(formData.startdate, today)) {
+        errors.startdate = "Start date cannot be in the past";
+      }
+    }
+    
+    // Validate number of days is not more than 7
+    if (formData.number_of_days > 7) {
+      errors.number_of_days = "Trip duration cannot exceed 7 days";
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // Handle form changes with validation
   const handleChange = (field: keyof FormData, value: any) => {
+    // Special handling for number_of_days to enforce the 7-day limit
+    if (field === 'number_of_days' && typeof value === 'number') {
+      value = Math.min(value, 7); // Cap at 7 days maximum
+    }
+    
     setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Clear validation errors for the field being changed
+    if (validationErrors[field as keyof ValidationErrors]) {
+      setValidationErrors(prev => ({ ...prev, [field]: undefined }));
+    }
+    
+    // Special validation for date field
+    if (field === 'startdate' && value) {
+      const today = startOfDay(new Date());
+      if (isBefore(value, today)) {
+        setValidationErrors(prev => ({ 
+          ...prev, 
+          startdate: "Start date cannot be in the past" 
+        }));
+      }
+    }
   };
 
   // Toggle interests
@@ -115,13 +165,43 @@ export default function Form() {
       }
     });
   };
+  
   const dispatch= useDispatch()
   const itineraries = useSelector((state: any) => state.itinerary.itineraries);
   
-  // Handle form submission
+  // Handle form submission with validation
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    handleAggregate();
+    
+    // Validate form before proceeding
+    if (validateForm()) {
+      handleAggregate();
+    } else {
+      // Show toast for validation errors
+      if (validationErrors.startdate) {
+        toast.error(validationErrors.startdate, {
+          duration: 4000,
+          style: {
+            background: '#000',
+            color: '#fff',
+            border: '1px solid rgba(220, 38, 38, 0.5)',
+          },
+          icon: '📅',
+        });
+      }
+      
+      if (validationErrors.number_of_days) {
+        toast.error(validationErrors.number_of_days, {
+          duration: 4000,
+          style: {
+            background: '#000',
+            color: '#fff',
+            border: '1px solid rgba(220, 38, 38, 0.5)',
+          },
+          icon: '⏱️',
+        });
+      }
+    }
   };
 
   // Animation for form submission
@@ -138,10 +218,36 @@ export default function Form() {
     }, 1300);
   };
 
-  // Move to next step with animation
+  // Move to next step with validation
   const nextStep = () => {
-    if (currentStep < 4) {
-      // Add a small delay for exit animation
+    // Validate current step before moving to the next
+    let canProceed = true;
+    
+    // Specific validation for step 1 (date validation)
+    if (currentStep === 1 && formData.startdate) {
+      const today = startOfDay(new Date());
+      if (isBefore(formData.startdate, today)) {
+        setValidationErrors(prev => ({ 
+          ...prev, 
+          startdate: "Start date cannot be in the past" 
+        }));
+        canProceed = false;
+        
+        // Show toast for invalid date
+        toast.error("Start date cannot be in the past", {
+          duration: 4000,
+          style: {
+            background: '#000',
+            color: '#fff',
+            border: '1px solid rgba(220, 38, 38, 0.5)',
+          },
+          icon: '📅',
+        });
+      }
+    }
+    
+    // If we can proceed, move to next step
+    if (canProceed && currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -154,16 +260,60 @@ export default function Form() {
     }
   };
 
-  // Handle step change directly
+  // Handle step change directly with validation
   const goToStep = (step: number) => {
-    if (step >= 1 && step <= 4) {
-      // Add a small delay for exit animation
+    // Validate current step before changing
+    let canProceed = true;
+    
+    // Check for date validation when on step 1
+    if (currentStep === 1 && formData.startdate) {
+      const today = startOfDay(new Date());
+      if (isBefore(formData.startdate, today)) {
+        setValidationErrors(prev => ({ 
+          ...prev, 
+          startdate: "Start date cannot be in the past" 
+        }));
+        canProceed = false;
+      }
+    }
+    
+    if (canProceed && step >= 1 && step <= 4) {
       setCurrentStep(step);
-    }  };
+    }
+  };
+  
   const navigate=useNavigate()
   
-  // Update the handleGenerateItinerary function to combine interests and customRequests
+  // Update the handleGenerateItinerary function to include validation
   const handleGenerateItinerary = async (formData: FormData) => {
+    // Validate form before generating itinerary
+    if (!validateForm()) {
+      if (validationErrors.startdate) {
+        toast.error(validationErrors.startdate, {
+          duration: 4000,
+          style: {
+            background: '#000',
+            color: '#fff',
+            border: '1px solid rgba(220, 38, 38, 0.5)',
+          },
+          icon: '📅',
+        });
+      }
+      
+      if (validationErrors.number_of_days) {
+        toast.error(validationErrors.number_of_days, {
+          duration: 4000,
+          style: {
+            background: '#000',
+            color: '#fff',
+            border: '1px solid rgba(220, 38, 38, 0.5)',
+          },
+          icon: '⏱️',
+        });
+      }
+      return;
+    }
+    
     setFormVisible(false);
     setShowSummary(true);
     setShowTimeoutMessage(false); // Reset timeout message
@@ -437,14 +587,19 @@ export default function Form() {
                         </div>
                       </div>
 
-                      {/* Start Date Field */}
+                      {/* Start Date Field with validation */}
                       <div className="space-y-2">
                         <Label className="text-blue-200 text-sm sm:text-base lg:text-lg">Start Date</Label>
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button
                               variant="outline"
-                              className="w-full justify-start text-left font-normal bg-black/60 border border-blue-500/20 focus:border-purple-500/50 h-12 sm:h-12 hover:bg-black/70 text-sm sm:text-base lg:text-lg "
+                              className={cn(
+                                "w-full justify-start text-left font-normal bg-black/60 border h-12 sm:h-12 hover:bg-black/70 text-sm sm:text-base lg:text-lg",
+                                validationErrors.startdate 
+                                  ? "border-red-500 focus:border-red-500" 
+                                  : "border-blue-500/20 focus:border-purple-500/50"
+                              )}
                             >
                               <CalendarIcon className="mr-2 h-4 w-4 text-blue-400" />
                               {formData.startdate ? (
@@ -460,10 +615,17 @@ export default function Form() {
                               selected={formData.startdate}
                               onSelect={(date) => handleChange("startdate", date)}
                               initialFocus
+                              fromDate={new Date()} // Disable past dates
                               className="bg-black text-white scale-90 sm:scale-100 max-w-[280px] sm:max-w-none"
                             />
                           </PopoverContent>
                         </Popover>
+                        {validationErrors.startdate && (
+                          <div className="text-red-500 text-xs flex items-center mt-1">
+                            <AlertCircle className="w-3 h-3 mr-1" />
+                            {validationErrors.startdate}
+                          </div>
+                        )}
                       </div>
 
                       <div className="flex justify-end mt-8">
@@ -498,7 +660,7 @@ export default function Form() {
                         Trip Details
                       </h2>
 
-                      {/* Budget Slider with manual input - fix visibility issue */}
+                      {/* Budget Slider with manual input */}
                       <div className="space-y-4">
                         <div className="flex justify-between items-center">
                           <Label className="text-blue-200 text-sm sm:text-base lg:text-lg">Budget</Label>
@@ -601,21 +763,35 @@ export default function Form() {
                         </div>
                       </div>
 
-                      {/* Trip Duration with manual input */}
+                      {/* Trip Duration with manual input - updated for 7 day limit */}
                       <div className="space-y-2">
                         <div className="flex justify-between items-center mb-2">
                           <Label className="text-blue-200">Trip Duration (days)</Label>
-                          <Input
-                            type="number"
-                            value={formData.number_of_days}
-                            onChange={(e) => handleChange("number_of_days", Number(e.target.value))}
-                            className="w-24 sm:w-28 h-10 sm:h-12 bg-black/60 border border-blue-500/20 focus:border-purple-500/50 text-white text-sm sm:text-base lg:text-lg px-3 py-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                            min={1}
-                            max={30}
-                          />
+                          <div className="flex items-center">
+                            <Input
+                              type="number"
+                              value={formData.number_of_days}
+                              onChange={(e) => handleChange("number_of_days", Math.min(Number(e.target.value), 7))}
+                              className={cn(
+                                "w-24 sm:w-28 h-10 sm:h-12 bg-black/60 border text-white text-sm sm:text-base lg:text-lg px-3 py-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+                                validationErrors.number_of_days 
+                                  ? "border-red-500 focus:border-red-500" 
+                                  : "border-blue-500/20 focus:border-purple-500/50"
+                              )}
+                              min={1}
+                              max={7}
+                            />
+                            <span className="ml-2 text-xs text-blue-300">(max 7)</span>
+                          </div>
                         </div>
+                        {validationErrors.number_of_days && (
+                          <div className="text-red-500 text-xs flex items-center mt-1">
+                            <AlertCircle className="w-3 h-3 mr-1" />
+                            {validationErrors.number_of_days}
+                          </div>
+                        )}
                         <div className="flex items-center space-x-4">
-                          {[3, 5, 7, 10, 14, 21].map(num => (
+                          {[1, 2, 3, 5, 7].map(num => (
                             <motion.button
                               key={num}
                               type="button"
@@ -771,6 +947,11 @@ export default function Form() {
                             <p className="text-white text-base md:text-lg font-medium">{formData.number_of_persons} {formData.number_of_persons === 1 ? "person" : "people"}</p>
                           </div>
                           <div>
+                            <p className="text-gray-400 text-sm md:text-base">Trip Duration</p>
+                            <p className="text-white text-base md:text-lg font-medium">
+                              {formData.number_of_days} {formData.number_of_days === 1 ? "day" : "days"} 
+                              <span className="text-xs text-blue-300 ml-1">(max 7 days)</span>
+                            </p>
                           </div>
                           <div>
                             <p className="text-gray-400 text-sm">Interests</p>
@@ -804,7 +985,18 @@ export default function Form() {
                           //@ts-ignore
                           type="button"
                           className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 font-medium text-white shadow-lg shadow-purple-900/20"
-                          onClick={()=>handleGenerateItinerary(formData)}
+                          onClick={() => {
+                            if (validateForm()) {
+                              handleGenerateItinerary(formData);
+                            } else {
+                              if (validationErrors.startdate) {
+                                toast.error(validationErrors.startdate);
+                              }
+                              if (validationErrors.number_of_days) {
+                                toast.error(validationErrors.number_of_days);
+                              }
+                            }
+                          }}
                         >
                           <span className="flex items-center justify-center text-xs sm:text-sm whitespace-nowrap">
                             Generate My Itinerary <Sparkles className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
