@@ -118,7 +118,7 @@ export const HeroParallax = ({
   return (
     <div
       ref={ref}
-      className="h-[200vh] overflow-hidden antialiased relative flex flex-col self-auto [perspective:1000px] [transform-style:preserve-3d] bg-gradient-to-b from-slate-900 via-gray-900 to-black"
+      className="h-[200vh] overflow-hidden antialiased relative flex flex-col self-auto [perspective:1000px] [transform-style:preserve-3d] "
     >
       <Header 
         spotlightActive={spotlightActive} 
@@ -288,7 +288,6 @@ export const ProductCard = ({
   product,
   translate,
   isLoaded = false,
-  spotlightActive = false,
   hasScrolled = false
 }: {
   product: {
@@ -324,10 +323,10 @@ export const ProductCard = ({
         src={product.thumbnail}
         height="600"
         width="600"
-        initial={{ opacity: 0, filter: "brightness(70%) contrast(1.1) blur(3px)" }}
+        initial={{ opacity: 0, filter: "brightness(70%) contrast(1.1) blur(1px)" }}
         animate={{ 
           opacity: isLoaded ? imageOpacity : 0,
-          filter: "brightness(85%) contrast(1.1) saturate(1.1) blur(2px)"
+          filter: "brightness(85%) contrast(1.1) saturate(1.1) blur(0.7px)"
         }}
         whileHover={{
           filter: "brightness(100%) contrast(1.2) saturate(1.2) blur(0px)",
