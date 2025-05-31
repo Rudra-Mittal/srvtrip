@@ -3,11 +3,11 @@ import { motion } from "framer-motion";
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { DayCard } from "@/components/ItineraryDayCard";
 import { useSelector } from "react-redux";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams} from "react-router-dom";
 
 export const ItineraryPage = () => {
     const { itineraryNum } = useParams();
-    const navigate = useNavigate();
+    
     
     const itineraryIdx = useMemo(() => Number(itineraryNum) - 1, [itineraryNum]);
     const [activeCardIndex, setActiveCardIndex] = useState(0);
@@ -251,8 +251,22 @@ export const ItineraryPage = () => {
             isLongPress.current = false;
             return;
         }
-        navigate(`${window.location.pathname}/day/${dayNumber}`);
-    }, [navigate]);
+        
+        // Construct the URL for the day page
+        const basePathParts = window.location.pathname.split('/');
+        // Make sure we're always using the correct base path to avoid nested paths
+        const basePath = basePathParts[0] === '' ? 
+            basePathParts.slice(0, basePathParts.indexOf('itinerary') + 2).join('/') : 
+            '/' + basePathParts.slice(0, basePathParts.indexOf('itinerary') + 2).join('/');
+        
+        const dayPath = `${basePath}/day/${dayNumber}`;
+        
+        // Use window.location for a full page reload instead of React Router navigation
+        window.location.href = dayPath;
+        
+        // Alternatively, if you want to preserve React Router:
+        // navigate(dayPath, { replace: true });
+    }, []);
 
     const destinationTitle = useMemo(() => 
         itineraryD.itinerary.destination[0].toUpperCase() + itineraryD.itinerary.destination.slice(1),
