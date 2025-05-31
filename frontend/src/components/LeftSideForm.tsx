@@ -17,7 +17,7 @@ export default function LeftSideForm({ type }: { type: string }) {
     type === 'signup' ? 'form' : 'form'
   );
   const [error, setError] = useState('');
-  const { signin,  signinWithGoogle, loading } = useAuth();
+  const { signin,  signinWithGoogle,} = useAuth();
   const [otpLoading, setOtpLoading] = useState(false);
   const [formSubmitting, setFormSubmitting] = useState(false); // New state for form submission
   const navigate = useNavigate();
@@ -127,7 +127,7 @@ export default function LeftSideForm({ type }: { type: string }) {
     } catch (err: any) {
       setError(err.message || 'Google sign in failed');
       toast.error(err.message || 'Google sign in failed');
-      setFormSubmitting(false); // Reset form submission state
+      // setFormSubmitting(false); // Reset form submission state
     }
   };
 
@@ -246,7 +246,7 @@ export default function LeftSideForm({ type }: { type: string }) {
             {/* Main Button (Sign up / Sign in) */}
             <button
               type="submit"
-              disabled={loading || otpLoading || formSubmitting}
+              disabled={ otpLoading || formSubmitting}
               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-2 px-4 rounded-lg mb-4 transition duration-200 cursor-pointer hover:-translate-y-0.5 shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {formSubmitting
@@ -265,15 +265,20 @@ export default function LeftSideForm({ type }: { type: string }) {
             {/* Google Signup/Signin Button */}
             <button
               type="button"
-              onClick={handleGoogleSignIn}
-              disabled={loading || formSubmitting}
+              onClick={(e) => {
+                e.preventDefault(); // Prevent any form submission
+                e.stopPropagation(); // Stop event bubbling
+                handleGoogleSignIn();
+              }}
+              disabled={ formSubmitting}
               className="w-full flex items-center justify-center bg-gray-900/60 border border-blue-500/20 py-2 px-4 rounded-lg mb-4 hover:bg-gray-800/70 transition duration-200 cursor-pointer hover:-translate-y-0.5 text-white disabled:opacity-70 disabled:cursor-not-allowed"
             >
               <img src={googlelogo} alt="Google" className="w-5 h-5 mr-2" />
-              {formSubmitting && type === 'signin' 
+              {/* {formSubmitting && type === 'signin' 
                 ? 'Signing in with Google...'
                 : (type === 'signup' ? 'Sign up with Google' : 'Sign in with Google')
-              }
+              } */}
+              Continue With Google
             </button>
             
             {/* Page Navigation (Sign Up ↔ Sign In) */}

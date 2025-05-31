@@ -113,7 +113,7 @@ export function useAuth() {
   // Sign in with email and password
   const signin = async (email: string, password: string) => {
     try {
-      setLoading(true);
+      // setLoading(true);
       setError(null);
       
       // Call backend signin directly (no Firebase authentication for regular signin)
