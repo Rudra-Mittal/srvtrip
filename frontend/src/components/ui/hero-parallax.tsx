@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { FlipWords } from "./flip-words";
 import {
   motion,
@@ -9,7 +9,8 @@ import {
   MotionValue,
 } from "motion/react";
 import { Spotlight } from "./spotlight";
-const words=["Extraordinary", "Stunning", "Unforgettable", "Next-Gen"];
+
+const words = ["Extraordinary", "Stunning", "Unforgettable", "Next-Gen"];
 
 export const HeroParallax = ({
   products,
@@ -20,52 +21,34 @@ export const HeroParallax = ({
     thumbnail: string;
   }[];
 }) => {
-  const firstRow = products.slice(0, 5);
-  const secondRow = products.slice(5, 10);
-  const thirdRow = products.slice(10, 15);
+  const firstRow = useMemo(() => products.slice(0, 5), [products]);
+  const secondRow = useMemo(() => products.slice(5, 10), [products]);
+  const thirdRow = useMemo(() => products.slice(10, 15), [products]);
+  
   const ref = React.useRef(null);
   const [initialized, setInitialized] = useState(false);
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [spotlightActive, setSpotlightActive] = useState(false);
   const [spotlightCompleted, setSpotlightCompleted] = useState(false);
   const [textVisible, setTextVisible] = useState(false);
-  // const [isMobile, setIsMobile] = useState(false);
-  // const [viewportHeight, setViewportHeight] = useState(0);
   
-  // Detect viewport size
+  // Animation sequence control - synchronized timings
   useEffect(() => {
-    const updateDimensions = () => {
-      // setViewportHeight(window.innerHeight);
-      // setIsMobile(window.innerWidth < 768);
-    };
-    
-    // Initial check
-    updateDimensions();
-    
-    // Listen for resize events
-    window.addEventListener('resize', updateDimensions);
-    return () => window.removeEventListener('resize', updateDimensions);
-  }, []);
-  
-  // Animation sequence control
-  useEffect(() => {
-    // First initialize the component
     const timer1 = setTimeout(() => {
       setInitialized(true);
       
-      // After a short delay, activate the spotlight only (no content)
       const timer2 = setTimeout(() => {
         setSpotlightActive(true);
         setTextVisible(true);
         
-        // Wait 3 seconds for spotlight animation to complete before showing images
+        // Wait for spotlight animation to complete (2000ms) + fade start delay (1000ms)
         const timer3 = setTimeout(() => {
           setSpotlightCompleted(true);
           setImagesLoaded(true);
-        }, 3000); // Match this with the spotlight animation duration
+        }, 3000); // Spotlight animation (2000ms) + fade delay (1000ms)
         
         return () => clearTimeout(timer3);
-      }, 2000);
+      }, 1500);
       
       return () => clearTimeout(timer2);
     }, 100);
@@ -73,28 +56,22 @@ export const HeroParallax = ({
     return () => clearTimeout(timer1);
   }, []);
   
-  
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
   });
 
-  // Create a derived state for tracking whether user has scrolled
   const [hasScrolled, setHasScrolled] = useState(false);
   
-  // Monitor scroll position changes
   useEffect(() => {
     const unsubscribe = scrollYProgress.onChange((value) => {
-      // Consider user has scrolled if we're more than 10% down the page
-      setHasScrolled(value > 0.1);
+      setHasScrolled(value > 0.05); // More sensitive scroll detection
     });
     
-    return () => {
-      unsubscribe();
-    };
+    return unsubscribe;
   }, [scrollYProgress]);
 
-  const springConfig = { stiffness: 300, damping: 30, bounce: 100 };
+  const springConfig = { stiffness: 400, damping: 40, bounce: 0.2 }; // Improved spring config
 
   const translateX = useSpring(
     useTransform(scrollYProgress, [0, 1], [0, 1000]),
@@ -114,39 +91,34 @@ export const HeroParallax = ({
     springConfig
   );
   
-  // Position images with a consistent approach for all screen sizes
-  // Start with images near the center, then transition down as you scroll
   const translateY = useSpring(
     useTransform(scrollYProgress, [0, 0.2], [0, 300]),
     springConfig
   );
   
-  // Reset scroll position on page refresh
   useEffect(() => {
     if (initialized) {
       window.scrollTo(0, 0);
     }
     
     return () => {
-      // Cleanup any animation values when component unmounts
       translateX.set(0);
       translateXReverse.set(0);
       rotateX.set(15);
       rotateZ.set(20);
       translateY.set(0);
     };
-  }, [initialized]);
+  }, [initialized, translateX, translateXReverse, rotateX, rotateZ, translateY]);
 
-  // Handler for spotlight animation completion
-  const handleSpotlightComplete = () => {
-    setSpotlightCompleted(true);
-    setImagesLoaded(true);
-  };
+  const handleSpotlightComplete = useCallback(() => {
+    // Don't immediately set images loaded here, let the timer handle it
+    // This ensures proper synchronization
+  }, []);
 
   return (
     <div
       ref={ref}
-      className="h-[200vh] overflow-hidden antialiased relative flex flex-col self-auto [perspective:1000px] [transform-style:preserve-3d]"
+      className="h-[200vh] overflow-hidden antialiased relative flex flex-col self-auto [perspective:1000px] [transform-style:preserve-3d] bg-gradient-to-b from-slate-900 via-gray-900 to-black"
     >
       <Header 
         spotlightActive={spotlightActive} 
@@ -155,8 +127,7 @@ export const HeroParallax = ({
         onSpotlightComplete={handleSpotlightComplete}
       />
       
-      {/* Position the content container in the center of viewport initially */}
-      <div className="absolute inset-0 flex  justify-center">
+      <div className="absolute inset-0 flex justify-center">
         <motion.div
           style={{
             rotateX,
@@ -166,13 +137,13 @@ export const HeroParallax = ({
           className="z-10 pointer-events-auto"
           initial={{ opacity: 0 }}
           animate={{ opacity: spotlightCompleted ? 1 : 0 }}
-          transition={{ duration: 1 }}
+          transition={{ duration: 0.8 }}
         >
           <motion.div 
             className="flex flex-row-reverse space-x-reverse space-x-4 xs:space-x-6 sm:space-x-10 md:space-x-16 lg:space-x-20 mb-8 sm:mb-12 md:mb-16 lg:mb-20"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: imagesLoaded && spotlightCompleted ? 1 : 0 }}
-            transition={{ duration: 1 }}
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: imagesLoaded && spotlightCompleted ? 1 : 0, y: imagesLoaded && spotlightCompleted ? 0 : 50 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
           >
             {firstRow.map((product) => (
               <ProductCard
@@ -187,9 +158,9 @@ export const HeroParallax = ({
           </motion.div>
           <motion.div 
             className="flex flex-row mb-8 sm:mb-12 md:mb-16 lg:mb-20 space-x-4 xs:space-x-6 sm:space-x-10 md:space-x-16 lg:space-x-20"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: imagesLoaded && spotlightCompleted ? 1 : 0 }}
-            transition={{ duration: 1, delay: 0.2 }}
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: imagesLoaded && spotlightCompleted ? 1 : 0, y: imagesLoaded && spotlightCompleted ? 0 : 50 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
           >
             {secondRow.map((product) => (
               <ProductCard
@@ -204,9 +175,9 @@ export const HeroParallax = ({
           </motion.div>
           <motion.div 
             className="flex flex-row-reverse space-x-reverse space-x-4 xs:space-x-6 sm:space-x-10 md:space-x-16 lg:space-x-20"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: imagesLoaded && spotlightCompleted ? 1 : 0 }}
-            transition={{ duration: 1, delay: 0.4 }}
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: imagesLoaded && spotlightCompleted ? 1 : 0, y: imagesLoaded && spotlightCompleted ? 0 : 50 }}
+            transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
           >
             {thirdRow.map((product) => (
               <ProductCard
@@ -238,7 +209,6 @@ export const Header = ({
 }) => {
   return (
     <div className="absolute inset-0 w-full h-screen z-20 flex flex-col justify-center items-center pointer-events-none">
-      {/* Center spotlight with vertical animation */}
       {spotlightActive && (
         <Spotlight
           className="w-full h-full absolute inset-0"
@@ -249,59 +219,65 @@ export const Header = ({
         />
       )}
     
-      {/* Text container centered vertically */}
+      {/* Text container without any borders or backgrounds */}
       <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: textVisible ? 1 : 0 }}
-        transition={{ duration: 1.5 }}
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: textVisible ? 1 : 0, y: textVisible ? 0 : 30 }}
+        transition={{ duration: 1.5, ease: "easeOut" }}
         className="relative z-30 px-4 sm:px-6 md:px-0 w-full max-w-full"
       >
-        {/* The rest of your Header content remains the same */}
         <div className="mb-4 sm:mb-6 md:mb-8 text-3xl font-bold tracking-tight sm:text-5xl md:text-6xl flex flex-col justify-center items-center text-center">
-          {/* Larger SrvTrip text with animated gradient */}
+          {/* SrvTrip text with proper styling */}
           <motion.div 
-            className="text-transparent bg-clip-text filter drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]"
-            animate={{ 
-              backgroundImage: [
-                "linear-gradient(to right, #3b82f6, #6366f1, #a855f7)",
-                "linear-gradient(to right, #8b5cf6, #3b82f6, #06b6d4)",
-                "linear-gradient(to right, #6366f1, #a855f7, #ec4899)",
-                "linear-gradient(to right, #3b82f6, #6366f1, #a855f7)"
-              ]
-            }}
-            transition={{ 
-              duration: 3, 
-              repeat: Infinity,
-              repeatType: "mirror" 
-            }}
+            className="mb-8"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: textVisible ? 1 : 0, scale: textVisible ? 1 : 0.9 }}
+            transition={{ duration: 1.2, delay: 0.3, ease: "easeOut" }}
           >
-            <div className="xs:text-2xl sm:text-3xl md:text-7xl text-6xl font-bold ">
-              SrvTrip
-            </div>
+            <h1 className="text-6xl xs:text-7xl sm:text-8xl md:text-9xl font-bold relative">
+              <span 
+                className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 filter drop-shadow-2xl"
+                style={{
+                  textShadow: '0 0 30px rgba(59, 130, 246, 0.5), 0 0 60px rgba(147, 51, 234, 0.3)',
+                }}
+              >
+                SrvTrip
+              </span>
+              {/* Subtle glow effect */}
+              <div 
+                className="absolute inset-0 text-6xl xs:text-7xl sm:text-8xl md:text-9xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text blur-sm opacity-30"
+                aria-hidden="true"
+              >
+                SrvTrip
+              </div>
+            </h1>
           </motion.div>
             
-          {/* Text sections with better mobile centering */}
-          <div className="h-auto sm:h-[15rem] flex flex-col justify-center items-center px-4 mt-4">
-            {/* Build + FlipWords section */}
-            <div className="flex flex-col xs:flex-row justify-center items-center gap-2 xs:gap-3 sm:gap-5 mb-4 w-full">
-              <span className="sm:text-lg md:text-2xl text-2xl font-semibold text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+          {/* Text sections without any background containers */}
+          <motion.div 
+            className="flex flex-col justify-center items-center px-4 mt-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: textVisible ? 1 : 0, y: textVisible ? 0 : 20 }}
+            transition={{ duration: 1.2, delay: 0.6, ease: "easeOut" }}
+          >
+            <div className="flex flex-col xs:flex-row justify-center items-center gap-2 xs:gap-3 sm:gap-5 mb-6 w-full">
+              <span className="text-xl sm:text-2xl md:text-3xl font-semibold text-white drop-shadow-2xl">
                 Build
               </span>
-              <div className="w-full xs:w-[180px] sm:w-[220px] md:w-[280px] min-h-[60px] flex items-center justify-center">
+              <div className="w-full xs:w-[200px] sm:w-[240px] md:w-[320px] min-h-[60px] flex items-center justify-center">
                 <FlipWords 
                   words={words} 
-                  className="text-3xl sm:text-4xl md:text-5xl font-semibold text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]"
+                  className="text-3xl sm:text-4xl md:text-5xl font-semibold text-white drop-shadow-2xl"
                 />
               </div>
             </div>
             
-            {/* Travel Itineraries text */}
-            <div className="text-center text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-semibold text-white bg-clip-text drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] mt-2 xs:mt-0">
-              <span className="bg-gradient-to-b from-white to-blue-300 text-transparent bg-clip-text drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+            <div className="text-center text-xl xs:text-2xl sm:text-3xl md:text-4xl font-semibold">
+              <span className="bg-gradient-to-b from-white via-blue-100 to-blue-300 text-transparent bg-clip-text drop-shadow-2xl">
                 Travel Itineraries with AI
               </span>
             </div>
-          </div>
+          </motion.div>
         </div>
       </motion.div>
     </div>
@@ -325,67 +301,48 @@ export const ProductCard = ({
   spotlightActive?: boolean;
   hasScrolled?: boolean;
 }) => {
-  // Track whether we've ever scrolled down
-  const [hasEverScrolled, setHasEverScrolled] = useState(false);
-  // Track the previous scroll state to determine direction
-  const [prevScrollState, setPrevScrollState] = useState(false);
   const [imageOpacity, setImageOpacity] = useState(0);
   
-  // Update opacity based on scroll direction
   useEffect(() => {
-    if (!prevScrollState && hasScrolled) {
-      // Scrolling down - increase opacity and remember we've scrolled
-      setImageOpacity(0.9);
-      setHasEverScrolled(true);
-    } else if (prevScrollState && !hasScrolled) {
-      // Scrolling up - if we've ever scrolled down, keep high opacity
-      if (hasEverScrolled) {
-        // Keep the high opacity
-        setImageOpacity(0.9);
-      } else {
-        // Initial state behavior - always visible
-        setImageOpacity(0.9);
-      }
-    } else if (isLoaded && !hasScrolled) {
-      // Initial state or after refresh - ensure visibility
-      if (!hasEverScrolled) {
-        setImageOpacity(0.9);
-      }
+    if (isLoaded) {
+      setImageOpacity(hasScrolled ? 0.95 : 0.85);
     }
-    
-    // Update the previous scroll state
-    setPrevScrollState(hasScrolled);
-  }, [hasScrolled, isLoaded, spotlightActive, prevScrollState, hasEverScrolled]);
+  }, [hasScrolled, isLoaded]);
   
   return (
     <motion.div
-      style={{
-        x: translate,
-      }}
+      style={{ x: translate }}
       whileHover={{
         y: -20,
+        scale: 1.02,
+        transition: { duration: 0.3, ease: "easeOut" }
       }}
       key={product.title}
-      className="group/product h-40 xs:h-48 sm:h-64 md:h-80 lg:h-96 w-[8rem] xs:w-[10rem] sm:w-[16rem] md:w-[20rem] lg:w-[24rem] relative shrink-0"
+      className="group/product h-40 xs:h-48 sm:h-64 md:h-80 lg:h-96 w-[8rem] xs:w-[10rem] sm:w-[16rem] md:w-[20rem] lg:w-[24rem] relative shrink-0 cursor-pointer"
     >
-        <motion.img
-          src={product.thumbnail}
-          height="600"
-          width="600"
-          initial={{ opacity: 0, filter: "brightness(80%)" }}
-          animate={{ 
-            opacity: isLoaded ? imageOpacity : 0,
-            filter: "brightness(80%)"
-          }}
-          transition={{ 
-            opacity: { duration: 1 },
-            filter: { duration: 1 }
-          }}
-          className="object-cover object-left-top absolute h-full w-full inset-0 cover-fit"
-          alt={product.title}
-        />
+      <motion.img
+        src={product.thumbnail}
+        height="600"
+        width="600"
+        initial={{ opacity: 0, filter: "brightness(70%) contrast(1.1) blur(3px)" }}
+        animate={{ 
+          opacity: isLoaded ? imageOpacity : 0,
+          filter: "brightness(85%) contrast(1.1) saturate(1.1) blur(2px)"
+        }}
+        whileHover={{
+          filter: "brightness(100%) contrast(1.2) saturate(1.2) blur(0px)",
+          transition: { duration: 0.3, ease: "easeOut" }
+        }}
+        transition={{ 
+          opacity: { duration: 0.8 },
+          filter: { duration: 0.8 }
+        }}
+        className="object-cover object-center absolute h-full w-full inset-0 rounded-lg shadow-2xl"
+        alt={product.title}
+      />
       
-      <div className="absolute inset-0 h-full w-full opacity-0 group-hover/product:opacity-100 group-hover/product:transition-all duration-300 ease-out pointer-events-none"></div>
+      {/* Simple hover overlay without blur effects */}
+      <div className="absolute inset-0 h-full w-full opacity-0 group-hover/product:opacity-100 bg-gradient-to-t from-black/30 via-transparent to-transparent transition-all duration-300 ease-out pointer-events-none rounded-lg" />
     </motion.div>
   );
 };
