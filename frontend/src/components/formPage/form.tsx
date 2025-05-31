@@ -159,16 +159,19 @@ export default function Form() {
     if (step >= 1 && step <= 4) {
       // Add a small delay for exit animation
       setCurrentStep(step);
-    }
-  };
+    }  };
   const navigate=useNavigate()
-  const timeoutTimer = setTimeout(() => {
-    setShowTimeoutMessage(true);
-  },3000)
+  
   // Update the handleGenerateItinerary function to combine interests and customRequests
   const handleGenerateItinerary = async (formData: FormData) => {
     setFormVisible(false);
     setShowSummary(true);
+    setShowTimeoutMessage(false); // Reset timeout message
+    
+    // Set timeout timer for 10 seconds (reasonable time for AI processing)
+    const timeoutTimer = setTimeout(() => {
+      setShowTimeoutMessage(true);
+    }, 10000);
     
     // Create a copy of the form data to modify
     const submissionData = { ...formData };
@@ -186,8 +189,7 @@ export default function Form() {
     
     console.log("submissiondata", submissionData);
     console.log("Form data:", submissionData);
-    
-    genitinerary(submissionData).then(async (res)=>{
+      genitinerary(submissionData).then(async (res)=>{
       clearTimeout(timeoutTimer);
       //if error thrown is invalid destination then show the error message
       if(res.error){
@@ -216,6 +218,57 @@ export default function Form() {
       const newItineraryNumber = currentItinerariesCount + 1;
       
       navigate(`/itinerary/${newItineraryNumber}`);
+    }).catch((error) => {
+      clearTimeout(timeoutTimer);
+      console.log("Error in generating itinerary:", error.message);
+      setIsAggregating(false);
+      setShowSummary(false);
+      setFormVisible(true);
+      
+      // Handle different types of errors with specific toast messages
+      if (error.message === 'Invalid destination') {
+        toast.error("Invalid destination. Please try again with a valid destination.", {
+          duration: 4000,
+          style: {
+            background: '#000',
+            color: '#fff',
+            border: '1px solid rgba(59, 130, 246, 0.5)',
+          },
+          icon: '🌍',
+        });
+      } else if (error.message.includes('Too many AI requests')) {
+        toast.error("Too many AI itinerary requests. Please try again after an hour.", {
+          duration: 6000,
+          style: {
+            background: '#000',
+            color: '#fff',
+            border: '1px solid rgba(255, 99, 71, 0.5)',
+          },
+          icon: '⏳',
+        });
+      } else if (error.message.includes('Rate limit exceeded') || error.message.includes('Too many')) {
+        toast.error("Rate limit exceeded. Please try again later.", {
+          duration: 5000,
+          style: {
+            background: '#000',
+            color: '#fff',
+            border: '1px solid rgba(255, 165, 0, 0.5)',
+          },
+          icon: '⚠️',
+        });
+      } else {
+        toast.error("Failed to generate itinerary. Please try again.", {
+          duration: 4000,
+          style: {
+            background: '#000',
+            color: '#fff',
+            border: '1px solid rgba(220, 20, 60, 0.5)',
+          },
+          icon: '❌',
+        });
+      }
+      
+      navigate("/form");
     })
   }
   // Particles for background animation

@@ -24,7 +24,7 @@ const LandingPage: React.FC = () => {
   return (
     <div className="bg-black min-h-screen text-white overflow-hidden">
       <HeroParallaxDemo/>
-      <div className="relative -mt-[35rem] md:-mt-10">
+      <div className="relative -mt-[24rem] md:-mt-10">
         {/* Smart Form Section */}
         <section id="smart-form" ref={smartFormRef}>
           <SmartForm smartFormRef={smartFormRef} formVisible={formVisible}/>

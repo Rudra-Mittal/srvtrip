@@ -6,6 +6,7 @@ import { handleFetchItineraries } from "@/api/itineraryfetch";
 import { appenditinerary } from "@/store/slices/itinerarySlice";
 import { appendPlaces } from "@/store/slices/placeSlice";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 
 export default function HistoryPage() {
     const itineraries = useSelector((state: any) => state.itinerary.itineraries);
@@ -25,8 +26,7 @@ export default function HistoryPage() {
         console.log("View details for itinerary ID:", itinerarynumber);
         // Navigate to the itinerary details page
         navigate(`/itinerary/${itinerarynumber}`);
-    };
-    const fetchItineraries = async () => {
+    };    const fetchItineraries = async () => {
         console.log("request reach here");
         setIsLoading(true);
         try {
@@ -34,8 +34,25 @@ export default function HistoryPage() {
             console.log("Fetched itineraries:", response);
             dispatch(appenditinerary(response.itineraries));
             dispatch(appendPlaces(response.placesData));
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error fetching itineraries:", error);
+            
+            // Handle rate limiting errors specifically
+            const errorMessage = error.message || "Failed to fetch itineraries";
+            
+            if (errorMessage.includes("Too many sync requests")) {
+                toast.error("Rate Limit: Too many sync requests. Please wait a few minutes before trying again.", {
+                    duration: 6000,
+                });
+            } else if (errorMessage.includes("Rate limit exceeded")) {
+                toast.error("Rate Limit: Please wait a moment before trying again.", {
+                    duration: 5000,
+                });
+            } else {
+                toast.error(`Sync Failed: ${errorMessage}`, {
+                    duration: 4000,
+                });
+            }
         } finally {
             setIsLoading(false);
         }

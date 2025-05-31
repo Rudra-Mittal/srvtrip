@@ -25,6 +25,11 @@ export const handleFetchItineraries = async ( storedIds: string[]) => {
         });
 
         if (!response.ok) {
+            // Handle rate limiting and other errors
+            if (response.status === 429) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Rate limit exceeded");
+            }
             throw new Error("Failed to fetch itineraries");
         }
 

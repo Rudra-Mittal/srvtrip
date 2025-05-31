@@ -84,3 +84,15 @@ export const AIexpensiveLimiter=rateLimit({
   legacyHeaders: false,
   skipSuccessfulRequests: false,
 });
+
+// Sync operations rate limiter for device synchronization fetch itinerary from db
+export const syncLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 15, // Limit each IP to 15 sync requests per 5 minutes fetch itinerary from db
+  message: {
+    error: 'Too many sync requests, please try again later.',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: false,
+});
