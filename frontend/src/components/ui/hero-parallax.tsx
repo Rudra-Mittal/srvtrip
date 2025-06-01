@@ -140,7 +140,7 @@ export const HeroParallax = ({
           transition={{ duration: 0.8 }}
         >
           <motion.div 
-            className="flex flex-row-reverse space-x-reverse space-x-4 xs:space-x-6 sm:space-x-10 md:space-x-16 lg:space-x-20 mb-8 sm:mb-12 md:mb-16 lg:mb-20"
+            className="flex  space-x-4 xs:space-x-6 sm:space-x-10 md:space-x-16 lg:space-x-20 mb-8 sm:mb-12 md:mb-16 lg:mb-20"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: imagesLoaded && spotlightCompleted ? 1 : 0, y: imagesLoaded && spotlightCompleted ? 0 : 50 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
@@ -174,7 +174,7 @@ export const HeroParallax = ({
             ))}
           </motion.div>
           <motion.div 
-            className="flex flex-row-reverse space-x-reverse space-x-4 xs:space-x-6 sm:space-x-10 md:space-x-16 lg:space-x-20"
+            className="flex  space-x-4 xs:space-x-6 sm:space-x-10 md:space-x-16 lg:space-x-20"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: imagesLoaded && spotlightCompleted ? 1 : 0, y: imagesLoaded && spotlightCompleted ? 0 : 50 }}
             transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
