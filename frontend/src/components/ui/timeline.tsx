@@ -17,11 +17,24 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
   const [height, setHeight] = useState(0);
 
   useEffect(() => {
-    if (ref.current) {
-      const rect = ref.current.getBoundingClientRect();
-      setHeight(rect.height);
-    }
-  }, [ref]);
+    const updateHeight = () => {
+      if (ref.current) {
+        const rect = ref.current.getBoundingClientRect();
+        setHeight(rect.height);
+      }
+    };
+    
+    // Initial height calculation
+    updateHeight();
+    
+    // Add resize listener to recalculate height on window resize
+    window.addEventListener("resize", updateHeight);
+    
+    // Cleanup listener on component unmount
+    return () => {
+      window.removeEventListener("resize", updateHeight);
+    };
+  }, []);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -63,6 +76,7 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
         <div
           style={{
             height: height + "px",
+            maxHeight: "100%"
           }}
           className="absolute md:left-8 left-8 top-0 overflow-hidden w-[2px] bg-[linear-gradient(to_bottom,var(--tw-gradient-stops))] from-transparent from-[0%] via-neutral-200 dark:via-neutral-700 to-transparent to-[99%]  [mask-image:linear-gradient(to_bottom,transparent_0%,black_10%,black_90%,transparent_100%)] "
         >
@@ -70,6 +84,7 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
             style={{
               height: heightTransform,
               opacity: opacityTransform,
+              maxHeight: "100%"
             }}
             className="absolute inset-x-0 top-0  w-[2px] bg-gradient-to-t from-purple-500 via-blue-500 to-transparent from-[0%] via-[10%] rounded-full"
           />
