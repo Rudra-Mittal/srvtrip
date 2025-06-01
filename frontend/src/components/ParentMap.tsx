@@ -37,7 +37,7 @@ function ParentMap({ dayNum, itineraryNum }: { dayNum: string, itineraryNum: str
               name: place.displayName,
               placeId: place.id, // Add placeId here
               photos: place.photos || [], // Add photos from place data
-              rating: place.rating || 4.5, // Add rating from place data
+              rating: place.rating, // Add rating from place data
               category: place.types?.[0] || "Tourist Attraction", // Add category from place data
             });
           }
