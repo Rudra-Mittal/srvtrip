@@ -53,7 +53,7 @@ export const products = [
   {
     title: "Iceland Northern Lights",
     link: "https://en.wikipedia.org/wiki/Aurora",
-    thumbnail: "/parallaximages/image9.jpg",
+    thumbnail: "/parallaximages/image10.jpg",
   },
   // New entries below
   {
