@@ -516,20 +516,17 @@ export default function Form() {
           >
             <BackgroundGradient className="rounded-2xl p-0.5">
               <form onSubmit={handleSubmit} className="bg-black/90 rounded-2xl p-8 relative">
-                {/* Progress indicator - make clickable */}
+                {/* Progress indicator - continuous bar */}
                 <div className="mb-8">
-                  <div className="flex justify-between">
-                    {[1, 2, 3, 4].map(step => (
-                      <motion.div
-                        key={step}
-                        className={`w-1/4 h-1 rounded-full ${step <= currentStep ? 'bg-gradient-to-r from-blue-500 to-purple-500' : 'bg-gray-700'}`}
-                        initial={{ scaleX: 0 }}
-                        animate={{ scaleX: step <= currentStep ? 1 : 0 }}
-                        transition={{ duration: 0.5, delay: step * 0.1 }}
-                      />
-                    ))}
+                  <div className="w-full h-1 bg-gray-700 rounded-full relative overflow-hidden">
+                    <motion.div 
+                      className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
+                      initial={{ width: '0%' }}
+                      animate={{ width: `${(currentStep / 4) * 100}%` }}
+                      transition={{ duration: 0.5 }}
+                    />
                   </div>
-                  <div className="flex justify-between mt-2">
+                  <div className="flex justify-between mt-2 relative">
                     {[
                       { step: 1, label: "Basics" },
                       { step: 2, label: "Details" },
@@ -540,10 +537,11 @@ export default function Form() {
                         key={step}
                         type="button"
                         onClick={() => goToStep(step)}
-                        className={`text-xs sm:text-sm lg:text-base px-2 py-1 rounded-md cursor-pointer ${step === currentStep
-                          ? 'text-blue-400 font-medium'
-                          : 'text-gray-400 hover:text-gray-200'
-                          }`}
+                        className={`text-xs sm:text-sm lg:text-base px-2 py-1 rounded-md cursor-pointer ${
+                          step <= currentStep
+                            ? 'text-blue-400 font-medium'
+                            : 'text-gray-400 hover:text-gray-200'
+                        }`}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
