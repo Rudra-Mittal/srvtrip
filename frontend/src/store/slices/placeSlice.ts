@@ -6,6 +6,7 @@ const initialState = {
     places: places,
     activePlaceId:null,
     isChatBotOpen: false,
+    reviewLoading: null, // Track which place is currently loading reviews
 };
 
 const placeSlice = createSlice({
@@ -30,19 +31,23 @@ const placeSlice = createSlice({
         },
         setActivePlaceId: (state, action) => {
             state.activePlaceId = action.payload;
-        },
+        },       
         setChatbotOpen: (state, action) => {
             state.isChatBotOpen = action.payload;
         },
+        setReviewLoading: (state, action) => {
+            state.reviewLoading = action.payload; // placeId or null
+        },
         setReview: (state, action) => {
-            const { placeId, summarizedReview,itineraryIdx } = action.payload;
-            console.log("Place ID:", placeId, "Summarized Review:", summarizedReview, "Itinerary Index:", itineraryIdx);
+            const { placeId, summarizedReview, rating, itineraryIdx } = action.payload;
+            console.log("Place ID:", placeId, "Summarized Review:", summarizedReview, "Rating:", rating, "Itinerary Index:", itineraryIdx);
             console.log("Places before update:", places);
             const placeIndex = state.places[itineraryIdx].map((days:any)=>{
                 return days.map((place:any)=>{
                     return {
                         ...place,
-                        summarizedReview:(place.id==placeId)?summarizedReview:place.summarizedReview
+                        summarizedReview:(place.id==placeId)?summarizedReview:place.summarizedReview,
+                        rating:(place.id==placeId && rating !== undefined)?rating:place.rating
                     }
                 })
             })
@@ -51,5 +56,5 @@ const placeSlice = createSlice({
         },
     },
 });
-export const { setPlaces, addPlace,setActivePlaceId,setChatbotOpen,setReview , appendPlaces } = placeSlice.actions;
+export const { setPlaces, addPlace, setActivePlaceId, setChatbotOpen, setReview, setReviewLoading, appendPlaces } = placeSlice.actions;
 export default placeSlice.reducer;

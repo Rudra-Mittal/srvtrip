@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 // FIX required: Stop the calls when the summary  is received
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-const getPlaceReview = async (placeId: string, abortSignal: AbortSignal) => {
+const getPlaceReview = async (placeId: string, abortSignal: AbortSignal): Promise<{summarizedReview: string, rating: number} | null> => {
     const MAX_ATTEMPTS = 2;
 
     let attempts = 0;
@@ -17,19 +17,17 @@ const getPlaceReview = async (placeId: string, abortSignal: AbortSignal) => {
         console.log(`Polling for place ${placeId} aborted`);
     });
 
-    const poll = async () => {
+    const poll = async (): Promise<{summarizedReview: string, rating: number} | null> => {
         // Check if we should stop polling
         if (!shouldContinue) {
             console.log(`Polling for place ${placeId} stopped due to cancellation`);
             return null;
         }
-        
-        try {
+          try {
             const res = await fetch(`${BACKEND_URL}/api/summarize?placeid=${placeId}`, {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Content-Type': 'application/json'
                 },
                 credentials: 'include',
                 signal: abortSignal // Pass the abort signal to fetch
@@ -37,8 +35,11 @@ const getPlaceReview = async (placeId: string, abortSignal: AbortSignal) => {
 
             const data = await res.json();
             if (res.ok) {
-                console.log("Successful response received.",data.summarizedReview);
-                return data.summarizedReview;
+                console.log("Successful response received.", data.summarizedReview, "Rating:", data.rating);
+                return {
+                    summarizedReview: data.summarizedReview,
+                    rating: data.rating
+                };
             }
 
         } catch (err : any) {
@@ -54,7 +55,7 @@ const getPlaceReview = async (placeId: string, abortSignal: AbortSignal) => {
         attempts++;
         if (attempts < MAX_ATTEMPTS && shouldContinue) {
             // Return a promise that will resolve after the timeout
-            return new Promise(resolve => {
+            return new Promise<{summarizedReview: string, rating: number} | null>(resolve => {
                 const timeoutId = setTimeout(() => {
                     // Only continue polling if not aborted
                     if (shouldContinue) {
@@ -114,7 +115,7 @@ export default function Summary({dayNum,itineraryNum}:{dayNum:number,itineraryNu
             const place = places[itineraryNum-1][dayNum-1].find((place: any) => place.id === currentPlace);
             console.log("Current place data:", place, currentPlace);
             setCurrentPlaceData(place);
-            setReviewError(null);
+            setReviewError(null);            
             if(place?.summarizedReview == null){
                 setReviewLoading(true);
                 
@@ -124,11 +125,16 @@ export default function Summary({dayNum,itineraryNum}:{dayNum:number,itineraryNu
                 
                 getPlaceReview(currentPlace, signal)
                     .then((data) => {
-                        console.log("Data received:", data,signal.aborted);
+                        console.log("Data received:", data, signal.aborted);
                         // Only update if the request wasn't aborted and we got data
                         if (data && !signal.aborted) {
-                            console.log('dispatching review:', data);
-                            dispatch(setReview({placeId: currentPlace, summarizedReview: data, itineraryIdx: itineraryNum-1}));
+                            console.log('dispatching review:', data.summarizedReview, 'rating:', data.rating);
+                            dispatch(setReview({
+                                placeId: currentPlace, 
+                                summarizedReview: data.summarizedReview, 
+                                rating: data.rating,
+                                itineraryIdx: itineraryNum-1
+                            }));
                         }else{
                         }
                         setReviewError(null);
