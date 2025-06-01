@@ -103,7 +103,9 @@ const MapComponent = React.memo(({
   infoOpen,
   setInfoOpen,
 }: { 
-  predefinedMarkers: { lat: number; lng: number; name?: string }[];
+  predefinedMarkers: {
+    placeId: any; lat: number; lng: number; name?: string 
+}[];
   hoveredMarker: { lat: number; lng: number; name?: string } | null;
   selectedMarker: { lat: number; lng: number; name?: string } | null;
   setSelectedMarker: any

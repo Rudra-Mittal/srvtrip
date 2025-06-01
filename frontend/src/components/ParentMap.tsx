@@ -77,6 +77,7 @@ function ParentMap({ dayNum, itineraryNum }: { dayNum: string, itineraryNum: str
         // Only update if it's actually different
         if (!selectedMarker || selectedMarker.placeId !== activeMarker.placeId) {
           setSelectedMarker(activeMarker);
+          //@ts-ignore
           setInfoOpen(activeMarker);
         }
       }
