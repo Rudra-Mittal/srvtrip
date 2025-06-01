@@ -30,8 +30,11 @@ const placeSlice = createSlice({
             localStorage.setItem("places", JSON.stringify(state.places));
         },
         setActivePlaceId: (state, action) => {
-            state.activePlaceId = action.payload;
-        },       
+            // Only update if the value actually changed
+            if (state.activePlaceId !== action.payload) {
+                state.activePlaceId = action.payload;
+            }
+        },
         setChatbotOpen: (state, action) => {
             state.isChatBotOpen = action.payload;
         },

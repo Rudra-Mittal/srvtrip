@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 
 // Extend the Window interface to include handlePlaceClick
 import { useSelector } from 'react-redux';
@@ -7,84 +7,112 @@ import { setActivePlaceId } from '@/store/slices/placeSlice';
 export const DayNumCompo = ({ dayNum, itineraryNum }: { dayNum: string, itineraryNum: string }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const placesData = useSelector((state: any) => state.place.places);
-
+  const dispatch = useDispatch();
 
   const currentDay = parseInt(dayNum, 10) - 1;
   const itineraryId = parseInt(itineraryNum,10) - 1;
 
-  //testing
-  const dispatch = useDispatch();
-  let placesforeachday = [];
-  // Safely access nested properties with proper validation
-  try {
-    if (placesData && 
-        placesData[ itineraryId] && 
-        placesData[ itineraryId][currentDay] &&
-        Array.isArray(placesData[ itineraryId][currentDay])) {
-      placesforeachday = placesData[ itineraryId][currentDay];
-    } else {
-      console.warn("Places data structure is not as expected:", 
-        placesData && placesData[ itineraryId] ? 
-        `Data exists but [${ itineraryId}][${currentDay}] is invalid` : 
-        "Places data is missing or incomplete");
+  // Memoize places data extraction to prevent recalculation
+  const placesforeachday = useMemo(() => {
+    try {
+      if (placesData && 
+          placesData[itineraryId] && 
+          placesData[itineraryId][currentDay] &&
+          Array.isArray(placesData[itineraryId][currentDay])) {
+        return placesData[itineraryId][currentDay];
+      }
+    } catch (err) {
+      console.error("Error accessing places data:", err);
     }
-  } catch (err) {
-    console.error("Error accessing places data:", err);
-  }
+    return [];
+  }, [placesData, itineraryId, currentDay]);
 
-  console.log("placeforeachday",placesforeachday);
-  
-  // Collect all images from all places for this day into a single flat array
-  // Now also track which place each image belongs to
-const allDayImages: {url: string, placeIndex: number}[] = [];
-placesforeachday.forEach((place: any, placeIdx: number) => {
-    // Check for images array (original structure)
-if (place.photos && Array.isArray(place.photos)) {
+  // Memoize all day images calculation
+  const allDayImages = useMemo(() => {
+    const images: {url: string, placeIndex: number}[] = [];
+    placesforeachday.forEach((place: any, placeIdx: number) => {
+      if (place.photos && Array.isArray(place.photos)) {
         place.photos.forEach((photoUrl: string) => {
-            allDayImages.push({
-                url: photoUrl,
-                placeIndex: placeIdx
-            });
+          images.push({
+            url: photoUrl,
+            placeIndex: placeIdx
+          });
         });
-    }
-});
+      }
+    });
+    return images;
+  }, [placesforeachday]);
 
-  console.log("allDayImages", allDayImages);
-  // console.log("photo",allDayImages[0].url);
-  // console.log("idx",allDayImages[0].placeIndex);
-  // console.log("allimages", allDayImages.map((image , index) => image.url));
+  // Optimize button click handler with useCallback
+  const handleButtonClick = useCallback((event: Event) => {
+    const target = event.target as HTMLElement;
+    if (target.tagName === 'BUTTON' && target.dataset.placeId) {
+      const placeId = target.dataset.placeId;
+      console.log(`Button clicked for place ID: ${placeId}`);
+      dispatch(setActivePlaceId(placeId));
+    }
+  }, [dispatch]);
 
   useEffect(() => {
-    const handleButtonClick = (event: Event) => {
-      const target = event.target as HTMLElement;
-
-      // Check if the clicked element is a button with a data-place-id attribute
-      if (target.tagName === 'BUTTON' && target.dataset.placeId) {
-        const placeId = target.dataset.placeId;
-        console.log(`Button clicked for place ID: ${placeId}`);
-
-        // Dispatch an action or perform any other logic
-        dispatch(setActivePlaceId(placeId));
-      }
-    };
-
-    // Add event listener to the document
     document.addEventListener('click', handleButtonClick);
-
-    // Cleanup the event listener on component unmount
     return () => {
       document.removeEventListener('click', handleButtonClick);
     };
+  }, [handleButtonClick]);
 
-  }, [dispatch]);
-
-  
-  
   const itinerary = useSelector((state: any) => state.itinerary.itineraries);
-  console.log("itinerary", itinerary);
-  // console.log("sdhjkskh",itinerary);
-  
-  // let currentDay=0;
+
+  // Memoize place map creation
+  const placeMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    if (placesData && placesData.length > 0) {
+      placesData.forEach((dayPlaces: any[]) => {
+        if (Array.isArray(dayPlaces)) {
+          dayPlaces.forEach((placeArray: any[]) => {
+            placeArray.forEach((place) => {
+              if (place && place.id && place.displayName) {
+                map[place.id] = place.displayName;
+              }
+            });
+          });          
+        }
+      });
+    }
+    return map;
+  }, [placesData]);
+
+  // Memoize replace function
+  const replacePlaceIds = useCallback((text: string) => {
+    if (!text) return text;
+    return text.replace(/#([a-zA-Z0-9_-]+)#/g, (match, placeId) => {
+      const placeName = placeMap[placeId];
+      if (!placeName) return match;
+      return `<button 
+        class="inline-flex items-center px-2 py-0.5 mx-0.5 bg-blue-900/30 text-blue-300 rounded border border-blue-500/20 hover:bg-blue-800/40 transition-all text-xs font-medium" 
+        data-place-id="${placeId}"
+      >
+        ${placeName}
+      </button>`;
+    });
+  }, [placeMap]);
+
+  // Memoize section processing
+  const processSection = useCallback((data: any) => {
+    if (!data) return data;
+    const processed = {...data};
+    
+    if (typeof processed.activities === 'string') {
+      processed.activities = replacePlaceIds(processed.activities);
+    }
+    if (typeof processed.food === 'string') {
+      processed.food = replacePlaceIds(processed.food);
+    }
+    if (typeof processed.transport === 'string') {
+      processed.transport = replacePlaceIds(processed.transport);
+    }
+    
+    return processed;
+  }, [replacePlaceIds]);
 
   // Function to navigate slides
   const nextSlide = () => {
@@ -95,76 +123,6 @@ if (place.photos && Array.isArray(place.photos)) {
     setCurrentSlide((prev) => (prev === 0 ? allDayImages.length - 1 : prev - 1));
   };
 
-  // console.log("placesData", placesData);  
-  
-  // Create a flat map of place IDs to display names for easy lookup
-  const createPlaceMap = () => {
-    const placeMap: Record<string, string> = {};
-    
-    if (placesData && placesData.length > 0) {
-      // Iterate through all days
-      placesData.forEach((dayPlaces: any[]) => {
-        // console.log("dayPlaces", dayPlaces);
-        if (Array.isArray(dayPlaces)) {
-          // Iterate through all places in a day
-          dayPlaces.forEach((placeArray: any[]) => {
-            // console.log("placeArray", placeArray);
-            placeArray.forEach((place) => {
-              if (place && place.id && place.displayName) {
-                placeMap[place.id] = place.displayName;
-                // console.log("placeMap[place.id]", "place id",place.id, placeMap[place.id]);
-              }
-            });
-          });          
-        }
-      });
-    }
-    
-    return placeMap;
-  };
-  const placeMap = createPlaceMap();
-  // Replace place IDs with their display names
- // Replace place IDs with their display names as buttons
-const replacePlaceIds = (text: string) => {
-  if (!text) return text;
-  
-  // Replace IDs in format #ChIJ...# with buttons containing place names
-  return text.replace(/#([a-zA-Z0-9_-]+)#/g, (match, placeId) => {
-    const placeName = placeMap[placeId];
-    if (!placeName) return match;
-    
-    // Return a button with the place name
-    return `<button 
-    class="inline-flex items-center px-2 py-0.5 mx-0.5 bg-blue-900/30 text-blue-300 rounded border border-blue-500/20 hover:bg-blue-800/40 transition-all text-xs font-medium" 
-    data-place-id="${placeId}"
-  >
-    ${placeName}
-  </button>`;
-  });
-};
-
-  
-  // // Process the data section to replace place IDs with names
-  const processSection = (data: any) => {
-    if (!data) return data;
-      // console.log("data", data);
-    const processed = {...data};
-    
-    if (typeof processed.activities === 'string') {
-      processed.activities = replacePlaceIds(processed.activities);
-    }
-    
-    if (typeof processed.food === 'string') {
-      processed.food = replacePlaceIds(processed.food);
-    }
-    
-    if (typeof processed.transport === 'string') {
-      processed.transport = replacePlaceIds(processed.transport);
-    }
-    
-    return processed;
-  };
-  
   const renderSectionContent = (data: { activities: any; food: any; transport: any; cost: any; }) => {
     // Process the data to replace place IDs with names
     const processedData = processSection(data);

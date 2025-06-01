@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import {
   Map,
   AdvancedMarker,
@@ -25,7 +25,7 @@ const directionsGlobalCache = {
 
 
 // Component to render directions between markers
-const DirectionsRenderer = ({predefinedMarkers, triggerDirections, isDarkTheme}: { 
+const DirectionsRenderer = React.memo(({predefinedMarkers, triggerDirections, isDarkTheme}: { 
   predefinedMarkers: any[], 
   triggerDirections: boolean,
   isDarkTheme: boolean 
@@ -83,8 +83,6 @@ const DirectionsRenderer = ({predefinedMarkers, triggerDirections, isDarkTheme}:
               if (status === google.maps.DirectionsStatus.OK && response) {
                 directionsRenderer.setDirections(response);
                 directionsGlobalCache.rendered = true;
-              } else {
-                console.error("Directions request failed due to " + status);
               }
             }
           );
@@ -94,17 +92,16 @@ const DirectionsRenderer = ({predefinedMarkers, triggerDirections, isDarkTheme}:
   }, [routesLibrary, map, triggerDirections, isDarkTheme]);
   
   return null;
-};
+});
 
-// Main Map Component
-const MapComponent = ({ 
+// Memoize MapComponent
+const MapComponent = React.memo(({ 
   predefinedMarkers,
   hoveredMarker,
   selectedMarker,
   setSelectedMarker,
   infoOpen,
   setInfoOpen,
-  
 }: { 
   predefinedMarkers: { lat: number; lng: number; name?: string }[];
   hoveredMarker: { lat: number; lng: number; name?: string } | null;
@@ -117,15 +114,29 @@ const MapComponent = ({
   const [allMarkersVisible, setAllMarkersVisible] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(true); // Default to dark theme
   
-  const defaultCenter = predefinedMarkers[0];
+  // Memoize default values
+  const defaultCenter = useMemo(() => predefinedMarkers[0], [predefinedMarkers]);
   const defaultZoom = 12;
-  
   const mapId = import.meta.env.VITE_GOOGLE_MAP_ID;
   
   // Toggle map theme
-  const toggleMapTheme = () => {
+  const toggleMapTheme = useCallback(() => {
     setIsDarkTheme(!isDarkTheme);
-  };
+  }, [isDarkTheme]);
+
+  // Memoize map props to prevent unnecessary re-renders
+  const mapProps = useMemo(() => ({
+    mapId,
+    colorScheme: isDarkTheme ? "DARK" : "LIGHT",
+    defaultCenter,
+    defaultZoom,
+    mapTypeControl: false,
+    disableDefaultUI: false,
+    zoomControl: true,
+    scrollwheel: true,
+    gestureHandling: "cooperative" as const,
+    style: { width: '100%', height: '100%' }
+  }), [mapId, isDarkTheme, defaultCenter, defaultZoom]);
   
   return (
     <div className="h-full w-full relative">
@@ -159,18 +170,7 @@ const MapComponent = ({
       </div>
       
       <div className="w-full h-full">
-        <Map
-          mapId={mapId}
-          colorScheme={isDarkTheme ? "DARK" : "LIGHT"}
-          defaultCenter={defaultCenter}
-          defaultZoom={defaultZoom}
-          mapTypeControl={false}
-          disableDefaultUI={false}
-          zoomControl={true}
-          scrollwheel={true}
-          gestureHandling={"cooperative"}
-          style={{ width: '100%', height: '100%' }}
-        >
+        <Map {...mapProps}>
           <MarkerManager 
             predefinedMarkers={predefinedMarkers}
             setAllMarkersVisible={setAllMarkersVisible} 
@@ -190,10 +190,18 @@ const MapComponent = ({
       </div>
     </div>
   );
-};
+}, (prevProps, nextProps) => {
+  // Custom comparison to prevent unnecessary re-renders
+  return (
+    JSON.stringify(prevProps.predefinedMarkers) === JSON.stringify(nextProps.predefinedMarkers) &&
+    prevProps.hoveredMarker === nextProps.hoveredMarker &&
+    prevProps.selectedMarker === nextProps.selectedMarker &&
+    prevProps.infoOpen === nextProps.infoOpen
+  );
+});
 
 // Component to manage markers and their animations
-const MarkerManager = ({ 
+const MarkerManager = React.memo(({ 
   setAllMarkersVisible, 
   setInfoOpen, 
   infoOpen, 
@@ -212,9 +220,9 @@ const MarkerManager = ({
   predefinedMarkers: any[];
   isDarkTheme: boolean;
 }) => {
-  // console.log("selected",selectedMarker)
   const [visibleMarkerIndices, setVisibleMarkerIndices] = useState<number[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [hasInitialized, setHasInitialized] = useState(false); // Add initialization flag
   const isInfoWindowHoveredRef = useRef(false);
   const map = useMap();
   const animationFrameRef = useRef<number | null>(null);
@@ -257,41 +265,61 @@ const MarkerManager = ({
     setCurrentImageIndex(0);
   }, [infoOpen?.placeId]);
 
-  // Effect for watching selected marker changes
+  // Effect for watching selected marker changes - optimized to prevent re-animation
   useEffect(() => {
-    if (selectedMarker && map) {
-      // Smooth zoom animation to the selected marker
+    if (selectedMarker && map && hasInitialized) {
+      // Only animate zoom if markers are already initialized
       map.panTo(selectedMarker);
       animateZoom(currentZoomRef.current, clickZoom, selectedMarker, zoomDuration);
     }
-  }, [selectedMarker, map]);
+  }, [selectedMarker, map, hasInitialized]);
 
   // Effect for watching hovered marker changes
   useEffect(() => {
-    if (hoveredMarker && map) {
-      // Smooth zoom animation to the hovered marker
+    if (hoveredMarker && map && hasInitialized) {
       map.panTo(hoveredMarker);
       animateZoom(currentZoomRef.current, clickZoom, hoveredMarker, zoomDuration);
-    } else if (!hoveredMarker && !selectedMarker && map && isTrackingMouseRef.current && !infoWindowCloseIntentionalRef.current) {
-      // Only zoom out if tracking mouse AND not an intentional InfoWindow close
+    } else if (!hoveredMarker && !selectedMarker && map && isTrackingMouseRef.current && !infoWindowCloseIntentionalRef.current && hasInitialized) {
       map.setZoom(defaultZoom);
     }
-  }, [hoveredMarker, map, selectedMarker]);
+  }, [hoveredMarker, map, selectedMarker, hasInitialized]);
   
-  // Animate markers appearing
+  // Animate markers appearing - ONLY on initial load
   useEffect(() => {
-    predefinedMarkers.forEach((_, index) => {
-      setTimeout(() => {
-        setVisibleMarkerIndices(prev => {
-          const newIndices = [...prev, index];
-          if (newIndices.length === predefinedMarkers.length) {
-            setAllMarkersVisible(true);
-          }
-          return newIndices;
-        });
-      }, 1000 + index * 200);
-    });
-  }, [setAllMarkersVisible]);
+    // Only run if not already initialized and we have markers
+    if (!hasInitialized && predefinedMarkers.length > 0) {
+      // Reset visible markers
+      setVisibleMarkerIndices([]);
+      setAllMarkersVisible(false);
+      
+      predefinedMarkers.forEach((_, index) => {
+        setTimeout(() => {
+          setVisibleMarkerIndices(prev => {
+            const newIndices = [...prev, index];
+            if (newIndices.length === predefinedMarkers.length) {
+              setAllMarkersVisible(true);
+              setHasInitialized(true); // Mark as initialized
+            }
+            return newIndices;
+          });
+        }, 1000 + index * 200);
+      });
+    } else if (hasInitialized && predefinedMarkers.length > 0) {
+      // If already initialized, just show all markers immediately
+      const allIndices = predefinedMarkers.map((_, index) => index);
+      setVisibleMarkerIndices(allIndices);
+      setAllMarkersVisible(true);
+    }
+  }, [predefinedMarkers.length, hasInitialized, setAllMarkersVisible]); // Only depend on length, not the array itself
+
+  // Reset initialization when day changes (when predefinedMarkers becomes empty then gets new data)
+  useEffect(() => {
+    if (predefinedMarkers.length === 0 && hasInitialized) {
+      setHasInitialized(false);
+      setVisibleMarkerIndices([]);
+      setAllMarkersVisible(false);
+    }
+  }, [predefinedMarkers.length, hasInitialized, setAllMarkersVisible]);
 
   // Cleanup timeouts and animation frames on unmount
   useEffect(() => {
@@ -373,9 +401,8 @@ const MarkerManager = ({
     animationFrameRef.current = requestAnimationFrame(animate);
   };
 
-  // Handle marker click
-  const handleMarkerClick = (position: any) => {
-    // console.log("ssss",selectedMarker)
+  // Memoize marker click handler
+  const handleMarkerClick = useCallback((position: any) => {
     if (selectedMarker === position) {
       // If already selected, deselect it
       handleZoomOut();
@@ -390,9 +417,8 @@ const MarkerManager = ({
         zoomOutTimeoutRef.current = null;
       }
       isTrackingMouseRef.current = false;
-      // Select new marker
-      // console.log("selectedMarker",selectedMarker)
-      const fullMarkerData=predefinedMarkers.find(marker=>
+      
+      const fullMarkerData = predefinedMarkers.find(marker=>
         marker.lat === position.lat &&
         marker.lng === position.lng &&
         marker.name === position.name
@@ -405,6 +431,7 @@ const MarkerManager = ({
         map.panTo(position);
         animateZoom(currentZoomRef.current, clickZoom, position, zoomDuration);
       }
+      
       // Start a 1.5 second timer before we start tracking mouse movement
       mouseTrackingTimeoutRef.current = setTimeout(() => {
         mouseTrackingTimeoutRef.current = null;
@@ -414,7 +441,7 @@ const MarkerManager = ({
         }
       }, mouseTrackingDelay); // 1.5 seconds delay
     }
-  };
+  }, [selectedMarker, predefinedMarkers, setSelectedMarker, setInfoOpen]);
 
   // Handle zoom out
   const handleZoomOut = () => {
@@ -513,33 +540,29 @@ const handlePopupMouseLeave = () => {
     <div className="info-win">
       {/* Render visible markers */}
       {predefinedMarkers.map((position, index) => {
-        // console.log("positionnn",position)
-        // console.log("sdsdsd",selectedMarker)
         return (
           visibleMarkerIndices.includes(index) && (
             <div className=""
-            key={index} 
+            key={`${position.placeId}-${index}`} // Use placeId for stable key
             onMouseEnter={handleMarkerMouseEnter}
             onMouseLeave={handleMarkerMouseLeave}
             >
             <AdvancedMarker
-  position={{
-    lat: parseFloat(position.lat) || 0,
-    lng: parseFloat(position.lng) || 0
-  }}
-  className="drop-bounce-animation cursor-pointer"
-  onClick={() => handleMarkerClick(position)}
->
-              <div
-                className={`drop-bounce-animation transition-transform duration-300`}
-                  >
+              position={{
+                lat: parseFloat(position.lat) || 0,
+                lng: parseFloat(position.lng) || 0
+              }}
+              className="drop-bounce-animation cursor-pointer"
+              onClick={() => handleMarkerClick(position)}
+            >
+              <div className={`transition-transform duration-300`}>
                 <Pin 
                   background={selectedMarker?.lat === position.lat && selectedMarker?.lng === position.lng && selectedMarker?.name === position.name  || hoveredMarker?.lat === position.lat && hoveredMarker?.lng === position.lng && hoveredMarker?.name === position.name ? "#0000FF" : "#FF0000"}
                   borderColor="#000000"
                   glyphColor="#000000"
                   glyph={(index + 1).toString()}
                   scale={selectedMarker?.lat === position.lat && selectedMarker?.lng === position.lng && selectedMarker?.name === position.name  || hoveredMarker?.lat === position.lat && hoveredMarker?.lng === position.lng && hoveredMarker?.name === position.name? 1.5 : 1}
-                  />
+                />
               </div>
             </AdvancedMarker>
           </div>
@@ -727,6 +750,16 @@ const handlePopupMouseLeave = () => {
       )}
     </div>
   );
-};
+}, (prevProps, nextProps) => {
+  // Enhanced comparison to prevent unnecessary re-renders
+  const markersChanged = JSON.stringify(prevProps.predefinedMarkers) !== JSON.stringify(nextProps.predefinedMarkers);
+  const selectedChanged = prevProps.selectedMarker !== nextProps.selectedMarker;
+  const hoveredChanged = prevProps.hoveredMarker !== nextProps.hoveredMarker;
+  const infoChanged = prevProps.infoOpen !== nextProps.infoOpen;
+  const themeChanged = prevProps.isDarkTheme !== nextProps.isDarkTheme;
+  
+  // Only re-render if there are meaningful changes
+  return !(markersChanged || selectedChanged || hoveredChanged || infoChanged || themeChanged);
+});
 
 export default MapComponent;
