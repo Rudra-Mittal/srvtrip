@@ -6,8 +6,7 @@ export async function fetchScrapperStatus(){
             // Add timeout to prevent hanging requests
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-            
-            const response = await fetch(scraper.url+"status",{
+              const response = await fetch(scraper.url+"status",{
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json"

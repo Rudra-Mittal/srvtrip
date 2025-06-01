@@ -10,7 +10,7 @@ export async function trySendingRequest(scraperUrl: string, requestBody: any) {
         const controller = new AbortController();
         const timeoutId: NodeJS.Timeout = setTimeout(() => controller.abort(), 30000); // 30 second timeout
         
-        const response = await fetch(`${scraperUrl}/scraper`, {
+        const response = await fetch(`${scraperUrl}scraper`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

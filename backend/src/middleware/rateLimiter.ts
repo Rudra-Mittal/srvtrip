@@ -76,7 +76,7 @@ export const otpEmailLimiter = (req: any, res: any, next: any) => {
 
 export const AIexpensiveLimiter=rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 5, // Limit each IP to 5 requests per hour
+  max: 10, // Limit each IP to 5 requests per hour
   message: {
     error: 'Too many AI requests, please try again after an hour.',
   },

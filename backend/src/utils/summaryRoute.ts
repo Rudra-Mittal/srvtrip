@@ -10,9 +10,10 @@ export function summaryRoute(req: any, res: any) {
         res.status(400).json({error:"Place ID is required"})
         return
     }
-    console.log("Place ID:", placeid);
+    console.log("Place ID:", placeid);    
     interface SummarizedReviewData {
         summarizedReview: string | null;
+        rating: number | null;
     }
 
     interface ErrorResponse {
@@ -21,6 +22,7 @@ export function summaryRoute(req: any, res: any) {
 
     interface SuccessResponse {
         summarizedReview: string;
+        rating: number;
     }
 
     prisma.place.findFirst({
@@ -29,11 +31,15 @@ export function summaryRoute(req: any, res: any) {
         },
         select: {
             summarizedReview: true,
+            rating: true,
         }
     }).then((data: SummarizedReviewData | null) => {
         // console.log("Data fetched from DB:", data);
         if (data?.summarizedReview) {
-            res.status(200).json({ summarizedReview: data.summarizedReview });
+            res.status(200).json({ 
+                summarizedReview: data.summarizedReview,
+                rating: data.rating 
+            });
         } else {
             res.status(404).json({ error: "No summary found" });
         }

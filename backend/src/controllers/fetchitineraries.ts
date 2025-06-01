@@ -67,8 +67,8 @@ export async function fetchItineraries(req: AuthRequest, res: Response) {
                 tips: day.proTip,
             });
             
-            const places = day.places;
-            placesData[i].push(
+            const places = day.places;           
+             placesData[i].push(
                 places.map((place: any) => {
                     return {
                         placename: place.placeName,
@@ -76,6 +76,7 @@ export async function fetchItineraries(req: AuthRequest, res: Response) {
                         formattedAddress: place.address,
                         displayName: place.name,
                         summarizedReview: place.summarizedReview,
+                        rating: place.rating,
                         location: {
                             latitude: place.latitude,
                             longitude: place.longitude
