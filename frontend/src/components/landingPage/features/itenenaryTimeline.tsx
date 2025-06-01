@@ -87,7 +87,7 @@ export default function IteneraryTimeline(){
                               </BackgroundGradient>
                               
                               {/* Timeline for the day */}
-                            <div className="pl-4 mt-16 space-y-12 relative">
+                            <div className="pl-4 mt-16  relative">
                               {/* Gradient line with proper spacing and constraints */}
                               <div className="absolute top-0 bottom-0 left-0 ml-[19px] w-[2px] bg-gradient-to-b from-blue-500 via-purple-500 to-blue-500 max-h-[95%] mt-5"></div>
                               
