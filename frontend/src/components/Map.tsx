@@ -127,7 +127,7 @@ const MapComponent = React.memo(({
   // Memoize map props to prevent unnecessary re-renders
   const mapProps = useMemo(() => ({
     mapId,
-    colorScheme: isDarkTheme ? "DARK" : "LIGHT",
+    colorScheme: isDarkTheme ? "DARK" as const : "LIGHT" as const,
     defaultCenter,
     defaultZoom,
     mapTypeControl: false,
@@ -682,10 +682,15 @@ const handlePopupMouseLeave = () => {
                 fontSize: "16px", 
                 fontWeight: "bold", 
                 margin: "3px 0",
-                color: isDarkTheme ? "#ffffff" : "#333333" 
+                color: isDarkTheme ? "#ffffff" : "#333333",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                maxWidth: "280px" // Slightly less than the container width (300px)
               }}>
                 {infoOpen.name || "Location"}
-              </h3>              {/* Star Rating Component */}
+              </h3>
+              {/* Star Rating Component */}
               <div className="flex items-center mt-1 mb-2">
                 <div className="flex mr-1">
                   {[1, 2, 3, 4, 5].map((star) => {
