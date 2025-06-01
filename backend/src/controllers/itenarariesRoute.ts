@@ -44,7 +44,7 @@ export async function itenarariesRoute(req:AuthRequest,res:Response){
                 evening:day.evening,
                 tips:day.proTip,                
             })
-            const places=day.places;
+            const places=day.places;            
             placesData[i].push(
                 places.map((place:any)=>{
                     return{
@@ -53,6 +53,7 @@ export async function itenarariesRoute(req:AuthRequest,res:Response){
                         formattedAddress:place.address,
                         displayName:place.name,
                         summarizedReview:place.summarizedReview,
+                        rating:place.rating,
                         location:{
                             latitude:place.latitude,
                             longitude:place.longitude
