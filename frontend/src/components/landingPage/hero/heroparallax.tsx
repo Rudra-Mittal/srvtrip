@@ -28,12 +28,12 @@ export const products = [
   {
     title: "Cappadocia, Turkey",
     link: "https://en.wikipedia.org/wiki/Cappadocia",
-    thumbnail: "https://images.unsplash.com/photo-1597205190446-4e14745d1731?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Y2FwcGFkb2NpYSUyMHR1cmtleXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=80",
+    thumbnail: "/parallaximages/image1.jpg",
   },
   {
     title: "Amalfi Coast, Italy",
     link: "https://en.wikipedia.org/wiki/Amalfi_Coast",
-    thumbnail: "https://images.unsplash.com/photo-1529251333259-d36cccaf22ea?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YW1hbGZpJTIwY29hc3R8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=80",
+    thumbnail: "/parallaximages/image3.jpg",
   },
   {
     title: "Machu Picchu, Peru",
@@ -53,7 +53,7 @@ export const products = [
   {
     title: "Iceland Northern Lights",
     link: "https://en.wikipedia.org/wiki/Aurora",
-    thumbnail: "https://images.unsplash.com/photo-1609902726285-00668009f004?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aWNlbGFuZCUyMG5vcnRoZXJuJTIwbGlnaHRzfGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=80",
+    thumbnail: "/parallaximages/image9.jpg",
   },
   // New entries below
   {
@@ -79,33 +79,33 @@ export const products = [
   {
     title: "Angkor Wat, Cambodia",
     link: "https://en.wikipedia.org/wiki/Angkor_Wat",
-    thumbnail: "https://images.unsplash.com/photo-1589500341672-44e6e947c26b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YW5na29yJTIwd2F0fGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=80",
+    thumbnail: "/parallaximages/image2.jpg",
   },
-  {
-    title: "Fiordland, New Zealand",
-    link: "https://en.wikipedia.org/wiki/Fiordland_National_Park",
-    thumbnail: "https://images.unsplash.com/photo-1574524096795-455892e9a6d3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZmhvcmRsYW5kJTIwbmV3JTIwemVhbGFuZHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    title: "Petra, Jordan",
-    link: "https://en.wikipedia.org/wiki/Petra",
-    thumbnail: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGV0cmElMjBqb3JkYW58ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    title: "Bali, Indonesia",
-    link: "https://en.wikipedia.org/wiki/Bali",
-    thumbnail: "https://images.unsplash.com/photo-1539368447531-05d2a6d4c954?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmFsaSUyMGluZG9uZXNpYXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    title: "Grand Canyon, USA",
-    link: "https://en.wikipedia.org/wiki/Grand_Canyon",
-    thumbnail: "https://images.unsplash.com/photo-1509316785289-025f5b846b35?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Z3JhbmQlMjBjYW55b258ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    title: "Paris, France",
-    link: "https://en.wikipedia.org/wiki/Paris",
-    thumbnail: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGFyaXMlMjBmcmFuY2V8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=80",
-  }
+  // {
+  //   title: "Fiordland, New Zealand",
+  //   link: "https://en.wikipedia.org/wiki/Fiordland_National_Park",
+  //   thumbnail: "https://images.unsplash.com/photo-1574524096795-455892e9a6d3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZmhvcmRsYW5kJTIwbmV3JTIwemVhbGFuZHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=80",
+  // },
+  // {
+  //   title: "Petra, Jordan",
+  //   link: "https://en.wikipedia.org/wiki/Petra",
+  //   thumbnail: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGV0cmElMjBqb3JkYW58ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=80",
+  // },
+  // {
+  //   title: "Bali, Indonesia",
+  //   link: "https://en.wikipedia.org/wiki/Bali",
+  //   thumbnail: "https://images.unsplash.com/photo-1539368447531-05d2a6d4c954?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmFsaSUyMGluZG9uZXNpYXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=80",
+  // },
+  // {
+  //   title: "Grand Canyon, USA",
+  //   link: "https://en.wikipedia.org/wiki/Grand_Canyon",
+  //   thumbnail: "https://images.unsplash.com/photo-1509316785289-025f5b846b35?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Z3JhbmQlMjBjYW55b258ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=80",
+  // },
+  // {
+  //   title: "Paris, France",
+  //   link: "https://en.wikipedia.org/wiki/Paris",
+  //   thumbnail: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGFyaXMlMjBmcmFuY2V8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=80",
+  // }
 ];
 
 
