@@ -42,14 +42,52 @@ export async function placeInfo(placename: string,dayNum:number,photoLimit=5): P
         });
 }
 
-export async function getPhotoUri(photoreference:string,photwidth=600):Promise<string>{
-    return fetch(`https://places.googleapis.com/v1/${photoreference}/media?key=${process.env.GOOGLE_PLACES_API_KEY}&maxWidthPx=${photwidth}&skipHttpRedirect=true`)
-    .then(async (data) => {
-        const res = await data.json() as any;
+export async function getPhotoUri(photoreference: string, photwidth = 600): Promise<string> {
+    try {
+        const response = await fetch(`https://places.googleapis.com/v1/${photoreference}/media?key=${process.env.GOOGLE_PLACES_API_KEY}&maxWidthPx=${photwidth}&skipHttpRedirect=true`);
+        
+        if (!response.ok) {
+            console.error(`API returned ${response.status}: ${response.statusText}`);
+            return getNoPhotoPlaceholder(photwidth);
+        }
+        
+        const res = await response.json();
+        
+        if (!res.photoUri) {
+            console.warn(`No photoUri property in response for ${photoreference}`);
+            return getNoPhotoPlaceholder(photwidth);
+        }
+        
         return res.photoUri;
-    })
-    .catch((err) => {
-        console.log(err);
-        return err
-    });
+    } catch (err) {
+        console.error(`Error fetching photo ${photoreference}:`, err);
+        return getNoPhotoPlaceholder(photwidth);
+    }
+}
+
+function getNoPhotoPlaceholder(width: number = 600): string {
+    // Calculate height based on standard 3:2 aspect ratio
+    const height = Math.floor(width * 2/3);
+    
+    // Create a professional-looking SVG with camera icon and text
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+        <rect width="100%" height="100%" fill="#f0f0f0"/>
+        <g transform="translate(${width/2}, ${height/2})">
+            <!-- Camera body -->
+            <rect x="-80" y="-30" width="160" height="90" rx="10" fill="#d1d5db"/>
+            <!-- Camera lens -->
+            <circle cx="0" cy="15" r="30" fill="#9ca3af" stroke="#f3f4f6" stroke-width="3"/>
+            <circle cx="0" cy="15" r="15" fill="#6b7280"/>
+            <!-- Camera flash -->
+            <rect x="40" y="-40" width="20" height="10" rx="3" fill="#9ca3af"/>
+            <!-- Diagonal line (slash) -->
+            <line x1="-70" y1="-50" x2="70" y2="70" stroke="#ef4444" stroke-width="8"/>
+            <!-- Text -->
+            <text x="0" y="${height/4}" font-family="Arial, sans-serif" font-size="${width/25}" text-anchor="middle" fill="#4b5563" font-weight="bold">No Image Available</text>
+        </g>
+    </svg>`;
+    
+    // Convert SVG to a data URI
+    const encodedSvg = encodeURIComponent(svg);
+    return `data:image/svg+xml;charset=UTF-8,${encodedSvg}`;
 }
