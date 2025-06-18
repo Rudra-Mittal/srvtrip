@@ -93,7 +93,7 @@ export default function ChatbotD({chatbotRef}:{chatbotRef: React.RefObject<HTMLD
     setInput("");
   
     try {
-      console.log("Sending query to backend:", input);
+      // console.log("Sending query to backend:", input);
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/query`, {
         method: "POST",
         headers: {
@@ -108,7 +108,7 @@ export default function ChatbotD({chatbotRef}:{chatbotRef: React.RefObject<HTMLD
       });
   
       const data = await res.json();
-      console.log("Response from backend /query route:", data);
+      // console.log("Response from backend /query route:", data);
   
       if (data) {
         dispatch(addChat({

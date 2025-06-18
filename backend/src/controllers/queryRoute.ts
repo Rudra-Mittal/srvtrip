@@ -13,14 +13,14 @@ export const queryRoute = (req:any, res:any) => {
         res.send(result);
       })
       .catch((err) => {
-        console.error(err);
-        res.status(500).json({ error: "Server Error" });
+        // console.error(err);
+        res.status(500).send( "Server Error" );
       });
   } catch (err: any) {
     if (err.name === "ZodError") {
-      return res.status(400).json({ error: err.errors });
+      return res.status(400).send( "Invalid request data " );
     }
     console.error("Query error:", err);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).send("Internal Server Error" );
   }
 };
