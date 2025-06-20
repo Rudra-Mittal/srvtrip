@@ -235,7 +235,7 @@ export default function ChatbotD({chatbotRef}:{chatbotRef: React.RefObject<HTMLD
                   <div className="flex gap-2">
                     <input
                       type="text"
-                      placeholder="Ask about any place..."
+                      placeholder={`Ask anything about ${activePlaceName || 'this place'}...`}
                       value={input}
                       onChange={(e)=>setInput(e.target.value)}
                       onKeyDown={(e)=>{
