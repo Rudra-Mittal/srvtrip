@@ -16,7 +16,7 @@ export default function Signup() {
   }, [testimonials.length]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative" style={{ backgroundColor: bgColor, transition: 'background-color 0.5s' }}>
+    <div className="min-h-screen flex items-center justify-center p-4 pt-20 relative" style={{ backgroundColor: bgColor, transition: 'background-color 0.5s' }}>
       {/* Grid background - keeping the same */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0" style={{ 

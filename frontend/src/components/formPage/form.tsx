@@ -321,7 +321,7 @@ export default function Form() {
     // Set timeout timer for 10 seconds (reasonable time for AI processing)
     const timeoutTimer = setTimeout(() => {
       setShowTimeoutMessage(true);
-    }, 10000);
+    }, 60000); // Changed from 10000 to 60000 (1 minute)
     
     // Create a copy of the form data to modify
     const submissionData = { ...formData };
@@ -1056,17 +1056,19 @@ export default function Form() {
                       <p className="text-gray-300 mb-4 text-sm">
                         Don't worry! Your itinerary is still being created. You can continue exploring our site or close this tab - your itinerary will be saved and ready when you return.
                       </p>
-                      <HoverBorderGradient
-                        as="button"
-                        //@ts-ignore
-                        type="button"
-                        onClick={handleExploreMore}
-                        className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 font-medium text-white shadow-lg shadow-purple-900/20 text-sm"
-                      >
-                        <span className="flex items-center justify-center">
-                          Explore More <ArrowRight className="ml-2 h-4 w-4" />
-                        </span>
-                      </HoverBorderGradient>
+                      <div className="flex justify-center"> {/* Added centering wrapper */}
+                        <HoverBorderGradient
+                          as="button"
+                          //@ts-ignore
+                          type="button"
+                          onClick={handleExploreMore}
+                          className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 font-medium text-white shadow-lg shadow-purple-900/20 text-sm"
+                        >
+                          <span className="flex items-center justify-center">
+                            Explore More <ArrowRight className="ml-2 h-4 w-4" />
+                          </span>
+                        </HoverBorderGradient>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
