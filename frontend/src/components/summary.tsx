@@ -180,7 +180,7 @@ export default function Summary({dayNum,itineraryNum}:{dayNum:number,itineraryNu
     }, [currentPlace, places, itineraryNum, dayNum]);
 
     if (!currentPlace) {
-        return <div className="text-gray-300">No place selected</div>
+        return <div className="text-gray-300">Select a place to see the summarized reviews</div>
     } 
     return (
         <div>
@@ -188,6 +188,10 @@ export default function Summary({dayNum,itineraryNum}:{dayNum:number,itineraryNu
                 <span className="inline-block w-1 h-5 bg-gradient-to-b from-blue-500 to-purple-500 mr-2 rounded-full"></span>
                 {currentPlaceData&&currentPlaceData.displayName}
             </h3>
+            
+            <h2 className="text-lg font-semibold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                Summarized Review of {currentPlaceData?.displayName || "Selected Place"}
+            </h2>
             
             {reviewLoading && (
                 <div className="space-y-4">

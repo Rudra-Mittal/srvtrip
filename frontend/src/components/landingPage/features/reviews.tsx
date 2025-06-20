@@ -30,43 +30,45 @@ export default function Reviews() {
       return ;
     }
   },[isInView, isAggregating, showSummary]) 
+  
   const reviews = [
     {
       id: 1,
-      name: "Alex Johnson",
+      name: "Emily Carter",
       avatar: "/placeholder.svg?height=40&width=40",
-      rating: 4,
-      comment: "Great product, very intuitive and easy to use!",
+      rating: 5,
+      comment: "The Taj Mahal is breathtaking. Seeing it in person at sunrise was a dream come true. Absolutely worth waking up early for.",
     },
     {
       id: 2,
-      name: "Sam Taylor",
+      name: "Liam Robinson",
       avatar: "/placeholder.svg?height=40&width=40",
-      rating: 5,
-      comment: "Absolutely love it! Best purchase I've made this year.",
+      rating: 4,
+      comment: "Stunning monument and great photo ops. Entry process was a bit slow due to the crowd, but the beauty makes up for it.",
     },
     {
       id: 3,
-      name: "Jordan Lee",
+      name: "Sofia Müller",
       avatar: "/placeholder.svg?height=40&width=40",
-      rating: 3,
-      comment: "Good overall, but could use some improvements.",
+      rating: 5,
+      comment: "An architectural masterpiece. Everything from the symmetry to the marble detailing is just mesmerizing. Loved every moment here.",
     },
     {
       id: 4,
-      name: "Casey Morgan",
+      name: "Carlos Diaz",
       avatar: "/placeholder.svg?height=40&width=40",
       rating: 4,
-      comment: "Very satisfied with the quality and performance.",
+      comment: "Truly a wonder of the world. I recommend hiring a local guide to understand the history better. Can get quite hot in the afternoon though.",
     },
     {
       id: 5,
-      name: "Riley Quinn",
+      name: "Isabelle Laurent",
       avatar: "/placeholder.svg?height=40&width=40",
-      rating: 5,
-      comment: "Exceeded my expectations in every way!",
+      rating: 3,
+      comment: "Monument is beautiful but over-commercialized. Too many vendors and the ticket pricing for foreigners feels steep.",
     },
-  ]
+  ];
+
   const averageRating = Math.round(reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length)
 
 
@@ -261,10 +263,8 @@ const handleAggregate = async () => {
           </p>
         </div>
         <div className="space-y-2">
-          <p className="text-center  dark:text-white leading-relaxed text-white  ">
-            Users praise the product's quality and ease of use, with <span style={{ color: "#6366f1" }} className="font-medium">85%</span> expressing
-            satisfaction. Key highlights include intuitive design and reliable
-            performance.
+          <p className="text-center dark:text-white leading-relaxed text-white">
+            Visitors consistently admire the Taj Mahal's breathtaking beauty and architectural brilliance, with <span style={{ color: "#6366f1" }} className="font-medium">88%</span> expressing high satisfaction. Highlights include the serene atmosphere at sunrise, intricate marble detailing, and the monument's historical significance.
           </p>
         </div>
       </BackgroundGradient>
