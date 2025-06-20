@@ -83,9 +83,9 @@ export default function RightSideImg({currentSlide,setCurrentSlide,setBgColor}: 
                         </svg>
 
                         <p className="text-lg sm:text-2xl font-light leading-relaxed mb-4">{testimonial.quote}</p>
-                        <h3 className="text-lg sm:text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-lavender-400 to-purple-400">{testimonial.author}</h3>
-                        <p className="text-xs sm:text-sm text-lavender-200 opacity-80">{testimonial.position}</p>
-                        <p className="text-xs sm:text-sm mt-1 text-lavender-100 font-medium">📍 {testimonial.location}</p>
+                        <h3 className="text-lg sm:text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">{testimonial.author}</h3>
+                        <p className="text-xs sm:text-sm text-blue-200 opacity-90">{testimonial.position}</p>
+                        <p className="text-xs sm:text-sm mt-1 text-blue-100 font-medium">📍 {testimonial.location}</p>
                       </div>
 
                       {/* Buttons with animated gradient borders */}
