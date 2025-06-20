@@ -209,7 +209,7 @@ export default function Form() {
     // Step 1: Start merging animation
     setIsAggregating(true);
     setTimeout(() => {
-      console.log("Star should be visible now");
+      // console.log("Star should be visible now");
 
       // Animate the star
       setTimeout(() => {
@@ -337,8 +337,8 @@ export default function Form() {
     // Update submissionData.interests with the updated array
     submissionData.interests = interestsArray;
     
-    console.log("submissiondata", submissionData);
-    console.log("Form data:", submissionData);
+    // console.log("submissiondata", submissionData);
+    // console.log("Form data:", submissionData);
       genitinerary(submissionData).then(async (res)=>{
       clearTimeout(timeoutTimer);
       //if error thrown is invalid destination then show the error message
@@ -359,7 +359,7 @@ export default function Form() {
         });
         navigate("/form");
       }
-      console.log("newitinerary",JSON.parse(res.newItenary))
+      // console.log("newitinerary",JSON.parse(res.newItenary))
       dispatch(addItinerary(await JSON.parse(res.newItenary)))
       dispatch(addPlace(await JSON.parse(res.placesData)))
       

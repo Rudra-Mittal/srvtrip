@@ -1,5 +1,5 @@
 export const genitinerary = async (data: any) => {
-    console.log("response reached in genitinerary")
+    // console.log("response reached in genitinerary")
     return await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/itenary`, {
         method: 'POST',
         headers: {

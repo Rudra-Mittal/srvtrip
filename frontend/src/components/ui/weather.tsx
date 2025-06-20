@@ -36,11 +36,11 @@ const Weather = () => {
     
     if (currentItinerary && currentItinerary.itinerary && currentItinerary.itinerary.destination) {
       const destination = currentItinerary.itinerary.destination;
-      console.log("Found destination city:", destination);
+      // console.log("Found destination city:", destination);
       return destination;
     }
     
-    console.log("No destination found for itinerary:", itineraryNum);
+    // console.log("No destination found for itinerary:", itineraryNum);
     return null;
   }, [itineraryNum, itineraries]);
   useEffect(() => {
@@ -66,7 +66,7 @@ const Weather = () => {
         }
         
         const data = await response.json();
-        console.log("Weather data received for", destinationCity, ":", data);
+        // console.log("Weather data received for", destinationCity, ":", data);
         setWeather(data);
       } catch (err : any) {
         console.error("Weather fetch error:", err);
@@ -77,8 +77,8 @@ const Weather = () => {
     };
     fetchWeather();
   }, [destinationCity]);
-  console.log("Itinerary Number:", itineraryNum);
-  console.log("Destination City:", destinationCity);
+  // console.log("Itinerary Number:", itineraryNum);
+  // console.log("Destination City:", destinationCity);
 
   // return for no destination city
   if (!destinationCity) {    return (
@@ -88,9 +88,9 @@ const Weather = () => {
     );
   }  // Get weather icon based on condition
   const getWeatherIcon = (condition: string, icon: string) => {
-    console.log("Weather condition received:", condition, "with icon:", icon); // Debug log
-    const conditionLower = condition.toLowerCase();
     
+    const conditionLower = condition.toLowerCase();
+     icon = icon.toLowerCase();
     // OpenWeatherMap main conditions: Clear, Clouds, Rain, Drizzle, Thunderstorm, Snow, Mist, Smoke, Haze, Dust, Fog, Sand, Ash, Squall, Tornado
     switch (conditionLower) {
       case 'clear':
@@ -117,7 +117,7 @@ const Weather = () => {
       case 'tornado':
         return <Wind className="h-10 w-10 text-gray-400" />;
       default:
-        console.log("Unknown weather condition, using default cloud:", conditionLower);
+        // console.log("Unknown weather condition, using default cloud:", conditionLower);
         return <Cloud className="h-10 w-10 text-gray-300" />;
     }
   };

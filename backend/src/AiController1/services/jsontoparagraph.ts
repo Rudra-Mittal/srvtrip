@@ -109,7 +109,7 @@ export async function convertItineraryToText(itineraryJSON: any) {
     }
 
     const itineraryText = data.choices[0].message.content.trim();
-    console.log("📜 Generated Itinerary Text:\n", itineraryText);
+    // console.log("📜 Generated Itinerary Text:\n", itineraryText);
     return itineraryText;
   } catch (error) {
     console.error("❌ Error converting itinerary to text:", error);

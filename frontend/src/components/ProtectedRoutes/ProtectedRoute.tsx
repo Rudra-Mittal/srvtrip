@@ -21,9 +21,9 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       }
       else{
           const itineraries= localStorage.getItem("itineraries");
-          console.log(itineraries)
+          // console.log(itineraries)
           if(!itineraries){
-            console.log("tyao")
+            // console.log("tyao")
             fetch(`${import.meta.env.VITE_BACKEND_URL}/api/itineraries`, {
               method: "GET",
               headers: {
@@ -31,7 +31,7 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
               },
               credentials: "include",
           }).then(async (response) => {
-            console.log("response")
+            // console.log("response")
             const data = await response.json();
             dispatch(setItineraries(data.itineraries));
             dispatch(setPlaces(data.placesData));
@@ -40,7 +40,7 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
           })
           }
           setLoading(false);
-          console.log(user)
+          // console.log(user)
           dispatch(loginUser(user));
       }
      });

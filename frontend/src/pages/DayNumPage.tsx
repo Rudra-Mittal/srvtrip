@@ -12,14 +12,14 @@ export const DayNumPage = () => {
     const { itineraryNum, dayNum } = useParams()
     const itinerarynumber = parseInt(itineraryNum || "0", 10)
     const daynumber = parseInt(dayNum || "0", 10)
-    console.log(itineraryNum, dayNum)
+    // console.log(itineraryNum, dayNum)
     const chatbotRef = useRef<HTMLDivElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
     const [leftWidth, setLeftWidth] = useState(60) // Initial width percentage for left column
     const [isDragging, setIsDragging] = useState(false)
     const itinerary = useSelector((state: any) => state.itinerary.itineraries);
     const days = (itinerary)?itinerary[parseInt(itineraryNum || "0", 10) - 1]?.itinerary?.days?.length || 0:0;
-    console.log("days", days)
+    // console.log("days", days)
     // Handle mouse events for resizing
     const handleMouseDown = (e: React.MouseEvent) => {
         e.preventDefault()

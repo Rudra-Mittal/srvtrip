@@ -33,7 +33,7 @@ export default function ChatbotD({chatbotRef}:{chatbotRef: React.RefObject<HTMLD
           for (let placeIdx = 0; placeIdx < dayPlaces.length; placeIdx++) {
             const place = dayPlaces[placeIdx];
             if (place && place.id === activePlaceId) {
-              console.log("Found Place:", place);
+              // console.log("Found Place:", place);
               // Use displayName, formattedAddress, or placename as fallback
               return place.displayName || place.placename || place.formattedAddress || "Unknown Place";
             }
@@ -41,12 +41,12 @@ export default function ChatbotD({chatbotRef}:{chatbotRef: React.RefObject<HTMLD
         }
       }
     }
-    console.log("Place not found for ID:", activePlaceId);
+    // console.log("Place not found for ID:", activePlaceId);
     return null;
   };
 
   const activePlaceName = getActivePlaceName();
-  console.log("Active Place Name:", activePlaceName);
+  // console.log("Active Place Name:", activePlaceName);
 
   const dispatch=useDispatch();
 
@@ -62,14 +62,14 @@ export default function ChatbotD({chatbotRef}:{chatbotRef: React.RefObject<HTMLD
   }, [activePlaceId, dispatch]);
 
   const toggleChatbotPanel = () => {
-    console.log("Toggling chatbot panel");
+    // console.log("Toggling chatbot panel");
     // dispatch(toggleChatbot());
     dispatch(setChatbotOpen(!isChatBotOpen));
   };
 
   const {chats}=useSelector((state:any)=>state.chat);
   const messages=chats[activePlaceId] || [];
-  console.log("Messages",messages); 
+  // console.log("Messages",messages); 
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
