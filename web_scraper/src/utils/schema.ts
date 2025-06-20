@@ -34,7 +34,7 @@ export const reviewSchema = {
     const classExists = schemaRes;
     if (!classExists) {
       await client.collections.create(reviewSchema);
-      console.log(`Class ${schemaName} created successfully!`);
+      // console.log(`Class ${schemaName} created successfully!`);
     }
     return classExists;
 

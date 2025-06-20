@@ -115,7 +115,7 @@ export async function generateItinerary(
       throw new Error("Invalid response from AI API");
     }
 
-    console.log("🛠️ Raw AI Response:", data.choices[0].message.content);
+    // console.log("🛠️ Raw AI Response:", data.choices[0].message.content);
 
     const rawContent = data.choices[0].message.content.trim();
 

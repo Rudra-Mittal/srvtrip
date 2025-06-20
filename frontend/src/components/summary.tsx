@@ -14,13 +14,13 @@ const getPlaceReview = async (placeId: string, abortSignal: AbortSignal): Promis
     // Set up abort handler
     abortSignal.addEventListener('abort', () => {
         shouldContinue = false;
-        console.log(`Polling for place ${placeId} aborted`);
+        // console.log(`Polling for place ${placeId} aborted`);
     });
 
     const poll = async (): Promise<{summarizedReview: string, rating: number} | null> => {
         // Check if we should stop polling
         if (!shouldContinue) {
-            console.log(`Polling for place ${placeId} stopped due to cancellation`);
+            // console.log(`Polling for place ${placeId} stopped due to cancellation`);
             return null;
         }
           try {
@@ -35,7 +35,7 @@ const getPlaceReview = async (placeId: string, abortSignal: AbortSignal): Promis
 
             const data = await res.json();
             if (res.ok) {
-                console.log("Successful response received.", data.summarizedReview, "Rating:", data.rating);
+                // console.log("Successful response received.", data.summarizedReview, "Rating:", data.rating);
                 return {
                     summarizedReview: data.summarizedReview,
                     rating: data.rating
@@ -47,7 +47,7 @@ const getPlaceReview = async (placeId: string, abortSignal: AbortSignal): Promis
             if (err.name !== 'AbortError') {
                 console.error("Error fetching place review:", err);
             } else {
-                console.log("Request was aborted");
+                // console.log("Request was aborted");
                 return null;
             }
         }
@@ -75,7 +75,7 @@ const getPlaceReview = async (placeId: string, abortSignal: AbortSignal): Promis
             if (!shouldContinue) {
                 return null;
             }
-            console.log("Max attempts reached. Stopping polling.");
+            // console.log("Max attempts reached. Stopping polling.");
             throw new Error("Taking too long to fetch the latest summary. Try again after some time.") ;
         }
     };
@@ -118,7 +118,7 @@ export default function Summary({dayNum,itineraryNum}:{dayNum:number,itineraryNu
         
         if(currentPlace && places[itineraryNum-1]?.[dayNum-1]?.length > 0){
             const place = places[itineraryNum-1][dayNum-1].find((place: any) => place.id === currentPlace);
-            console.log("Current place data:", place, currentPlace);
+            // console.log("Current place data:", place, currentPlace);
             setCurrentPlaceData(place);
             setReviewError(null);
             
@@ -134,10 +134,10 @@ export default function Summary({dayNum,itineraryNum}:{dayNum:number,itineraryNu
                 
                 getPlaceReview(currentPlace, signal)
                     .then((data) => {
-                        console.log("Data received:", data, signal.aborted);
+                        // console.log("Data received:", data, signal.aborted);
                         // Only update if this is still the current place and request wasn't aborted
                         if (data && !signal.aborted && currentPlaceRef.current === currentPlace) {
-                            console.log('dispatching review:', data.summarizedReview, 'rating:', data.rating);
+                            // console.log('dispatching review:', data.summarizedReview, 'rating:', data.rating);
                             dispatch(setReview({
                                 placeId: currentPlace, 
                                 summarizedReview: data.summarizedReview, 

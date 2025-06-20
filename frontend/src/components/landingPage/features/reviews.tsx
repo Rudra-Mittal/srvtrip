@@ -13,7 +13,7 @@ export default function Reviews() {
   const containerRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(containerRef, { once: false, amount: "some" });
   useEffect(() => {
-    console.log("isInView", isInView)
+    // console.log("isInView", isInView)
     if (isInView && !isAggregating && !showSummary) {
       // Add a small delay for better UX
       const timer = setTimeout(() => {

@@ -30,7 +30,7 @@ export default function VerifyOtpPage() {
       // Redirect to the landing page
       navigate("/", { replace: true });
     } catch (err: any) {
-      console.error("OTP verification error:", err);
+      // console.error("OTP verification error:", err);
       toast.error("Invalid or expired OTP. Please try again.");
     } finally {
       setLoading(false);

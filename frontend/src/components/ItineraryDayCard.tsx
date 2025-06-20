@@ -135,7 +135,7 @@ export const DayCard = ({itineraryIdx,dayIdx}: any) => {
     };
 
     const handleImageError = (idx: number) => {
-        console.log(`Error loading image at index ${idx}`);
+        // console.log(`Error loading image at index ${idx}`);
         setImageErrors(prev => new Set(prev).add(idx));
         setLoadingImage(null);
         

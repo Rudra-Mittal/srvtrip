@@ -34,7 +34,7 @@ export const handleFetchItineraries = async ( storedIds: string[]) => {
         }
 
         const data = await response.json();
-        console.log("Fetched itineraries:", data);
+        // console.log("Fetched itineraries:", data);
         return data;
     } catch (error) {
         console.error("Error in handleFetchItineraries:", error);

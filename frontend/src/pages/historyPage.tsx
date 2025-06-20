@@ -10,11 +10,11 @@ import { toast } from "react-hot-toast";
 
 export default function HistoryPage() {
     const itineraries = useSelector((state: any) => state.itinerary.itineraries);
-    console.log("Itineraries from Redux:", itineraries);
+    // console.log("Itineraries from Redux:", itineraries);
     const storedIds = itineraries
         .map((itinerary: any) => itinerary?.itinerary?.id)
         .filter(Boolean);
-    console.log("Stored IDdddss:", storedIds);
+    // console.log("Stored IDdddss:", storedIds);
     // Default to showing the most recent itinerary if available
     const [selectedItineraryIndex, setSelectedItineraryIndex] = useState(0);
     // Add loading state for fetch action
@@ -23,19 +23,19 @@ export default function HistoryPage() {
 
     const navigate = useNavigate();
     const handleViewDetails = (itinerarynumber: number) => {
-        console.log("View details for itinerary ID:", itinerarynumber);
+        // console.log("View details for itinerary ID:", itinerarynumber);
         // Navigate to the itinerary details page
         navigate(`/itinerary/${itinerarynumber}`);
     };    const fetchItineraries = async () => {
-        console.log("request reach here");
+        // console.log("request reach here");
         setIsLoading(true);
         try {
             const response = await handleFetchItineraries(storedIds);
-            console.log("Fetched itineraries:", response);
+            // console.log("Fetched itineraries:", response);
             dispatch(appenditinerary(response.itineraries));
             dispatch(appendPlaces(response.placesData));
         } catch (error: any) {
-            console.error("Error fetching itineraries:", error);
+            // console.error("Error fetching itineraries:", error);
             
             // Handle rate limiting errors specifically
             const errorMessage = error.message || "Failed to fetch itineraries";
