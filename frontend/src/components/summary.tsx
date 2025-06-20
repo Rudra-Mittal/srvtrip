@@ -190,9 +190,7 @@ export default function Summary({dayNum,itineraryNum}:{dayNum:number,itineraryNu
             </h3>
             
             <h2 className="text-lg font-semibold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                <span className="block truncate">
-                    Summarized Review of {currentPlaceData?.displayName || "Selected Place"}
-                </span>
+                Summarized Review of {currentPlaceData?.displayName || "Selected Place"}
             </h2>
             
             {reviewLoading && (
