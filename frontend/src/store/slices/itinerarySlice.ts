@@ -14,7 +14,7 @@ const itinerarySlice = createSlice({
     initialState,
     reducers: {
         setItineraries: (state, action) => {
-            // console.log("Setting itineraries", action.payload);
+            console.log("Setting itineraries", action.payload);
             state.itineraries = action.payload;
             // localStorage. setItem("itineraries", JSON.stringify(action.payload));
         },

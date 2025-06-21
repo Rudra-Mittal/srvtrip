@@ -13,6 +13,8 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const [loading, setLoading] = useState(true);
     const navigate=useNavigate();
     const dispatch = useDispatch();
+    const itineraries= useSelector((state: any)=>state.itinerary.itineraries); // Initialize as null or an empty array if needed
+
     useEffect(()=>{
      auth().then((user)=>{
       if(user.error){
@@ -22,7 +24,6 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       else{
           // const itineraries= localStorage.getItem("itineraries");
           // console.log(itineraries)
-          const itineraries= useSelector((state: any)=>state.itinerary.itineraries); // Initialize as null or an empty array if needed
           if(!itineraries){
             // console.log("tyao")
             fetch(`${import.meta.env.VITE_BACKEND_URL}/api/itineraries`, {

@@ -1,16 +1,48 @@
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronLeftIcon, ChevronRightIcon, RefreshCwIcon } from "lucide-react";
 import { handleFetchItineraries } from "@/api/itineraryfetch";
-import { appenditinerary } from "@/store/slices/itinerarySlice";
-import { appendPlaces } from "@/store/slices/placeSlice";
+import { appenditinerary, setItineraries } from "@/store/slices/itinerarySlice";
+import { appendPlaces, setPlaces } from "@/store/slices/placeSlice";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 
 export default function HistoryPage() {
+    
+    const dispatch = useDispatch();
+    useEffect(() => {
+            
+                    // console.log("tyao")
+                    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/itineraries`, {
+                      method: "GET",
+                      headers: {
+                        "Content-Type": "application/json", 
+                      },
+                      credentials: "include",
+                  }).then(async (response) => {
+                    // console.log("response")
+                    const data = await response.json();
+                    dispatch(setItineraries(data.itineraries));
+                    dispatch(setPlaces(data.placesData));
+                  }).catch((err)=>{
+                    console.log(err)
+                  })
+    },[])
     const itineraries = useSelector((state: any) => state.itinerary.itineraries);
     // console.log("Itineraries from Redux:", itineraries);
+    if(!itineraries || itineraries.length === 0) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+                <div className="max-w-md w-full bg-gray-800/50 backdrop-blur-lg p-6 rounded-lg shadow-lg border border-blue-500/20">
+                    <h2 className="text-2xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">No Itineraries Found</h2>
+                    <p className="text-gray-400 mb-6">
+                        You haven't created any itineraries yet.
+                    </p>
+                </div>
+            </div>
+        );
+    }
     const storedIds = itineraries
         .map((itinerary: any) => itinerary?.itinerary?.id)
         .filter(Boolean);
@@ -19,7 +51,7 @@ export default function HistoryPage() {
     const [selectedItineraryIndex, setSelectedItineraryIndex] = useState(0);
     // Add loading state for fetch action
     const [isLoading, setIsLoading] = useState(false);
-    const dispatch = useDispatch();
+
 
     const navigate = useNavigate();
     const handleViewDetails = (itinerarynumber: number) => {
