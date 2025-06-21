@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "@/store/slices/userSlice";
 import { auth } from "@/api/auth";
 import {useNavigate} from "react-router-dom";
@@ -20,8 +20,9 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         navigate("/signin", { replace: true });
       }
       else{
-          const itineraries= localStorage.getItem("itineraries");
+          // const itineraries= localStorage.getItem("itineraries");
           // console.log(itineraries)
+          const itineraries= useSelector((state: any)=>state.itinerary.itineraries); // Initialize as null or an empty array if needed
           if(!itineraries){
             // console.log("tyao")
             fetch(`${import.meta.env.VITE_BACKEND_URL}/api/itineraries`, {
