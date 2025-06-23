@@ -25,7 +25,6 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
           // const itineraries= localStorage.getItem("itineraries");
           // console.log(itineraries)
           if(!itineraries){
-            // console.log("tyao")
             fetch(`${import.meta.env.VITE_BACKEND_URL}/api/itineraries`, {
               method: "GET",
               headers: {

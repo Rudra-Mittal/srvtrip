@@ -11,54 +11,47 @@ import { toast } from "react-hot-toast";
 export default function HistoryPage() {
     
     const dispatch = useDispatch();
-    useEffect(() => {
-            
-                    // console.log("tyao")
-                    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/itineraries`, {
-                      method: "GET",
-                      headers: {
-                        "Content-Type": "application/json", 
-                      },
-                      credentials: "include",
-                  }).then(async (response) => {
-                    // console.log("response")
-                    const data = await response.json();
-                    dispatch(setItineraries(data.itineraries));
-                    dispatch(setPlaces(data.placesData));
-                  }).catch((err)=>{
-                    console.log(err)
-                  })
-    },[])
-    const itineraries = useSelector((state: any) => state.itinerary.itineraries);
-    // console.log("Itineraries from Redux:", itineraries);
-    if(!itineraries || itineraries.length === 0) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-                <div className="max-w-md w-full bg-gray-800/50 backdrop-blur-lg p-6 rounded-lg shadow-lg border border-blue-500/20">
-                    <h2 className="text-2xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">No Itineraries Found</h2>
-                    <p className="text-gray-400 mb-6">
-                        You haven't created any itineraries yet.
-                    </p>
-                </div>
-            </div>
-        );
-    }
-    const storedIds = itineraries
-        .map((itinerary: any) => itinerary?.itinerary?.id)
-        .filter(Boolean);
-    // console.log("Stored IDdddss:", storedIds);
-    // Default to showing the most recent itinerary if available
-    const [selectedItineraryIndex, setSelectedItineraryIndex] = useState(0);
-    // Add loading state for fetch action
-    const [isLoading, setIsLoading] = useState(false);
-
-
     const navigate = useNavigate();
+    
+    // All hooks must be called at the top level, before any early returns
+    const [selectedItineraryIndex, setSelectedItineraryIndex] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
+    const itineraries = useSelector((state: any) => state.itinerary.itineraries);
+    
+    useEffect(() => {
+        setIsInitialLoading(true);
+        // console.log("tyao")
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/itineraries`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json", 
+          },
+          credentials: "include",
+      }).then(async (response) => {
+        // console.log("response")
+        const data = await response.json();
+        dispatch(setItineraries(data.itineraries));
+        dispatch(setPlaces(data.placesData));
+      }).catch((err)=>{
+        console.log(err)
+      }).finally(() => {
+        setIsInitialLoading(false);
+      })
+    },[])
+    
+    // console.log("Itineraries from Redux:", itineraries);
+    
+    const storedIds = itineraries
+        ? itineraries.map((itinerary: any) => itinerary?.itinerary?.id).filter(Boolean)
+        : [];
     const handleViewDetails = (itinerarynumber: number) => {
         // console.log("View details for itinerary ID:", itinerarynumber);
         // Navigate to the itinerary details page
         navigate(`/itinerary/${itinerarynumber}`);
-    };    const fetchItineraries = async () => {
+    };
+    
+    const fetchItineraries = async () => {
         // console.log("request reach here");
         setIsLoading(true);
         try {
@@ -89,11 +82,120 @@ export default function HistoryPage() {
             setIsLoading(false);
         }
     };
+    
+    // Show skeleton while initial loading
+    if (isInitialLoading) {
+        return (
+            <div className="min-h-screen bg-gray-900 text-white p-4 pt-28 pb-12">
+                <div className="max-w-2xl w-full mx-auto">
+                    {/* Header skeleton */}
+                    <div className="flex flex-col md:flex-row items-center justify-between mb-6">
+                        <div className="h-8 md:h-12 w-64 bg-gray-800 rounded-lg animate-pulse mb-3 md:mb-0"></div>
+                        <div className="h-10 w-full md:w-48 bg-gray-800 rounded-lg animate-pulse"></div>
+                    </div>
 
+                    {/* Navigation indicators skeleton */}
+                    <div className="flex justify-center mb-6 gap-2">
+                        {[1, 2, 3].map((_, index) => (
+                            <div key={index} className="w-8 h-1.5 bg-gray-800 rounded-full animate-pulse"></div>
+                        ))}
+                    </div>
+
+                    {/* Main card skeleton */}
+                    <div className="relative overflow-hidden rounded-2xl border border-gray-700 backdrop-blur-md shadow-xl">
+                        <div className="bg-gradient-to-br from-black/80 via-gray-900/90 to-gray-800/70 p-4 md:p-8">
+                            <div className="flex flex-col md:flex-row gap-6">
+                                {/* Left column skeleton */}
+                                <div className="flex-1">
+                                    {/* Title skeleton */}
+                                    <div className="mb-6">
+                                        <div className="h-10 md:h-12 w-48 bg-gray-800 rounded-lg animate-pulse mb-2"></div>
+                                        <div className="h-5 w-32 bg-gray-800 rounded animate-pulse"></div>
+                                    </div>
+
+                                    {/* Info items skeleton */}
+                                    <div className="space-y-6">
+                                        {[1, 2, 3].map((_, index) => (
+                                            <div key={index} className="flex items-center gap-4">
+                                                <div className="w-12 h-12 bg-gray-800 rounded-full animate-pulse"></div>
+                                                <div>
+                                                    <div className="h-3 w-16 bg-gray-800 rounded animate-pulse mb-1"></div>
+                                                    <div className="h-5 w-24 bg-gray-800 rounded animate-pulse"></div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Right column skeleton */}
+                                <div className="flex-1">
+                                    {/* Budget summary skeleton */}
+                                    <div className="bg-black/30 border border-gray-700 rounded-xl p-5 mb-6">
+                                        <div className="h-6 w-32 bg-gray-800 rounded animate-pulse mb-3"></div>
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between">
+                                                <div className="h-4 w-24 bg-gray-800 rounded animate-pulse"></div>
+                                                <div className="h-4 w-16 bg-gray-800 rounded animate-pulse"></div>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <div className="h-4 w-28 bg-gray-800 rounded animate-pulse"></div>
+                                                <div className="h-4 w-20 bg-gray-800 rounded animate-pulse"></div>
+                                            </div>
+                                            <div className="h-2 w-full bg-gray-800 rounded-full animate-pulse mt-3"></div>
+                                        </div>
+                                    </div>
+
+                                    {/* Interests skeleton */}
+                                    <div>
+                                        <div className="h-5 w-20 bg-gray-800 rounded animate-pulse mb-3"></div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {[1, 2, 3, 4, 5].map((_, index) => (
+                                                <div key={index} className="h-7 w-16 bg-gray-800 rounded-full animate-pulse"></div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Button skeleton */}
+                            <div className="mt-8 text-center">
+                                <div className="h-10 w-64 bg-gray-800 rounded-lg animate-pulse mx-auto"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Extended interests section skeleton */}
+                    <div className="mt-8 relative overflow-hidden rounded-2xl border border-gray-700 backdrop-blur-md shadow-xl">
+                        <div className="bg-gradient-to-br from-black/80 via-gray-900/90 to-gray-800/70 p-6">
+                            <div className="flex items-center justify-center mb-6">
+                                <div className="h-6 w-32 bg-gray-800 rounded animate-pulse"></div>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {[1, 2, 3].map((_, index) => (
+                                    <div key={index} className="bg-gray-800/60 rounded-lg overflow-hidden">
+                                        <div className="p-4">
+                                            <div className="h-5 w-24 bg-gray-700 rounded animate-pulse mb-3"></div>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {[1, 2, 3].map((_, subIndex) => (
+                                                    <div key={subIndex} className="h-6 w-16 bg-gray-700 rounded-full animate-pulse"></div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+    
+    // Early return AFTER all hooks are called to follow Rules of Hooks
     if (!itineraries || itineraries.length === 0) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-                <div className="max-w-md w-full bg-gray-800/50 backdrop-blur-lg p-6 rounbded-lg shadow-lg border border-blue-500/20">
+                <div className="max-w-md w-full bg-gray-800/50 backdrop-blur-lg p-6 rounded-lg shadow-lg border border-blue-500/20">
                     <h2 className="text-2xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">No Itineraries Found</h2>
                     <p className="text-gray-400 mb-6">
                         You haven't created any itineraries yet.
