@@ -20,7 +20,7 @@ export const ItineraryPage = () => {
     const isLongPress = useRef(false);
 
     const itineraries = useSelector((state: any) => state.itinerary.itineraries);
-    const itineraryD = useMemo(() => itineraries[itineraryIdx], [itineraries, itineraryIdx]);
+    const itineraryD = useMemo(() => itineraries?.[itineraryIdx], [itineraries, itineraryIdx]);
 
     // Detect mobile screen size
     useEffect(() => {
@@ -60,13 +60,15 @@ export const ItineraryPage = () => {
 
     // Navigate to next/previous card
     const navigateSlider = useCallback((direction: 'prev' | 'next') => {
+        if (!itineraryD?.itinerary?.days) return;
+        
         const newIndex = direction === 'prev' 
             ? Math.max(0, activeCardIndex - 1)
             : Math.min(itineraryD.itinerary.days.length - 1, activeCardIndex + 1);
         
         setActiveCardIndex(newIndex);
         scrollToCard(newIndex);
-    }, [activeCardIndex, itineraryD.itinerary.days.length, scrollToCard]);
+    }, [activeCardIndex, itineraryD?.itinerary?.days?.length, scrollToCard]);
 
     // Handle indicator click
     const handleIndicatorClick = useCallback((index: number) => {
@@ -141,7 +143,7 @@ export const ItineraryPage = () => {
 
     // Track scroll position to update active card
     useEffect(() => {
-        if (!sliderRef.current) return;
+        if (!sliderRef.current || !itineraryD?.itinerary?.days) return;
 
         let timeoutId: NodeJS.Timeout;
         
@@ -181,7 +183,7 @@ export const ItineraryPage = () => {
             slider.removeEventListener('scroll', handleScroll);
             clearTimeout(timeoutId);
         };
-    }, [activeCardIndex]);
+    }, [activeCardIndex, itineraryD?.itinerary?.days]);
 
     // Enhanced card hover/press effect
     const handleCardInteraction = useCallback((element: HTMLElement, isActive: boolean, isMobileExpand = false) => {
@@ -269,9 +271,109 @@ export const ItineraryPage = () => {
     }, []);
 
     const destinationTitle = useMemo(() => 
-        itineraryD.itinerary.destination[0].toUpperCase() + itineraryD.itinerary.destination.slice(1),
-        [itineraryD.itinerary.destination]
+        itineraryD?.itinerary?.destination ? 
+        itineraryD.itinerary.destination[0].toUpperCase() + itineraryD.itinerary.destination.slice(1) : 
+        '',
+        [itineraryD?.itinerary?.destination]
     );
+
+    // Show skeleton if itineraries are null or itineraryD is undefined - AFTER all hooks
+    if (!itineraries || !itineraryD) {
+        return (
+            <div className="bg-black min-h-screen w-full overflow-hidden">
+                <div className="absolute inset-0 z-0 overflow-hidden opacity-50">
+                    <Boxes />
+                </div>
+
+                <div className="relative z-10 min-h-screen w-full pointer-events-none mx-auto px-3 sm:px-4 py-6 sm:py-12">
+                    {/* Header skeleton */}
+                    <div className="text-center mb-8 sm:mb-12 pointer-events-auto">
+                        <div className="mt-6 sm:mt-12">
+                            <div className="h-8 sm:h-12 md:h-16 w-64 sm:w-96 bg-gray-800 rounded-lg animate-pulse mx-auto mb-2 sm:mb-3"></div>
+                        </div>
+                        <div className="h-4 sm:h-5 w-48 sm:w-80 bg-gray-800 rounded animate-pulse mx-auto"></div>
+                    </div>
+
+                    {/* Navigation controls skeleton */}
+                    <div className="flex justify-between items-center mb-6 sm:mb-8 pointer-events-auto px-2">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            <div className="h-6 sm:h-8 w-16 sm:w-20 bg-gray-800 rounded animate-pulse"></div>
+                            <div className="h-4 sm:h-5 w-8 sm:w-12 bg-gray-800 rounded animate-pulse"></div>
+                        </div>
+
+                        {/* Desktop navigation buttons skeleton */}
+                        <div className="hidden sm:flex gap-3">
+                            <div className="w-10 h-10 bg-gray-800 rounded-full animate-pulse"></div>
+                            <div className="w-10 h-10 bg-gray-800 rounded-full animate-pulse"></div>
+                        </div>
+
+                        {/* Mobile swipe indicator skeleton */}
+                        <div className="sm:hidden flex items-center gap-1">
+                            <div className="w-4 h-4 bg-gray-800 rounded animate-pulse"></div>
+                            <div className="w-8 h-3 bg-gray-800 rounded animate-pulse"></div>
+                            <div className="w-4 h-4 bg-gray-800 rounded animate-pulse"></div>
+                        </div>
+                    </div>
+
+                    {/* Card slider skeleton */}
+                    <div className="relative pb-6 sm:pb-8 flex-1">
+                        {/* Gradient overlays */}
+                        <div className="absolute inset-y-0 left-0 w-6 sm:w-20 bg-gradient-to-r from-black to-transparent z-20 pointer-events-none" />
+                        <div className="absolute inset-y-0 right-0 w-6 sm:w-20 bg-gradient-to-l from-black to-transparent z-20 pointer-events-none" />
+
+                        <div className="overflow-x-auto scrollbar-hide pb-4">
+                            <div className="flex gap-2 sm:gap-6 px-2 sm:px-6 py-2 sm:py-4" style={{ width: 'max-content' }}>
+                                {/* Skeleton cards */}
+                                {[1, 2, 3].map((_, index) => (
+                                    <div
+                                        key={index}
+                                        className="flex-shrink-0"
+                                        style={{
+                                            width: isMobile ? '220px' : '320px',
+                                            minWidth: isMobile ? '220px' : '320px'
+                                        }}
+                                    >
+                                        <div className="bg-gray-800/50 rounded-xl p-4 h-96 animate-pulse">
+                                            {/* Card content skeleton */}
+                                            <div className="h-6 w-32 bg-gray-700 rounded mb-4"></div>
+                                            <div className="space-y-3">
+                                                <div className="h-4 w-full bg-gray-700 rounded"></div>
+                                                <div className="h-4 w-3/4 bg-gray-700 rounded"></div>
+                                                <div className="h-4 w-1/2 bg-gray-700 rounded"></div>
+                                            </div>
+                                            <div className="mt-6 space-y-2">
+                                                <div className="h-3 w-full bg-gray-700 rounded"></div>
+                                                <div className="h-3 w-5/6 bg-gray-700 rounded"></div>
+                                                <div className="h-3 w-4/5 bg-gray-700 rounded"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Day indicators skeleton */}
+                        <div className="flex justify-center mt-4 sm:mt-6 gap-1.5 sm:gap-2 pointer-events-auto px-4">
+                            {[1, 2, 3].map((_, index) => (
+                                <div
+                                    key={index}
+                                    className="h-1 sm:h-1.5 w-6 sm:w-8 bg-gray-700 rounded-full animate-pulse"
+                                />
+                            ))}
+                        </div>
+
+                        {/* Mobile navigation buttons skeleton */}
+                        {isMobile && (
+                            <div className="flex justify-center gap-8 mt-6 pointer-events-auto">
+                                <div className="w-12 h-12 bg-gray-800 rounded-full animate-pulse"></div>
+                                <div className="w-12 h-12 bg-gray-800 rounded-full animate-pulse"></div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="bg-black min-h-screen w-full overflow-hidden">

@@ -11,88 +11,170 @@ import connectPlace from "../utils/connectPlace";
 import createPlace from "../utils/createPlace";
 import callWebScrapper from "./callWebScrapper";
 
-export const itenaryRoute = async (req: AuthRequest, res:Response) => {
-  // await new Promise((resolve) => setTimeout(resolve, 1000000)); // Simulate a delay of 1 second
-  try{
-    const { prompt } = req.body;
-  console.log("prompt",prompt);
-
-  const userId = req.user?.userId;//get userId from token
-  console.log(userId)
-
-  if (!userId) {
-    res.status(403).json({ "error": "User not found" });
-    return
-  }
-
-  //firstly check if destination is valid or not it shouldnt be gibberish or not a place
-  const placeFound=await placeInfo(prompt.destination,1,0);
-  if(placeFound.notfound){
-    console.log("No place found for this name");
-    res.status(403).json({ "error": "Invalid destination" });
-    return
-  }
-
-  const itenary = await generate2(prompt)
-
-  const allDayPlaces = extractPlacesByRegex(itenary)//get the 2d array of places (daywise places)
-
-  const placesData = await Promise.all(
-    allDayPlaces.map((dayPlaces, index) =>
-      Promise.all(dayPlaces.map((place) => placeInfo(place, index + 1)))
-    )
-  ) as placesData;
-  let dayNum = 0
-  let newItenary = replacePlace(itenary, placesData)
-  const itenaryid = await createItenary(newItenary, userId);
-  if (!itenaryid) {
-    res.status(403).json({ "error": "User not found" });
-    return;
-  }
-
-  // Add the itinerary ID to the new itinerary
-  const newItenaryObject = JSON.parse(newItenary); // Parse the JSON string
-    newItenaryObject.itinerary.id = itenaryid; // Append the ID
-    newItenary = JSON.stringify(newItenaryObject); 
+export const itenaryRoute = async (req: AuthRequest, res: Response) => {
+  // Check if client wants SSE by looking at Accept header
+  const wantsSSE = req.headers.accept?.includes('text/event-stream');
   
-  if (!itenaryid) {
-    res.status(403).json({ "error": "User not found" });
-    return
+  // Set up SSE if requested
+  if (wantsSSE) {
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': process.env.FRONTEND_URL || 'http://localhost:5173',
+      'Access-Control-Allow-Credentials': 'true',
+    });
+    
+    // Send initial connection message
+    res.write(`data: ${JSON.stringify({ type: 'connected', message: 'Connected to itinerary generation stream' })}\n\n`);
   }
-  for (const day of placesData) {
-    const dayId = await createDay(dayNum, itenaryid, newItenary);
-    for (const place of day) {
-      console.log("Place:", place)
-      const placeD= await checkPlaceAndReturnPhotos(place);
-      if (placeD.id) {
-        console.log("Place already exist in db")
-        const id = await connectPlace(placeD.id, dayId);
-        if (id) {
-          place.photos = placeD.images.map((image) => image.imageUrl);
-        }
-        else console.log("Error connecting place")
-      }
-      else {
-        //call the photos api
-        const placePhotos = await Promise.all((place.photos?.map((reference: string) => getPhotoUri(reference))));
-        place.photos= placePhotos
-        const placeD = await  createPlace(place, dayId, placePhotos);
-        if (!placeD) {
-          console.log("Error creating place")
-        }
-        else  callWebScrapper(place.displayName, 5, place.id,place.formattedAddress)
-      }
-      place.summarizedReview=null;
+
+  const sendProgress = (step: number, totalSteps: number, message: string) => {
+    if (wantsSSE) {
+      res.write(`data: ${JSON.stringify({ 
+        type: 'progress', 
+        message, 
+        step, 
+        totalSteps 
+      })}\n\n`);
     }
-    dayNum++;
-  }
-  
-  console.log("Places Data in backend iti route:", placesData)
-  res.json({newItenary,placesData:JSON.stringify(placesData)});
-  return
-  }catch(err){
+  };
+
+  const sendError = (message: string) => {
+    if (wantsSSE) {
+      res.write(`data: ${JSON.stringify({ 
+        type: 'error', 
+        message 
+      })}\n\n`);
+      res.end();
+    } else {
+      if (message === 'Invalid destination') {
+        res.status(403).json({ "error": message });
+      } else {
+        res.status(500).json({ "error": message });
+      }
+    }
+  };
+
+  const sendSuccess = (data: any) => {
+    if (wantsSSE) {
+      res.write(`data: ${JSON.stringify({ 
+        type: 'success', 
+        data,
+        message: 'Itinerary generated successfully!' 
+      })}\n\n`);
+      res.end();
+    } else {
+      res.json(data);
+    }
+  };
+
+  try {
+    const { prompt } = req.body;
+    console.log("prompt", prompt);
+
+    const userId = req.user?.userId;
+    console.log(userId);
+
+    if (!userId) {
+      sendError("User not found");
+      return;
+    }
+
+    // Progress Step 1
+    sendProgress(1, 8, 'Validating destination...');
+
+    // Check if destination is valid
+    const placeFound = await placeInfo(prompt.destination, 1, 0);
+    if (placeFound.notfound) {
+      console.log("No place found for this name");
+      sendError("Invalid destination");
+      return;
+    }
+
+    // Progress Step 2
+    sendProgress(2, 8, 'Generating AI itinerary...');
+
+    const itenary = await generate2(prompt);
+
+    // Progress Step 3
+    sendProgress(3, 8, 'Extracting places from itinerary...');
+
+    const allDayPlaces = extractPlacesByRegex(itenary);
+
+    // Progress Step 4
+    sendProgress(4, 8, 'Fetching place information and photos...');
+
+    const placesData = await Promise.all(
+      allDayPlaces.map((dayPlaces, index) =>
+        Promise.all(dayPlaces.map((place) => placeInfo(place, index + 1)))
+      )
+    ) as placesData;
+
+    // Progress Step 5
+    sendProgress(5, 8, 'Processing place data...');
+
+    let dayNum = 0;
+    let newItenary = replacePlace(itenary, placesData);
+
+    // Progress Step 6
+    sendProgress(6, 8, 'Saving itinerary to database...');
+
+    const itenaryid = await createItenary(newItenary, userId);
+    if (!itenaryid) {
+      sendError("Failed to save itinerary");
+      return;
+    }
+
+    // Add the itinerary ID to the new itinerary
+    const newItenaryObject = JSON.parse(newItenary);
+    newItenaryObject.itinerary.id = itenaryid;
+    newItenary = JSON.stringify(newItenaryObject);
+
+    // Progress Step 7
+    sendProgress(7, 8, 'Processing places and photos...');
+
+    for (const day of placesData) {
+      const dayId = await createDay(dayNum, itenaryid, newItenary);
+      for (const place of day) {
+        console.log("Place:", place);
+        const placeD = await checkPlaceAndReturnPhotos(place);
+        if (placeD.id) {
+          console.log("Place already exist in db");
+          const id = await connectPlace(placeD.id, dayId);
+          if (id) {
+            place.photos = placeD.images.map((image) => image.imageUrl);
+          } else {
+            console.log("Error connecting place");
+          }
+        } else {
+          // Call the photos api
+          const placePhotos = await Promise.all((place.photos?.map((reference: string) => getPhotoUri(reference))));
+          place.photos = placePhotos;
+          const placeD = await createPlace(place, dayId, placePhotos);
+          if (!placeD) {
+            console.log("Error creating place");
+          } else {
+            callWebScrapper(place.displayName, 5, place.id, place.formattedAddress);
+          }
+        }
+        place.summarizedReview = null;
+      }
+      dayNum++;
+    }
+
+    // Progress Step 8
+    sendProgress(8, 8, 'Finalizing itinerary...');
+
+    console.log("Places Data in backend iti route:", placesData);
+    
+    sendSuccess({
+      newItenary,
+      placesData: JSON.stringify(placesData)
+    });
+
+  } catch (err) {
     console.log(err);
-    res.status(500).json({errror:"Internal server error"})
-    return 
+    sendError("Internal server error");
   }
-}
+};

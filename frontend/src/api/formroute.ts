@@ -24,7 +24,97 @@ export const genitinerary = async (data: any) => {
         console.log(err)
         throw err; // Re-throw to allow proper error handling in components
     });
-    }
+}
+
+// SSE version of itinerary generation for handling long-running requests
+export const genitinerarySSE = (data: any, onProgress: (step: number, totalSteps: number, message: string) => void): Promise<any> => {
+    return new Promise((resolve, reject) => {
+        // First, send the POST request with the data
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/itenary`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'text/event-stream', // Request SSE response
+            },
+            credentials: 'include',
+            body: JSON.stringify({ prompt: data })
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const reader = response.body?.getReader();
+            if (!reader) {
+                throw new Error('Failed to get response reader');
+            }
+
+            const decoder = new TextDecoder();
+            
+            function readStream(): Promise<void> {
+                return reader!.read().then(({ done, value }) => {
+                    if (done) {
+                        return;
+                    }
+
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const eventData = JSON.parse(line.slice(6));
+                                console.log('SSE message received:', eventData);
+
+                                switch (eventData.type) {
+                                    case 'connected':
+                                        console.log('Connected to stream:', eventData.message);
+                                        break;
+
+                                    case 'progress':
+                                        onProgress(
+                                            eventData.step || 0,
+                                            eventData.totalSteps || 8,
+                                            eventData.message || 'Processing...'
+                                        );
+                                        break;
+
+                                    case 'success':
+                                        resolve(eventData.data);
+                                        return;
+
+                                    case 'error':
+                                        if (eventData.message === 'Invalid destination') {
+                                            reject(new Error('Invalid destination'));
+                                        } else if (eventData.message.includes('Rate limit') || eventData.message.includes('Too many')) {
+                                            reject(new Error(eventData.message));
+                                        } else {
+                                            reject(new Error(eventData.message || 'Failed to generate itinerary'));
+                                        }
+                                        return;
+                                }
+                            } catch (parseError) {
+                                console.error('Error parsing SSE data:', parseError);
+                                // Continue reading, don't reject for parse errors
+                            }
+                        }
+                    }
+
+                    return readStream();
+                });
+            }
+
+            return readStream();
+        }).catch(error => {
+            console.error('SSE fetch error:', error);
+            reject(new Error('Connection error occurred during itinerary generation'));
+        });
+
+        // Optional: Add timeout for the entire process
+        setTimeout(() => {
+            reject(new Error('Itinerary generation timeout'));
+        }, 5 * 60 * 1000); // 5 minutes timeout
+    });
+};
 
 export const genotp = async (email:any) => 
   await fetch(`${import.meta.env.VITE_BACKEND_URL}/generate-otp`,{

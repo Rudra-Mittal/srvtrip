@@ -16,7 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Slider } from "@/components/ui/slider";
 import Loader from '../loader';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { genitinerary } from '@/api/formroute';
+import { genitinerary, genitinerarySSE } from '@/api/formroute';
 import { useDispatch, useSelector } from 'react-redux';
 import { addItinerary } from '@/store/slices/itinerarySlice';
 import { addPlace } from '@/store/slices/placeSlice';
@@ -317,11 +317,12 @@ export default function Form() {
     setFormVisible(false);
     setShowSummary(true);
     setShowTimeoutMessage(false); // Reset timeout message
+    setGenerationProgress({ step: 0, totalSteps: 8, message: 'Starting itinerary generation...' });
     
-    // Set timeout timer for 10 seconds (reasonable time for AI processing)
+    // Set timeout timer for 5 minutes (reasonable time for AI processing with SSE)
     const timeoutTimer = setTimeout(() => {
       setShowTimeoutMessage(true);
-    }, 60000); // Changed from 10000 to 60000 (1 minute)
+    }, 300000); // 5 minutes
     
     // Create a copy of the form data to modify
     const submissionData = { ...formData };
@@ -337,9 +338,11 @@ export default function Form() {
     // Update submissionData.interests with the updated array
     submissionData.interests = interestsArray;
     
-    // console.log("submissiondata", submissionData);
-    // console.log("Form data:", submissionData);
-      genitinerary(submissionData).then(async (res)=>{
+    // Use SSE for itinerary generation
+    genitinerarySSE(submissionData, (step, totalSteps, message) => {
+      // Update progress
+      setGenerationProgress({ step, totalSteps, message });
+    }).then(async (res) => {
       clearTimeout(timeoutTimer);
       //if error thrown is invalid destination then show the error message
       if(res.error){
@@ -358,6 +361,7 @@ export default function Form() {
           icon: '🌍',
         });
         navigate("/form");
+        return;
       }
       // console.log("newitinerary",JSON.parse(res.newItenary))
       dispatch(addItinerary(await JSON.parse(res.newItenary)))
@@ -368,9 +372,86 @@ export default function Form() {
       const newItineraryNumber = currentItinerariesCount + 1;
       
       navigate(`/itinerary/${newItineraryNumber}`);
-    }).catch((error) => {
+    }).catch((error: Error) => {
       clearTimeout(timeoutTimer);
-      console.log("Error in generating itinerary:", error.message);
+      console.log("SSE Error, falling back to regular HTTP:", error.message);
+      
+      // If SSE fails, fall back to regular HTTP request
+      if (error.message.includes('Connection error') || error.message.includes('timeout')) {
+        console.log("Falling back to regular HTTP request...");
+        setGenerationProgress({ step: 1, totalSteps: 2, message: 'Retrying with fallback method...' });
+        
+        // Use the original HTTP method as fallback
+        genitinerary(submissionData).then(async (res) => {
+          clearTimeout(timeoutTimer);
+          if(res.error){
+            setIsAggregating(false);
+            setShowSummary(false);
+            setFormVisible(true);
+            toast.error("Invalid destination. Please try again with a valid destination.", {
+              duration: 4000,
+              style: {
+                background: '#000',
+                color: '#fff',
+                border: '1px solid rgba(59, 130, 246, 0.5)',
+              },
+              icon: '🌍',
+            });
+            navigate("/form");
+            return;
+          }
+          
+          dispatch(addItinerary(await JSON.parse(res.newItenary)))
+          dispatch(addPlace(await JSON.parse(res.placesData)))
+          
+          const currentItinerariesCount = itineraries ? itineraries.length : 0;
+          const newItineraryNumber = currentItinerariesCount + 1;
+          
+          navigate(`/itinerary/${newItineraryNumber}`);
+        }).catch((fallbackError: Error) => {
+          console.log("Fallback also failed:", fallbackError.message);
+          setIsAggregating(false);
+          setShowSummary(false);
+          setFormVisible(true);
+          
+          // Handle the same error types as before
+          if (fallbackError.message === 'Invalid destination') {
+            toast.error("Invalid destination. Please try again with a valid destination.", {
+              duration: 4000,
+              style: {
+                background: '#000',
+                color: '#fff',
+                border: '1px solid rgba(59, 130, 246, 0.5)',
+              },
+              icon: '🌍',
+            });
+          } else if (fallbackError.message.includes('Too many AI requests')) {
+            toast.error("Too many AI itinerary requests. Please try again after an hour.", {
+              duration: 6000,
+              style: {
+                background: '#000',
+                color: '#fff',
+                border: '1px solid rgba(255, 99, 71, 0.5)',
+              },
+              icon: '⏳',
+            });
+          } else {
+            toast.error("Failed to generate itinerary. Please try again.", {
+              duration: 4000,
+              style: {
+                background: '#000',
+                color: '#fff',
+                border: '1px solid rgba(220, 38, 38, 0.5)',
+              },
+              icon: '❌',
+            });
+          }
+          navigate("/form");
+        });
+        return;
+      }
+      
+      // Handle other SSE-specific errors
       setIsAggregating(false);
       setShowSummary(false);
       setFormVisible(true);
@@ -432,6 +513,13 @@ export default function Form() {
 
   // Add a state to track if loading is taking too long
   const [showTimeoutMessage, setShowTimeoutMessage] = useState(false);
+  
+  // Add progress tracking state
+  const [generationProgress, setGenerationProgress] = useState({
+    step: 0,
+    totalSteps: 8,
+    message: 'Starting...'
+  });
 
   // Add function to navigate to homepage or other sections
   const handleExploreMore = () => {
@@ -1028,16 +1116,28 @@ export default function Form() {
                 <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
                   Creating Your Perfect Trip!
                 </h2>
-                <p className="text-blue-200 mb-8 max-w-md mx-auto text-sm sm:text-base lg:text-lg">
-                  We're generating a personalized itinerary for your {formData.number_of_days}-day adventure to {formData.destination}. This might take a moment.
+                <p className="text-blue-200 mb-4 max-w-md mx-auto text-sm sm:text-base lg:text-lg">
+                  We're generating a personalized itinerary for your {formData.number_of_days}-day adventure to {formData.destination}.
                 </p>
-                <div className="relative h-2 w-64 mx-auto bg-gray-700 rounded-full overflow-hidden">
-                  <motion.div
-                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-purple-500"
-                    initial={{ width: "0%" }}
-                    animate={{ width: "100%" }}
-                    transition={{ duration: 50, ease: "easeInOut" }}
-                  />
+                
+                {/* Progress indicator */}
+                <div className="mb-6">
+                  <p className="text-blue-300 mb-2 text-sm">
+                    Step {generationProgress.step} of {generationProgress.totalSteps}: {generationProgress.message}
+                  </p>
+                  <div className="relative h-2 w-64 mx-auto bg-gray-700 rounded-full overflow-hidden">
+                    <motion.div
+                      className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-purple-500"
+                      initial={{ width: "0%" }}
+                      animate={{ width: `${(generationProgress.step / generationProgress.totalSteps) * 100}%` }}
+                      transition={{ duration: 0.5, ease: "easeInOut" }}
+                    />
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-400 mt-1 w-64 mx-auto">
+                    <span>0%</span>
+                    <span>{Math.round((generationProgress.step / generationProgress.totalSteps) * 100)}%</span>
+                    <span>100%</span>
+                  </div>
                 </div>
                 
                 {/* Timeout message and button */}

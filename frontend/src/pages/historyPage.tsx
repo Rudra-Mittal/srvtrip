@@ -83,8 +83,8 @@ export default function HistoryPage() {
         }
     };
     
-    // Show skeleton while initial loading
-    if (isInitialLoading) {
+    // Show skeleton while initial loading OR when itineraries is null (being fetched by ProtectedRoute)
+    if (isInitialLoading || !itineraries) {
         return (
             <div className="min-h-screen bg-gray-900 text-white p-4 pt-28 pb-12">
                 <div className="max-w-2xl w-full mx-auto">
@@ -192,7 +192,7 @@ export default function HistoryPage() {
     }
     
     // Early return AFTER all hooks are called to follow Rules of Hooks
-    if (!itineraries || itineraries.length === 0) {
+    if (itineraries.length === 0) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
                 <div className="max-w-md w-full bg-gray-800/50 backdrop-blur-lg p-6 rounded-lg shadow-lg border border-blue-500/20">
