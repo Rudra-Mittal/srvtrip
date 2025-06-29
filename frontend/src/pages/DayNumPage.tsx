@@ -7,19 +7,30 @@ import { Navbar } from "@/components/Navbar"
 import { useParams } from "react-router-dom"
 import { useSelector } from "react-redux"
 import Summary from "@/components/summary"
+import DayPageSkeletonLoader from "@/components/ui/SkeletonLoader"
 
 export const DayNumPage = () => {
     const { itineraryNum, dayNum } = useParams()
     const itinerarynumber = parseInt(itineraryNum || "0", 10)
     const daynumber = parseInt(dayNum || "0", 10)
-    // console.log(itineraryNum, dayNum)
     const chatbotRef = useRef<HTMLDivElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
     const [leftWidth, setLeftWidth] = useState(60) // Initial width percentage for left column
     const [isDragging, setIsDragging] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
     const itinerary = useSelector((state: any) => state.itinerary.itineraries);
     const days = (itinerary)?itinerary[parseInt(itineraryNum || "0", 10) - 1]?.itinerary?.days?.length || 0:0;
-    // console.log("days", days)
+
+    // Show loading state during page transitions and initial data fetching
+    useEffect(() => {
+        setIsLoading(true);
+        const timer = setTimeout(() => {
+            setIsLoading(false);
+        }, 500);
+        
+        return () => clearTimeout(timer);
+    }, [itineraryNum, dayNum]);
+
     // Handle mouse events for resizing
     const handleMouseDown = (e: React.MouseEvent) => {
         e.preventDefault()
@@ -58,12 +69,9 @@ export const DayNumPage = () => {
 
     // Calculate right width as complement to 100%
     const rightWidth = 100 - leftWidth
-    if(!itinerary){
-        return (
-            <div className="flex justify-center items-center h-screen">
-                <div className="text-white">Loading...</div>
-            </div>
-        )
+    // Show skeleton loader while loading or when data is missing
+    if (isLoading || !itinerary) {
+        return <DayPageSkeletonLoader />;
     }
     return (
         <div className="flex flex-col min-h-screen bg-black">
