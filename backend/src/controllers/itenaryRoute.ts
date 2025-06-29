@@ -82,7 +82,7 @@ export const itenaryRoute = async (req: AuthRequest, res: Response) => {
     }
 
     // Progress Step 1
-    sendProgress(1, 8, 'Validating destination...');
+    sendProgress(1, 8, 'Scanning the globe for your dream destination...');
 
     // Check if destination is valid
     const placeFound = await placeInfo(prompt.destination, 1, 0);
@@ -93,17 +93,17 @@ export const itenaryRoute = async (req: AuthRequest, res: Response) => {
     }
 
     // Progress Step 2
-    sendProgress(2, 8, 'Generating AI itinerary...');
+    sendProgress(2, 8, 'Crafting a personalized adventure with AI magic...');
 
     const itenary = await generate2(prompt);
 
     // Progress Step 3
-    sendProgress(3, 8, 'Extracting places from itinerary...');
+    sendProgress(3, 8, 'Uncovering hidden gems and must-see spots...');
 
     const allDayPlaces = extractPlacesByRegex(itenary);
 
     // Progress Step 4
-    sendProgress(4, 8, 'Fetching place information and photos...');
+    sendProgress(4, 8, 'Gathering stunning photos and essential info...');
 
     const placesData = await Promise.all(
       allDayPlaces.map((dayPlaces, index) =>
@@ -112,13 +112,13 @@ export const itenaryRoute = async (req: AuthRequest, res: Response) => {
     ) as placesData;
 
     // Progress Step 5
-    sendProgress(5, 8, 'Processing place data...');
+    sendProgress(5, 8, 'Piecing together your perfect travel experience...');
 
     let dayNum = 0;
     let newItenary = replacePlace(itenary, placesData);
 
     // Progress Step 6
-    sendProgress(6, 8, 'Saving itinerary to database...');
+    sendProgress(6, 8, 'Saving your itinerary masterpiece...');
 
     const itenaryid = await createItenary(newItenary, userId);
     if (!itenaryid) {
@@ -132,11 +132,14 @@ export const itenaryRoute = async (req: AuthRequest, res: Response) => {
     newItenary = JSON.stringify(newItenaryObject);
 
     // Progress Step 7
-    
     for (const day of placesData) {
       const dayId = await createDay(dayNum, itenaryid, newItenary);
       for (const place of day) {
-        sendProgress(7, 8, 'Processing places and photos...');
+        sendProgress(
+          7,
+          8,
+          `"${place.displayName}" — fetching reviews & turbocharging your trip...`
+        );
         console.log("Place:", place);
         const placeD = await checkPlaceAndReturnPhotos(place);
         if (placeD.id) {
@@ -164,7 +167,7 @@ export const itenaryRoute = async (req: AuthRequest, res: Response) => {
     }
 
     // Progress Step 8
-    sendProgress(8, 8, 'Finalizing itinerary...');
+    sendProgress(8, 8, 'All set! Your unforgettable journey is ready to explore!');
 
     console.log("Places Data in backend iti route:", placesData);
     
