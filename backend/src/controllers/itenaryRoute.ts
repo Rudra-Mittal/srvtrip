@@ -132,11 +132,11 @@ export const itenaryRoute = async (req: AuthRequest, res: Response) => {
     newItenary = JSON.stringify(newItenaryObject);
 
     // Progress Step 7
-    sendProgress(7, 8, 'Processing places and photos...');
-
+    
     for (const day of placesData) {
       const dayId = await createDay(dayNum, itenaryid, newItenary);
       for (const place of day) {
+        sendProgress(7, 8, 'Processing places and photos...');
         console.log("Place:", place);
         const placeD = await checkPlaceAndReturnPhotos(place);
         if (placeD.id) {
@@ -169,8 +169,7 @@ export const itenaryRoute = async (req: AuthRequest, res: Response) => {
     console.log("Places Data in backend iti route:", placesData);
     
     sendSuccess({
-      newItenary,
-      placesData: JSON.stringify(placesData)
+      success:"true"
     });
 
   } catch (err) {

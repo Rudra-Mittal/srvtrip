@@ -363,10 +363,6 @@ export default function Form() {
         navigate("/form");
         return;
       }
-      // console.log("newitinerary",JSON.parse(res.newItenary))
-      dispatch(addItinerary(await JSON.parse(res.newItenary)))
-      dispatch(addPlace(await JSON.parse(res.placesData)))
-      
       // Calculate the itinerary number based on current store count
       const currentItinerariesCount = itineraries ? itineraries.length : 0;
       const newItineraryNumber = currentItinerariesCount + 1;

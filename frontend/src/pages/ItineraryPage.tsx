@@ -4,11 +4,11 @@ import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { DayCard } from "@/components/ItineraryDayCard";
 import { useSelector } from "react-redux";
 import { useParams} from "react-router-dom";
-
+import { setItineraries } from "@/store/slices/itinerarySlice";
+import { setPlaces } from "@/store/slices/placeSlice";
+import { useDispatch } from "react-redux";
 export const ItineraryPage = () => {
     const { itineraryNum } = useParams();
-    
-    
     const itineraryIdx = useMemo(() => Number(itineraryNum) - 1, [itineraryNum]);
     const [activeCardIndex, setActiveCardIndex] = useState(0);
     const [isMobile, setIsMobile] = useState(false);
@@ -18,10 +18,30 @@ export const ItineraryPage = () => {
     const touchEndX = useRef<number>(0);
     const longPressTimer = useRef<NodeJS.Timeout | null>(null);
     const isLongPress = useRef(false);
-
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
     const itineraries = useSelector((state: any) => state.itinerary.itineraries);
     const itineraryD = useMemo(() => itineraries?.[itineraryIdx], [itineraries, itineraryIdx]);
-
+    const dispatch = useDispatch();
+    useEffect(() => {
+            setIsInitialLoading(true);
+            // console.log("tyao")
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/itineraries`, {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json", 
+              },
+              credentials: "include",
+          }).then(async (response) => {
+            // console.log("response")
+            const data = await response.json();
+            dispatch(setItineraries(data.itineraries));
+            dispatch(setPlaces(data.placesData));
+          }).catch((err)=>{
+            console.log(err)
+          }).finally(() => {
+            setIsInitialLoading(false);
+          })
+        },[])
     // Detect mobile screen size
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -278,7 +298,7 @@ export const ItineraryPage = () => {
     );
 
     // Show skeleton if itineraries are null or itineraryD is undefined - AFTER all hooks
-    if (!itineraries || !itineraryD) {
+    if (isInitialLoading) {
         return (
             <div className="bg-black min-h-screen w-full overflow-hidden">
                 <div className="absolute inset-0 z-0 overflow-hidden opacity-50">

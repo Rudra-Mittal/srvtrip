@@ -43,7 +43,7 @@ app.use(cors({
   origin: [process.env.FRONTEND_URL as string,"http://localhost:5173"], // Your frontend URL
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization', 'Google-Auth', 'SERVER-API-KEY'], // Add X-API-KEY
+  allowedHeaders: ['Content-Type', 'Authorization', 'Google-Auth', 'SERVER-API-KEY','Accept'], // Add X-API-KEY
 }));
 
 app.get('/', (req, res) => {
